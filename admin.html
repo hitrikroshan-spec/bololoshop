@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOLOLO MASTER - Administration</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #6366f1; --sidebar-bg: #0f172a; --bg-main: #f1f5f9; }
+        body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg-main); display: flex; min-height: 100vh; }
+        .sidebar { width: 260px; background: var(--sidebar-bg); color: white; position: fixed; height: 100vh; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 30px 20px; font-size: 1.2rem; font-weight: 800; color: var(--primary); border-bottom: 1px solid #1e293b; }
+        .nav-item { padding: 15px 25px; color: #94a3b8; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 10px; }
+        .nav-item.active { background: #1e293b; color: white; border-left: 4px solid var(--primary); }
+        .main-content { margin-left: 260px; flex: 1; padding: 40px; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .stat-card h3 { margin: 0; font-size: 0.8rem; color: #64748b; text-transform: uppercase; }
+        .stat-card p { margin: 10px 0 0; font-size: 1.8rem; font-weight: 800; color: #0f172a; }
+        .data-card { background: white; border-radius: 16px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { text-align: left; padding: 15px; color: #64748b; border-bottom: 2px solid #f1f5f9; }
+        td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
+        .user-cell { display: flex; align-items: center; gap: 12px; }
+        .u-logo { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: #eee; }
+        .badge { padding: 5px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 700; }
+        .badge-active { background: #dcfce7; color: #15803d; }
+        .badge-blocked { background: #fee2e2; color: #b91c1c; }
+        .btn { border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.8rem; }
+        .btn-quota { background: var(--primary); color: white; }
+        .btn-block { background: #ef4444; color: white; }
+        .btn-unblock { background: #22c55e; color: white; }
+        .btn-del { background: #f1f5f9; color: #64748b; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header">BOLOLO MASTER</div>
+    <div class="nav-item active">👤 Utilisateurs</div>
+</div>
+
+<div class="main-content">
+    <header>
+        <h1>Gestion des Boutiques</h1>
+        <button class="btn btn-quota" onclick="refreshList()">Actualiser</button>
+    </header>
+
+    <div class="stats-grid">
+        <div class="stat-card"><h3>Inscrits</h3><p id="stat-users">0</p></div>
+        <div class="stat-card"><h3>Articles</h3><p id="stat-articles">0</p></div>
+        <div class="stat-card"><h3>Bloqués</h3><p id="stat-blocked" style="color:#ef4444">0</p></div>
+    </div>
+
+    <div class="data-card">
+        <table>
+            <thead>
+                <tr>
+                    <th>UTILISATEUR</th>
+                    <th>STATUT</th>
+                    <th>ARTICLES</th>
+                    <th>QUOTA</th>
+                    <th>ACTIONS</th>
+                </tr>
+            </thead>
+            <tbody id="user-list"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function refreshList() {
+        const tbody = document.getElementById('user-list');
+        const accounts = JSON.parse(localStorage.getItem('bololo_accounts')) || [];
+        
+        // Stats
+        document.getElementById('stat-users').innerText = accounts.length;
+        document.getElementById('stat-blocked').innerText = accounts.filter(a => a.blocked).length;
+        document.getElementById('stat-articles').innerText = accounts.reduce((sum, a) => sum + (a.catalog ? a.catalog.length : 0), 0);
+
+        tbody.innerHTML = accounts.map((user, index) => `
+            <tr>
+                <td>
+                    <div class="user-cell">
+                        <img src="${user.shopLogo || 'https://via.placeholder.com/45'}" class="u-logo">
+                        <div>
+                            <div style="font-weight:700;">${user.shopName || 'Boutique'}</div>
+                            <div style="font-size:0.75rem; color:#64748b;">${user.tel}</div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <span class="badge ${user.blocked ? 'badge-blocked' : 'badge-active'}">
+                        ${user.blocked ? 'BLOQUÉ' : 'ACTIF'}
+                    </span>
+                </td>
+                <td><b>${user.catalog ? user.catalog.length : 0}</b></td>
+                <td><b style="color:var(--primary)">${user.limit || 2}</b></td>
+                <td>
+                    <button class="btn btn-quota" onclick="updateQuota(${index})">Quota</button>
+                    <button class="btn ${user.blocked ? 'btn-unblock' : 'btn-block'}" onclick="toggleBlock(${index})">
+                        ${user.blocked ? 'Débloquer' : 'Bloquer'}
+                    </button>
+                    <button class="btn btn-del" onclick="deleteUser(${index})">🗑️</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function toggleBlock(index) {
+        let accounts = JSON.parse(localStorage.getItem('bololo_accounts'));
+        // Alterne entre true et false
+        accounts[index].blocked = !accounts[index].blocked;
+        localStorage.setItem('bololo_accounts', JSON.stringify(accounts));
+        refreshList();
+    }
+
+    function updateQuota(index) {
+        let accounts = JSON.parse(localStorage.getItem('bololo_accounts'));
+        const n = prompt("Nouveau quota pour " + accounts[index].tel, accounts[index].limit || 2);
+        if (n !== null) {
+            accounts[index].limit = parseInt(n);
+            localStorage.setItem('bololo_accounts', JSON.stringify(accounts));
+            refreshList();
+        }
+    }
+
+    function deleteUser(index) {
+        if(confirm("Supprimer cette boutique ?")) {
+            let accounts = JSON.parse(localStorage.getItem('bololo_accounts'));
+            accounts.splice(index, 1);
+            localStorage.setItem('bololo_accounts', JSON.stringify(accounts));
+            refreshList();
+        }
+    }
+
+    // Mise à jour auto quand on revient sur l'onglet
+    window.onfocus = refreshList;
+    refreshList();
+</script>
+</body>
+</html>
