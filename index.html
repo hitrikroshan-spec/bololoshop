@@ -2,147 +2,353 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BOLOLO MASTER - Administration</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>BOLOLO Pro</title>
     
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="BololoShop">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+
     <style>
-        :root { --primary: #6366f1; --sidebar-bg: #0f172a; --bg-main: #f1f5f9; }
-        body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg-main); display: flex; min-height: 100vh; }
-        .sidebar { width: 260px; background: var(--sidebar-bg); color: white; position: fixed; height: 100vh; display: flex; flex-direction: column; }
-        .sidebar-header { padding: 30px 20px; font-size: 1.2rem; font-weight: 800; color: var(--primary); border-bottom: 1px solid #1e293b; }
-        .nav-item { padding: 15px 25px; color: #94a3b8; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 10px; }
-        .nav-item.active { background: #1e293b; color: white; border-left: 4px solid var(--primary); }
-        .main-content { margin-left: 260px; flex: 1; padding: 40px; }
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
-        .stat-card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .stat-card h3 { margin: 0; font-size: 0.8rem; color: #64748b; text-transform: uppercase; }
-        .stat-card p { margin: 10px 0 0; font-size: 1.8rem; font-weight: 800; color: #0f172a; }
-        .data-card { background: white; border-radius: 16px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { text-align: left; padding: 15px; color: #64748b; border-bottom: 2px solid #f1f5f9; }
-        td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
-        .user-cell { display: flex; align-items: center; gap: 12px; }
-        .u-logo { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: #eee; }
-        .badge { padding: 5px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 700; }
-        .badge-active { background: #dcfce7; color: #15803d; }
-        .badge-blocked { background: #fee2e2; color: #b91c1c; }
-        .btn { border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.8rem; }
-        .btn-quota { background: var(--primary); color: white; }
-        .btn-block { background: #ef4444; color: white; }
-        .btn-unblock { background: #22c55e; color: white; }
-        .btn-del { background: #f1f5f9; color: #64748b; }
+        :root { --primary: #6366f1; --glam: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); --bg: #f1f5f9; --text: #1e293b; }
+        body.theme-glamour { --primary: #a855f7; --glam: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); --bg: #f1f5f9; }
+        body.theme-feminin { --primary: #ec4899; --glam: linear-gradient(135deg, #f472b6 0%, #ec4899 100%); --bg: #fff1f2; }
+        body.theme-masculin { --primary: #0ea5e9; --glam: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%); --bg: #f0f9ff; }
+        body.theme-dark { --primary: #64748b; --glam: linear-gradient(135deg, #334155 0%, #0f172a 100%); --bg: #1e293b; --text: #f8fafc; }
+        
+        /* DIMENSIONS EXACTES DU FICHIER SI-JOINTE */
+        body { margin: 0; font-family: 'Inter', sans-serif; background: #000; min-height: 100vh; display: flex; justify-content: center; align-items: center; color: var(--text); }
+        .iphone-xs-screen { width: 375px; height: 812px; background: white; border-radius: 40px; display: flex; flex-direction: column; overflow: hidden; position: relative; box-shadow: 0 0 30px rgba(255,255,255,0.1); }
+        
+        header { background: var(--glam); color: white; padding: 55px 20px 15px; text-align: center; font-weight: bold; font-size: 0.9rem; position: relative; z-index: 100; }
+        .btn-logout { position: absolute; right: 15px; bottom: 12px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 5px 10px; border-radius: 8px; font-size: 0.6rem; cursor: pointer; }
+        
+        .content { flex: 1; overflow-y: auto; padding: 20px; background: var(--bg); position: relative; }
+        .card { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #eee; }
+
+        .search-container { position: relative; margin-bottom: 15px; }
+        .autocomplete-results { position: absolute; top: 45px; left: 0; right: 0; background: white; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); z-index: 200; max-height: 200px; overflow-y: auto; border: 1px solid #eee; }
+        .suggestion-item { display: flex; align-items: center; gap: 10px; padding: 10px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #000; }
+        .suggestion-item img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
+
+        .sticky-shop-header { position: sticky; top: -20px; background: var(--bg); z-index: 50; padding: 10px 0; margin-bottom: 15px; }
+
+        /* DESIGN DES IMAGES EXACT (D'ORIGINE) */
+        .product-card { background: white; border-radius: 15px; overflow: hidden; margin-bottom: 20px; border: 1px solid #eee; color: #1e293b; }
+        .product-img-container { width: 100%; height: 180px; background: #f8fafc; display: flex; align-items: center; justify-content: center; }
+        .product-img-display { max-width: 100%; max-height: 100%; object-fit: contain; }
+        
+        .interactions { display: flex; gap: 15px; padding: 10px; border-top: 1px solid #eee; }
+        .btn-vote { border: none; background: none; cursor: pointer; font-size: 14px; font-weight: bold; color: #000 !important; }
+        .btn-vote:disabled { opacity: 0.4; cursor: default; }
+        
+        .badge { font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; margin-left: 5px; font-weight: bold; }
+        .badge-vendeur { background: var(--primary); color: white; }
+        .badge-client { background: #e2e8f0; color: #475569; }
+
+        .qr-box { background: white; padding: 10px; border-radius: 12px; display: inline-block; margin: 10px auto; border: 1px solid #eee; }
+        .tab-bar { display: flex; gap: 5px; margin-bottom: 25px; border-bottom: 1px solid #eee; }
+        .tab-item { flex: 1; text-align: center; padding: 12px; cursor: pointer; font-weight: bold; font-size: 0.7rem; color: #999; }
+        .tab-item.active { color: var(--primary); border-bottom: 3px solid var(--primary); }
+        
+        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; box-sizing: border-box; }
+        .btn-action { background: var(--glam); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        
+        .nav-bar { background: white; display: flex; border-top: 1px solid #eee; padding: 10px 0 34px; } 
+        .nav-item { flex: 1; text-align: center; font-size: 0.65rem; color: #94a3b8; cursor: pointer; font-weight: bold; }
+        .nav-item.active { color: var(--primary); }
+        .hidden { display: none !important; }
     </style>
 </head>
-<body>
+<body class="theme-glamour">
 
-<div class="sidebar">
-    <div class="sidebar-header">BOLOLO MASTER</div>
-    <div class="nav-item active">👤 Utilisateurs</div>
-</div>
-
-<div class="main-content">
+<div class="iphone-xs-screen">
     <header>
-        <h1>Gestion des Boutiques</h1>
-        <button class="btn btn-quota" onclick="location.reload()">Actualiser</button>
+        <span id="title-text">BOLOLO Pro</span>
+        <button id="logout-btn" class="btn-logout hidden" onclick="location.reload()">SORTIR</button>
     </header>
+    
+    <div class="content" id="main-content">
+        <div id="view-auth">
+            <div class="tab-bar">
+                <span id="t-login" class="tab-item active" onclick="switchTab('login')">LOGIN</span>
+                <span id="t-signup" class="tab-item" onclick="switchTab('signup')">CREER</span>
+            </div>
+            <div id="area-login">
+                <input type="tel" id="l-tel" placeholder="Numéro de téléphone">
+                <input type="password" id="l-pass" placeholder="Mot de passe">
+                <button class="btn-action" onclick="doLogin()">SE CONNECTER</button>
+                <center><img src="bololo.png" alt="Logo" style="width: 130px; margin-top: 30px;"></center>
+            </div>
+            <div id="area-signup" class="hidden">
+                <input type="tel" id="s-tel" placeholder="Votre numéro" oninput="drawQR('s-tel', 'qr-signup')">
+                <center><div id="qr-signup" class="qr-box"></div></center>
+                <input type="password" id="s-pass" placeholder="Mot de passe">
+                <input type="password" id="s-confirm" placeholder="Confirmer">
+                <button class="btn-action" onclick="doSignup()">CREER LE COMPTE</button>
+            </div>
+        </div>
 
-    <div class="stats-grid">
-        <div class="stat-card"><h3>Inscrits</h3><p id="stat-users">0</p></div>
-        <div class="stat-card"><h3>Articles</h3><p id="stat-articles">0</p></div>
-        <div class="stat-card"><h3>Bloqués</h3><p id="stat-blocked" style="color:#ef4444">0</p></div>
+        <div id="dash-params" class="hidden">
+            <div class="card" style="text-align:center;">
+                <label style="font-size:0.7rem; font-weight:bold; color:var(--primary)">VOTRE QR</label><br>
+                <div id="qr-admin" class="qr-box"></div>
+            </div>
+            <div class="card">
+                <select id="theme-selector" onchange="changeTheme()">
+                    <option value="theme-glamour">✨ Glamour</option>
+                    <option value="theme-feminin">🌸 Féminin</option>
+                    <option value="theme-masculin">👔 Masculin</option>
+                    <option value="theme-dark">🌙 Sombre</option>
+                </select>
+                <input type="text" id="set-name" placeholder="Nom de la Boutique">
+                <label style="font-size:0.7rem;">LOGO DE BOUTIQUE</label>
+                <input type="file" accept="image/*" onchange="handleLogo(event)">
+                <button class="btn-action" onclick="saveSettings()">ENREGISTRER</button>
+            </div>
+        </div>
+
+        <div id="dash-articles" class="hidden">
+            <div class="card">
+                <input type="text" id="p-name" placeholder="Nom Article">
+                <input type="number" id="p-price" placeholder="Prix (FCFA)">
+                <textarea id="p-desc" placeholder="Description..."></textarea>
+                <input type="file" id="p-img-input" accept="image/*" onchange="handleProdImg(event)">
+                <button class="btn-action" onclick="addProduct()">PUBLIER</button>
+            </div>
+            <div id="admin-list"></div>
+        </div>
+
+        <div id="dash-view" class="hidden">
+            <div class="search-container">
+                <input type="tel" id="search-tel" placeholder="Chercher une boutique..." oninput="autoComplete(this.value)">
+                <div id="suggest-box" class="autocomplete-results hidden"></div>
+            </div>
+            <div id="shop-header" class="sticky-shop-header"></div>
+            <div id="shop-list"></div>
+        </div>
     </div>
 
-    <div class="data-card">
-        <table>
-            <thead>
-                <tr>
-                    <th>UTILISATEUR</th>
-                    <th>STATUT</th>
-                    <th>ARTICLES</th>
-                    <th>QUOTA</th>
-                    <th>ACTIONS</th>
-                </tr>
-            </thead>
-            <tbody id="user-list"></tbody>
-        </table>
-    </div>
+    <nav id="bottom-nav" class="nav-bar hidden">
+        <div class="nav-item active" onclick="showSection('params', this)">⚙️<br>CONFIG</div>
+        <div class="nav-item" onclick="showSection('articles', this)">📦<br>ARTICLES</div>
+        <div class="nav-item" onclick="showSection('view', this); viewCurrentShop();">🛒<br>VUE</div>
+    </nav>
 </div>
 
 <script>
-    // 1. CONFIGURATION FIREBASE (Doit être identique à index.html)
-    const firebaseConfig = {
-        databaseURL: "https://bololoshop-bf59b-default-rtdb.firebaseio.com/"
-    };
+    // --- FIREBASE CONFIG ---
+    const firebaseConfig = { databaseURL: "https://bololoshop-bf59b-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 2. CHARGEMENT EN TEMPS RÉEL DEPUIS FIREBASE
-    function initAdmin() {
-        db.ref('accounts').on('value', (snap) => {
-            const data = snap.val();
-            const accounts = data ? Object.values(data) : [];
-            const tbody = document.getElementById('user-list');
-            
-            // Mise à jour des statistiques
-            document.getElementById('stat-users').innerText = accounts.length;
-            document.getElementById('stat-blocked').innerText = accounts.filter(a => a.blocked).length;
-            document.getElementById('stat-articles').innerText = accounts.reduce((sum, a) => sum + (a.catalog ? a.catalog.length : 0), 0);
+    let currentUser = null;
+    let viewedTel = "";
+    let tempLogo = "";
+    let tempProdImg = "";
+    let userVotes = {}; 
 
-            // Génération de la table
-            tbody.innerHTML = accounts.map((user) => `
-                <tr>
-                    <td>
-                        <div class="user-cell">
-                            <img src="${user.shopLogo || 'bololo.png'}" class="u-logo">
-                            <div>
-                                <div style="font-weight:700;">${user.shopName || 'Boutique'}</div>
-                                <div style="font-size:0.75rem; color:#64748b;">${user.tel}</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        <span class="badge ${user.blocked ? 'badge-blocked' : 'badge-active'}">
-                            ${user.blocked ? 'BLOQUÉ' : 'ACTIF'}
-                        </span>
-                    </td>
-                    <td><b>${user.catalog ? user.catalog.length : 0}</b></td>
-                    <td><b style="color:var(--primary)">${user.limit || 2}</b></td>
-                    <td>
-                        <button class="btn btn-quota" onclick="updateQuota('${user.tel}', ${user.limit || 2})">Quota</button>
-                        <button class="btn ${user.blocked ? 'btn-unblock' : 'btn-block'}" onclick="toggleBlock('${user.tel}', ${user.blocked})">
-                            ${user.blocked ? 'Débloquer' : 'Bloquer'}
-                        </button>
-                        <button class="btn btn-del" onclick="deleteUser('${user.tel}')">🗑️</button>
-                    </td>
-                </tr>
-            `).join('');
+    // --- NAVIGATION ---
+    function switchTab(t) {
+        document.getElementById('area-login').classList.toggle('hidden', t !== 'login');
+        document.getElementById('area-signup').classList.toggle('hidden', t !== 'signup');
+        document.getElementById('t-login').classList.toggle('active', t === 'login');
+        document.getElementById('t-signup').classList.toggle('active', t === 'signup');
+    }
+
+    function showSection(id, el) {
+        ['params', 'articles', 'view'].forEach(s => document.getElementById('dash-'+s).classList.add('hidden'));
+        document.getElementById('dash-'+id).classList.remove('hidden');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    // --- AUTH ---
+    function drawQR(inputId, containerId) {
+        const val = document.getElementById(inputId).value;
+        const container = document.getElementById(containerId);
+        container.innerHTML = "";
+        if(val.length >= 4) new QRCode(container, { text: val, width: 120, height: 120 });
+    }
+
+    function doSignup() {
+        const tel = document.getElementById('s-tel').value;
+        const pass = document.getElementById('s-pass').value;
+        if (tel.length < 4 || pass !== document.getElementById('s-confirm').value) return alert("Erreur saisie");
+        
+        db.ref('accounts/' + tel).set({
+            tel, pass, limit: 2, shopName: "", shopLogo: "", catalog: [], blocked: false
+        }).then(() => { alert("Compte créé !"); switchTab('login'); });
+    }
+
+    function doLogin() {
+        const tel = document.getElementById('l-tel').value;
+        const pass = document.getElementById('l-pass').value;
+        
+        db.ref('accounts/' + tel).once('value', (snap) => {
+            const user = snap.val();
+            if (!user || user.pass !== pass) return alert("Identifiants incorrects");
+            if (user.blocked) return alert("❌ COMPTE BLOQUÉ.");
+
+            currentUser = user; viewedTel = tel;
+            document.getElementById('view-auth').classList.add('hidden');
+            document.getElementById('bottom-nav').classList.remove('hidden');
+            document.getElementById('logout-btn').classList.remove('hidden');
+            document.getElementById('set-name').value = user.shopName || "";
+            tempLogo = user.shopLogo || "";
+            
+            showSection('params', document.querySelector('.nav-item'));
+            new QRCode(document.getElementById('qr-admin'), { text: user.tel, width: 140, height: 140 });
+            renderAdminList();
         });
     }
 
-    // 3. ACTIONS DIRECTES SUR FIREBASE
-    function toggleBlock(tel, currentStatus) {
-        db.ref('accounts/' + tel).update({ blocked: !currentStatus });
+    // --- LOGIC BOUTIQUE ---
+    function handleLogo(e) {
+        const reader = new FileReader();
+        reader.onload = () => tempLogo = reader.result;
+        reader.readAsDataURL(e.target.files[0]);
     }
 
-    function updateQuota(tel, currentLimit) {
-        const n = prompt("Nouveau quota pour " + tel, currentLimit);
-        if (n !== null) {
-            db.ref('accounts/' + tel).update({ limit: parseInt(n) });
-        }
+    function saveSettings() {
+        db.ref('accounts/' + currentUser.tel).update({
+            shopName: document.getElementById('set-name').value,
+            shopLogo: tempLogo
+        }).then(() => alert("Config sauvegardée"));
     }
 
-    function deleteUser(tel) {
-        if(confirm("Supprimer définitivement cette boutique ?")) {
-            db.ref('accounts/' + tel).remove();
-        }
+    function handleProdImg(e) {
+        const reader = new FileReader();
+        reader.onload = () => tempProdImg = reader.result;
+        reader.readAsDataURL(e.target.files[0]);
     }
 
-    initAdmin();
+    function addProduct() {
+        db.ref('accounts/' + currentUser.tel).once('value', snap => {
+            const user = snap.val();
+            const catalog = user.catalog || [];
+            if (catalog.length >= (user.limit || 2)) return alert("Quota atteint");
+
+            const newItem = { 
+                id: Date.now(), 
+                name: document.getElementById('p-name').value, 
+                price: document.getElementById('p-price').value, 
+                desc: document.getElementById('p-desc').value, 
+                img: tempProdImg, 
+                likes: 0, 
+                dislikes: 0, 
+                comments: [] 
+            };
+            
+            catalog.push(newItem);
+            db.ref('accounts/' + currentUser.tel + '/catalog').set(catalog).then(() => {
+                tempProdImg = ""; document.getElementById('p-img-input').value = "";
+                renderAdminList();
+            });
+        });
+    }
+
+    function renderAdminList() {
+        db.ref('accounts/' + currentUser.tel + '/catalog').on('value', snap => {
+            const catalog = snap.val() || [];
+            document.getElementById('admin-list').innerHTML = catalog.map((it, i) => `
+                <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <img src="${it.img || ''}" style="width:40px;height:40px;border-radius:5px;object-fit:cover;">
+                        <span><b>${it.name}</b></span>
+                    </div>
+                    <button onclick="deleteProduct(${i})" style="color:red; border:none; background:none;">🗑️</button>
+                </div>`).join('');
+        });
+    }
+
+    function deleteProduct(i) {
+        db.ref('accounts/' + currentUser.tel + '/catalog').once('value', snap => {
+            let cat = snap.val();
+            cat.splice(i, 1);
+            db.ref('accounts/' + currentUser.tel + '/catalog').set(cat);
+        });
+    }
+
+    // --- RECHERCHE ET RENDER CLIENT ---
+    function autoComplete(val) {
+        const box = document.getElementById('suggest-box');
+        if(val.length < 2) { box.classList.add('hidden'); return; }
+        db.ref('accounts').once('value', snap => {
+            const data = snap.val();
+            const filtered = Object.values(data).filter(a => a.tel.includes(val) || (a.shopName && a.shopName.toLowerCase().includes(val.toLowerCase())));
+            box.classList.toggle('hidden', filtered.length === 0);
+            box.innerHTML = filtered.map(a => `
+                <div class="suggestion-item" onclick="selectShop('${a.tel}')">
+                    <img src="${a.shopLogo || 'https://via.placeholder.com/30'}">
+                    <div><b>${a.shopName || 'Boutique'}</b><br><small>${a.tel}</small></div>
+                </div>`).join('');
+        });
+    }
+
+    function selectShop(tel) { viewedTel = tel; document.getElementById('suggest-box').classList.add('hidden'); renderShop(); }
+    function viewCurrentShop() { viewedTel = currentUser.tel; renderShop(); }
+
+    function renderShop() {
+        db.ref('accounts/' + viewedTel).on('value', snap => {
+            const u = snap.val();
+            const catalog = u.catalog || [];
+            const isOwner = (currentUser.tel === viewedTel);
+
+            document.getElementById('shop-header').innerHTML = `
+                <div style="display:flex; align-items:center; gap:12px; background:white; padding:12px; border-radius:15px; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
+                    <img src="${u.shopLogo || ''}" style="width:50px; height:50px; border-radius:50%; object-fit:cover; border:2px solid var(--primary);">
+                    <div style="text-align:left"><h4 style="margin:0">${u.shopName || 'Boutique'}</h4><small>${u.tel}</small></div>
+                </div>`;
+
+            document.getElementById('shop-list').innerHTML = catalog.map((it, i) => {
+                const hasVoted = userVotes[it.id];
+                return `
+                <div class="product-card">
+                    <div class="product-img-container">${it.img ? `<img src="${it.img}" class="product-img-display">` : 'Image'}</div>
+                    <div style="padding:15px;">
+                        <b>${it.name}</b><br><span style="color:var(--primary); font-weight:bold;">${it.price} FCFA</span>
+                        <p style="font-size:0.75rem; color:#666; margin:5px 0;">${it.desc || ''}</p>
+                        
+                        <div class="interactions">
+                            <button class="btn-vote" ${ (isOwner || hasVoted) ? 'disabled' : '' } onclick="vote(${i}, 'likes', ${it.id})">👍 ${it.likes || 0}</button>
+                            <button class="btn-vote" ${ (isOwner || hasVoted) ? 'disabled' : '' } onclick="vote(${i}, 'dislikes', ${it.id})">👎 ${it.dislikes || 0}</button>
+                        </div>
+
+                        <div style="background:#f8fafc; padding:10px; border-radius:10px; font-size:11px;">
+                            <div id="comm-area-${i}">${(it.comments || []).map(c => `<div style="margin-bottom:4px; border-bottom:1px solid #eee;"><b>${c.text}</b> <span class="badge ${c.isOwner ? 'badge-vendeur' : 'badge-client'}">${c.isOwner ? 'Vendeur' : 'Client'}</span></div>`).join('')}</div>
+                            <div style="display:flex; gap:5px; margin-top:5px;">
+                                <input type="text" id="in-comm-${i}" placeholder="Commenter..." style="margin:0; padding:5px; font-size:11px;">
+                                <button onclick="sendComm(${i}, ${isOwner})" style="border:none; background:var(--primary); color:white; border-radius:5px; padding:5px 10px; cursor:pointer;">📩</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        });
+    }
+
+    function vote(idx, type, prodId) { 
+        userVotes[prodId] = true; 
+        db.ref('accounts/' + viewedTel + '/catalog/' + idx + '/' + type).transaction(v => (v || 0) + 1);
+    }
+
+    function sendComm(idx, isOwner) {
+        const input = document.getElementById('in-comm-'+idx);
+        if(!input.value) return;
+        db.ref('accounts/' + viewedTel + '/catalog/' + idx + '/comments').once('value', s => {
+            let comms = s.val() || [];
+            comms.push({ text: input.value, isOwner: isOwner });
+            db.ref('accounts/' + viewedTel + '/catalog/' + idx + '/comments').set(comms);
+            input.value = "";
+        });
+    }
+
+    function changeTheme() { document.body.className = document.getElementById('theme-selector').value; }
 </script>
 </body>
 </html>
