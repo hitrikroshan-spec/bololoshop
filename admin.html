@@ -5,7 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BOLOLO MASTER - Administration</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+
     <style>
+        /* Vos styles originaux conservés */
         :root { --primary: #6366f1; --sidebar-bg: #0f172a; --bg-main: #f1f5f9; }
         body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg-main); display: flex; min-height: 100vh; }
         .sidebar { width: 260px; background: var(--sidebar-bg); color: white; position: fixed; height: 100vh; display: flex; flex-direction: column; }
@@ -70,73 +75,73 @@
 </div>
 
 <script>
+    // INITIALISATION FIREBASE
+    const firebaseConfig = {
+        databaseURL: "https://bololoshop-bf59b-default-rtdb.firebaseio.com/"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
     function refreshList() {
         const tbody = document.getElementById('user-list');
-        const accounts = JSON.parse(localStorage.getItem('bololo_accounts')) || [];
         
-        // Stats
-        document.getElementById('stat-users').innerText = accounts.length;
-        document.getElementById('stat-blocked').innerText = accounts.filter(a => a.blocked).length;
-        document.getElementById('stat-articles').innerText = accounts.reduce((sum, a) => sum + (a.catalog ? a.catalog.length : 0), 0);
+        // On écoute la base de données en temps réel
+        db.ref('accounts').on('value', (snapshot) => {
+            const data = snapshot.val() || {};
+            const accounts = Object.values(data);
+            
+            // Stats
+            document.getElementById('stat-users').innerText = accounts.length;
+            document.getElementById('stat-blocked').innerText = accounts.filter(a => a.blocked).length;
+            document.getElementById('stat-articles').innerText = accounts.reduce((sum, a) => sum + (a.catalog ? a.catalog.length : 0), 0);
 
-        tbody.innerHTML = accounts.map((user, index) => `
-            <tr>
-                <td>
-                    <div class="user-cell">
-                        <img src="${user.shopLogo || 'https://via.placeholder.com/45'}" class="u-logo">
-                        <div>
-                            <div style="font-weight:700;">${user.shopName || 'Boutique'}</div>
-                            <div style="font-size:0.75rem; color:#64748b;">${user.tel}</div>
+            tbody.innerHTML = accounts.map((user) => `
+                <tr>
+                    <td>
+                        <div class="user-cell">
+                            <img src="${user.shopLogo || 'https://via.placeholder.com/45'}" class="u-logo">
+                            <div>
+                                <div style="font-weight:700;">${user.shopName || 'Boutique'}</div>
+                                <div style="font-size:0.75rem; color:#64748b;">${user.tel}</div>
+                            </div>
                         </div>
-                    </div>
-                </td>
-                <td>
-                    <span class="badge ${user.blocked ? 'badge-blocked' : 'badge-active'}">
-                        ${user.blocked ? 'BLOQUÉ' : 'ACTIF'}
-                    </span>
-                </td>
-                <td><b>${user.catalog ? user.catalog.length : 0}</b></td>
-                <td><b style="color:var(--primary)">${user.limit || 2}</b></td>
-                <td>
-                    <button class="btn btn-quota" onclick="updateQuota(${index})">Quota</button>
-                    <button class="btn ${user.blocked ? 'btn-unblock' : 'btn-block'}" onclick="toggleBlock(${index})">
-                        ${user.blocked ? 'Débloquer' : 'Bloquer'}
-                    </button>
-                    <button class="btn btn-del" onclick="deleteUser(${index})">🗑️</button>
-                </td>
-            </tr>
-        `).join('');
+                    </td>
+                    <td>
+                        <span class="badge ${user.blocked ? 'badge-blocked' : 'badge-active'}">
+                            ${user.blocked ? 'BLOQUÉ' : 'ACTIF'}
+                        </span>
+                    </td>
+                    <td><b>${user.catalog ? user.catalog.length : 0}</b></td>
+                    <td><b style="color:var(--primary)">${user.limit || 2}</b></td>
+                    <td>
+                        <button class="btn btn-quota" onclick="updateQuota('${user.tel}', ${user.limit || 2})">Quota</button>
+                        <button class="btn ${user.blocked ? 'btn-unblock' : 'btn-block'}" onclick="toggleBlock('${user.tel}', ${user.blocked})">
+                            ${user.blocked ? 'Débloquer' : 'Bloquer'}
+                        </button>
+                        <button class="btn btn-del" onclick="deleteUser('${user.tel}')">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+        });
     }
 
-    function toggleBlock(index) {
-        let accounts = JSON.parse(localStorage.getItem('bololo_accounts'));
-        // Alterne entre true et false
-        accounts[index].blocked = !accounts[index].blocked;
-        localStorage.setItem('bololo_accounts', JSON.stringify(accounts));
-        refreshList();
+    function toggleBlock(tel, currentStatus) {
+        db.ref('accounts/' + tel).update({ blocked: !currentStatus });
     }
 
-    function updateQuota(index) {
-        let accounts = JSON.parse(localStorage.getItem('bololo_accounts'));
-        const n = prompt("Nouveau quota pour " + accounts[index].tel, accounts[index].limit || 2);
+    function updateQuota(tel, currentQuota) {
+        const n = prompt("Nouveau quota pour " + tel, currentQuota);
         if (n !== null) {
-            accounts[index].limit = parseInt(n);
-            localStorage.setItem('bololo_accounts', JSON.stringify(accounts));
-            refreshList();
+            db.ref('accounts/' + tel).update({ limit: parseInt(n) });
         }
     }
 
-    function deleteUser(index) {
-        if(confirm("Supprimer cette boutique ?")) {
-            let accounts = JSON.parse(localStorage.getItem('bololo_accounts'));
-            accounts.splice(index, 1);
-            localStorage.setItem('bololo_accounts', JSON.stringify(accounts));
-            refreshList();
+    function deleteUser(tel) {
+        if(confirm("Supprimer définitivement cette boutique ?")) {
+            db.ref('accounts/' + tel).remove();
         }
     }
 
-    // Mise à jour auto quand on revient sur l'onglet
-    window.onfocus = refreshList;
     refreshList();
 </script>
 </body>
