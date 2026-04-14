@@ -33,20 +33,20 @@
             overscroll-behavior: none; 
         }
 
-        .iphone-xs-screen { 
-            width: 100%;
-            max-width: 375px; 
-            height: 95vh; 
-            max-height: 812px; 
-            background: white; 
-            display: flex; 
-            flex-direction: column; 
-            overflow: hidden; 
-            position: relative; 
-            border-radius: 30px; 
-            border: 8px solid #333; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-        }
+       .iphone-xs-screen { 
+    width: 100%;
+    max-width: 375px; 
+    height: 100vh; /* On peut mettre 100vh pour prendre toute la hauteur */
+    background: white; 
+    display: flex; 
+    flex-direction: column; 
+    overflow: hidden; 
+    position: relative; 
+    /* --- MODIFICATIONS ICI --- */
+    border: none;             /* Enlève la bordure noire */
+    border-radius: 0;         /* Enlève les coins arrondis si tu veux du plein écran */
+    box-shadow: none;         /* Enlève l'ombre portée */
+}
         
         header { background: var(--glam); color: white; padding: 20px 20px 15px; text-align: center; font-weight: bold; font-size: 0.9rem; position: relative; z-index: 1000; }
         .btn-logout { position: absolute; right: 15px; bottom: 12px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 5px 10px; border-radius: 8px; font-size: 0.6rem; cursor: pointer; }
