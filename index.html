@@ -28,20 +28,13 @@
         
         .card { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #eee; }
         
-        /* Recherche et Bannière Marché */
         .market-header-sticky { position: sticky; top: -20px; background: var(--bg); z-index: 50; padding: 10px 0; }
         .search-results { background: white; border-radius: 10px; position: absolute; width: 100%; box-shadow: 0 10px 20px rgba(0,0,0,0.1); z-index: 100; max-height: 200px; overflow-y: auto; border: 1px solid #eee; }
         .search-item { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 0.8rem; }
 
-        /* Produits */
-        .product-card { background: white; border-radius: 20px; overflow: hidden; margin-bottom: 25px; border: 1px solid #eee; }
+        .product-card { background: white; border-radius: 20px; overflow: hidden; margin-bottom: 25px; border: 1px solid #eee; position: relative; }
         .product-img { width: 100%; height: 220px; object-fit: cover; background: #f8fafc; }
         
-        /* Commentaires */
-        .comm-bubble { display: flex; gap: 8px; margin-top: 8px; align-items: flex-start; }
-        .comm-logo { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; background: #eee; }
-        .comm-text { background: #f1f5f9; padding: 8px 12px; border-radius: 12px; flex: 1; font-size: 0.75rem; color: #334155; }
-
         .btn-action { background: var(--glam); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn-action:active { transform: scale(0.98); }
 
@@ -49,6 +42,11 @@
         .nav-item { flex: 1; text-align: center; font-size: 0.65rem; color: #94a3b8; cursor: pointer; font-weight: bold; }
         .nav-item.active { color: var(--primary); }
         
+        .plan-box { border: 2px solid #eee; padding: 10px; border-radius: 15px; margin-bottom: 10px; cursor: pointer; transition: 0.3s; }
+        .plan-box.active { border-color: var(--primary); background: #f5f3ff; }
+
+        .btn-delete-item { position: absolute; top: 10px; right: 10px; background: rgba(239, 68, 68, 0.9); color: white; border: none; padding: 8px; border-radius: 10px; font-size: 0.7rem; cursor: pointer; }
+
         input, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; box-sizing: border-box; font-family: inherit; }
         .hidden { display: none !important; }
         .qr-box { background: white; padding: 10px; border-radius: 15px; display: inline-block; border: 1px solid #eee; margin: 15px 0; }
@@ -83,11 +81,25 @@
                 <h1 id="user-balance" style="margin:0; font-size: 2.5rem;">0 BLL</h1>
                 <p style="margin:0; font-size:0.8rem; opacity: 0.9;">SOLDE PORTEFEUILLE</p>
             </div>
+            
             <div class="card">
-                <label style="font-size: 0.8rem; font-weight: bold;">Logo de votre entreprise :</label>
+                <h3>Votre Forfait (Quota : <span id="user-limit">0</span>)</h3>
+                <div class="plan-box" id="plan-bronze" onclick="buyPlan('Bronze', 500, 20)">
+                    <b>BRONZE (500 BLL)</b><br><small>Jusqu'à 20 articles</small>
+                </div>
+                <div class="plan-box" id="plan-argent" onclick="buyPlan('Argent', 1200, 50)">
+                    <b>ARGENT (1200 BLL)</b><br><small>Jusqu'à 50 articles</small>
+                </div>
+                <div class="plan-box" id="plan-or" onclick="buyPlan('Or', 3000, 100)">
+                    <b>OR (3000 BLL)</b><br><small>Jusqu'à 100 articles</small>
+                </div>
+            </div>
+
+            <div class="card">
+                <label style="font-size: 0.8rem; font-weight: bold;">Logo & Nom :</label>
                 <input type="file" accept="image/*" onchange="handleFile(event, 'logo')" style="margin-top:5px;">
-                <input type="text" id="set-name" placeholder="Nom de l'entreprise / Boutique">
-                <button class="btn-action" onclick="saveSettings()">ENREGISTRER LE PROFIL</button>
+                <input type="text" id="set-name" placeholder="Nom de la boutique">
+                <button class="btn-action" onclick="saveSettings()">METTRE À JOUR</button>
             </div>
         </div>
 
@@ -96,39 +108,35 @@
                 <h3>Nouvel Article</h3>
                 <input type="text" id="p-name" placeholder="Nom de l'article">
                 <input type="number" id="p-price" placeholder="Prix en BLL">
-                <textarea id="p-desc" placeholder="Description de l'article (caractéristiques, taille...)" rows="3"></textarea>
+                <textarea id="p-desc" placeholder="Description..." rows="3"></textarea>
                 <input type="file" accept="image/*" onchange="handleFile(event, 'prod')">
-                <button class="btn-action" onclick="addProduct()">PUBLIER DANS LE MARCHÉ</button>
+                <button class="btn-action" onclick="addProduct()">PUBLIER L'ARTICLE</button>
             </div>
-            <div id="my-list"></div>
+            <h4 style="margin-left:10px;">Mes articles publiés :</h4>
+            <div id="my-articles-list"></div>
         </div>
 
         <div id="dash-view" class="hidden">
             <div class="market-header-sticky">
-                <input type="text" id="search-box" placeholder="Chercher une boutique ou un client..." oninput="autoSearch(this.value)">
+                <input type="text" id="search-box" placeholder="Rechercher..." oninput="autoSearch(this.value)">
                 <div id="search-results" class="search-results hidden"></div>
-                
                 <div class="card" style="display:flex; align-items:center; gap:15px; margin-top:10px; padding:12px;">
-                    <img id="banner-logo" src="bololo.png" style="width:55px; height:55px; border-radius:12px; object-fit:cover; border:1px solid #eee;">
-                    <div>
-                        <b id="banner-name" style="font-size:1.1rem;">Boutique Bololo</b><br>
-                        <small id="banner-tel" style="color:#666;">---</small>
-                    </div>
+                    <img id="banner-logo" src="bololo.png" style="width:50px; height:50px; border-radius:10px; object-fit:cover;">
+                    <div><b id="banner-name">Boutique</b><br><small id="banner-tel">---</small></div>
                 </div>
             </div>
-            <div id="market-list" style="margin-top:10px;"></div>
+            <div id="market-list"></div>
         </div>
     </div>
 
     <nav id="bottom-nav" class="nav-bar hidden">
         <div class="nav-item active" onclick="showSection('params', this)">⚙️<br>PROFIL</div>
-        <div class="nav-item" onclick="showSection('articles', this)">📦<br>AJOUTER</div>
+        <div class="nav-item" onclick="showSection('articles', this); renderMyArticles();">📦<br>MES ARTICLES</div>
         <div class="nav-item" onclick="showSection('view', this); renderMarket();">🛒<br>MARCHÉ</div>
     </nav>
 </div>
 
 <script>
-    // --- CONFIGURATION FIREBASE ---
     const firebaseConfig = { databaseURL: "https://bololoshop-bf59b-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
@@ -137,44 +145,35 @@
     let tempLogo = "";
     let tempProdImg = "";
 
-    // --- SYSTÈME D'INSCRIPTION ORIGINAL (AVEC QR) ---
     function generateQR(val) {
         const container = document.getElementById('qr-signup');
         container.innerHTML = "";
-        if(val.length > 2) {
-            new QRCode(container, { text: val, width: 110, height: 110 });
-        }
+        if(val.length > 2) new QRCode(container, { text: val, width: 110, height: 110 });
     }
 
     function doSignup() {
         const tel = document.getElementById('s-tel').value;
         const pass = document.getElementById('s-pass').value;
-        const confirm = document.getElementById('s-confirm').value;
+        if (tel.length < 4 || pass.length < 4) return alert("Infos invalides");
 
-        if (tel.length < 4 || pass !== confirm || pass.length < 4) return alert("Vérifiez vos informations");
-
-        db.ref('accounts/' + tel).once('value', snap => {
-            if (snap.exists()) return alert("Numéro déjà inscrit");
-            db.ref('accounts/' + tel).set({
-                tel, pass, balance: 0, limit: 10, plan: "Gratuit", shopName: "Boutique " + tel, shopLogo: "", catalog: [], blocked: false
-            }).then(() => { alert("Compte créé !"); switchAuth('login'); });
-        });
+        db.ref('accounts/' + tel).set({
+            tel, pass, balance: 100, limit: 5, plan: "Gratuit", shopName: "Boutique " + tel, shopLogo: "", catalog: [], blocked: false
+        }).then(() => { alert("Bienvenue sur Bololo (100 BLL offerts!)"); switchAuth('login'); });
     }
 
-    // --- CONNEXION ---
     function doLogin() {
         const tel = document.getElementById('l-tel').value;
         const pass = document.getElementById('l-pass').value;
         db.ref('accounts/' + tel).once('value', snap => {
             const u = snap.val();
             if(u && u.pass === pass) {
-                if(u.blocked) return alert("Compte bloqué par l'administrateur");
+                if(u.blocked) return alert("Compte bloqué");
                 currentUser = u;
                 document.getElementById('view-auth').classList.add('hidden');
                 document.getElementById('bottom-nav').classList.remove('hidden');
                 showSection('params', document.querySelector('.nav-item'));
                 syncData();
-            } else alert("Identifiants incorrects");
+            } else alert("Erreur");
         });
     }
 
@@ -182,25 +181,27 @@
         db.ref('accounts/' + currentUser.tel).on('value', snap => {
             currentUser = snap.val();
             document.getElementById('user-balance').innerText = (currentUser.balance || 0) + " BLL";
+            document.getElementById('user-limit').innerText = (currentUser.limit || 5);
             document.getElementById('banner-name').innerText = currentUser.shopName;
-            document.getElementById('banner-tel').innerText = "Propriétaire: " + currentUser.tel;
             if(currentUser.shopLogo) document.getElementById('banner-logo').src = currentUser.shopLogo;
         });
     }
 
-    // --- PROFIL ---
-    function saveSettings() {
-        const newName = document.getElementById('set-name').value || currentUser.shopName;
-        db.ref('accounts/' + currentUser.tel).update({
-            shopName: newName,
-            shopLogo: tempLogo || currentUser.shopLogo
-        }).then(() => alert("Profil mis à jour !"));
+    // ACHETER FORFAIT
+    function buyPlan(name, price, limit) {
+        if(currentUser.balance < price) return alert("Solde insuffisant");
+        if(confirm(`Activer le forfait ${name} pour ${price} BLL ?`)) {
+            db.ref('accounts/' + currentUser.tel).update({
+                balance: currentUser.balance - price,
+                limit: limit,
+                plan: name
+            }).then(() => alert("Forfait activé !"));
+        }
     }
 
-    // --- ARTICLES ---
     function addProduct() {
         const cat = currentUser.catalog || [];
-        if(cat.length >= (currentUser.limit || 10)) return alert("Limite d'articles atteinte !");
+        if(cat.length >= (currentUser.limit || 5)) return alert("Quota plein ! Achetez un forfait.");
         
         const newItem = {
             id: Date.now(),
@@ -208,20 +209,41 @@
             price: parseInt(document.getElementById('p-price').value),
             desc: document.getElementById('p-desc').value,
             img: tempProdImg,
-            likes: 0, dislikes: 0, comments: []
+            likes: 0, comments: []
         };
         
         cat.push(newItem);
         db.ref('accounts/' + currentUser.tel + '/catalog').set(cat).then(() => {
             alert("Article publié !");
-            tempProdImg = "";
-            document.getElementById('p-name').value = "";
-            document.getElementById('p-price').value = "";
-            document.getElementById('p-desc').value = "";
+            renderMyArticles();
         });
     }
 
-    // --- MARCHÉ ---
+    // RENDRE ET SUPPRIMER SES PROPRES ARTICLES
+    function renderMyArticles() {
+        const cat = currentUser.catalog || [];
+        let html = "";
+        cat.forEach((it, i) => {
+            html += `
+            <div class="product-card">
+                <button class="btn-delete-item" onclick="deleteMyItem(${i})">🗑️ Supprimer</button>
+                <img src="${it.img || 'bololo.png'}" class="product-img">
+                <div style="padding:10px;">
+                    <b>${it.name}</b> - ${it.price} BLL
+                </div>
+            </div>`;
+        });
+        document.getElementById('my-articles-list').innerHTML = html || "<small style='margin-left:15px;'>Aucun article</small>";
+    }
+
+    function deleteMyItem(index) {
+        if(confirm("Supprimer cet article ?")) {
+            let cat = currentUser.catalog;
+            cat.splice(index, 1);
+            db.ref('accounts/' + currentUser.tel + '/catalog').set(cat).then(() => renderMyArticles());
+        }
+    }
+
     function renderMarket() {
         db.ref('accounts').on('value', snap => {
             const all = snap.val();
@@ -229,99 +251,32 @@
             for(let tel in all) {
                 const shop = all[tel];
                 (shop.catalog || []).forEach((it, i) => {
-                    html += `
-                    <div class="product-card">
+                    html += `<div class="product-card">
                         <img src="${it.img || 'bololo.png'}" class="product-img">
                         <div style="padding:15px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <b style="font-size:1.1rem;">${it.name}</b>
-                                <span style="background:#f1f5f9; padding:5px 10px; border-radius:10px; font-weight:900; color:var(--primary);">${it.price} BLL</span>
-                            </div>
-                            <p style="font-size:0.8rem; color:#64748b; margin:10px 0;">${it.desc || 'Aucune description'}</p>
-                            
-                            <div style="display:flex; gap:20px; margin-top:15px; font-size:0.9rem;">
-                                <span onclick="interact('${tel}', ${i}, 'likes')" style="cursor:pointer;">👍 ${it.likes||0}</span>
-                                <span onclick="interact('${tel}', ${i}, 'dislikes')" style="cursor:pointer;">👎 ${it.dislikes||0}</span>
-                                <span style="color:#94a3b8;">🏪 ${shop.shopName}</span>
-                            </div>
-
-                            <div style="margin-top:15px; border-top:1px solid #f1f5f9; padding-top:10px;">
-                                ${(it.comments || []).map(c => `
-                                    <div class="comm-bubble">
-                                        <img src="${c.logo || 'bololo.png'}" class="comm-logo">
-                                        <div class="comm-text">
-                                            <b style="color:var(--primary)">${c.name}</b><br>${c.text}
-                                        </div>
-                                    </div>
-                                `).join('')}
-                                <div style="display:flex; gap:8px; margin-top:12px;">
-                                    <input type="text" id="in-${tel}-${i}" placeholder="Ecrire un commentaire..." style="margin:0; padding:8px; font-size:0.75rem;">
-                                    <button onclick="sendComm('${tel}', ${i})" style="background:var(--primary); color:white; border:none; border-radius:10px; padding:0 12px; cursor:pointer;">📩</button>
-                                </div>
-                            </div>
-
-                            <button class="btn-action" onclick="buyItem('${tel}', ${it.price})" style="margin-top:20px;">ACHETER MAINTENANT</button>
+                            <b>${it.name}</b> | <span style="color:var(--primary)">${it.price} BLL</span>
+                            <p style="font-size:0.7rem; color:gray;">Vendeur: ${shop.shopName}</p>
+                            <button class="btn-action" onclick="buyItem('${tel}', ${it.price})">ACHETER</button>
                         </div>
                     </div>`;
                 });
             }
-            document.getElementById('market-list').innerHTML = html || "<center>Aucun article disponible</center>";
+            document.getElementById('market-list').innerHTML = html;
         });
     }
 
-    // --- LOGIQUE INTERACTIONS ---
-    function interact(tel, idx, type) {
-        db.ref('accounts/'+tel+'/catalog/'+idx+'/'+type).transaction(v => (v || 0) + 1);
+    function saveSettings() {
+        const name = document.getElementById('set-name').value || currentUser.shopName;
+        db.ref('accounts/' + currentUser.tel).update({
+            shopName: name,
+            shopLogo: tempLogo || currentUser.shopLogo
+        }).then(() => alert("Profil enregistré"));
     }
 
-    function sendComm(tel, idx) {
-        const inp = document.getElementById(`in-${tel}-${idx}`);
-        if(!inp.value) return;
-        db.ref('accounts/'+tel+'/catalog/'+idx+'/comments').once('value', s => {
-            let comms = s.val() || [];
-            comms.push({
-                name: currentUser.shopName,
-                logo: currentUser.shopLogo || "",
-                text: inp.value
-            });
-            db.ref('accounts/'+tel+'/catalog/'+idx+'/comments').set(comms).then(() => inp.value = "");
-        });
-    }
-
-    // --- RECHERCHE ---
-    function autoSearch(val) {
-        const res = document.getElementById('search-results');
-        if(!val) return res.classList.add('hidden');
-        db.ref('accounts').once('value', snap => {
-            const all = snap.val(); let html = "";
-            for(let tel in all) {
-                if(all[tel].shopName.toLowerCase().includes(val.toLowerCase()) || tel.includes(val)) {
-                    html += `<div class="search-item" onclick="selectShop('${tel}')">
-                        <img src="${all[tel].shopLogo || 'bololo.png'}" style="width:30px; height:30px; border-radius:50%; object-fit:cover;">
-                        <span>${all[tel].shopName} (${tel})</span>
-                    </div>`;
-                }
-            }
-            res.innerHTML = html; res.classList.toggle('hidden', !html);
-        });
-    }
-
-    function selectShop(tel) {
-        document.getElementById('search-box').value = tel;
-        document.getElementById('search-results').classList.add('hidden');
-        // Filtre visuel optionnel ici
-    }
-
-    // --- UTILITAIRES ---
     function handleFile(e, type) {
         const reader = new FileReader();
         reader.onload = () => { if(type === 'logo') tempLogo = reader.result; else tempProdImg = reader.result; };
         reader.readAsDataURL(e.target.files[0]);
-    }
-
-    function switchAuth(mode) {
-        document.getElementById('view-auth').classList.toggle('hidden', mode !== 'login');
-        document.getElementById('view-signup').classList.toggle('hidden', mode !== 'signup');
     }
 
     function showSection(id, el) {
@@ -331,14 +286,9 @@
         el.classList.add('active');
     }
 
-    function buyItem(sellerTel, price) {
-        if(sellerTel === currentUser.tel) return alert("Vous possédez déjà cet article");
-        if(currentUser.balance < price) return alert("Solde insuffisant");
-        if(confirm(`Confirmer l'achat de ${price} BLL ?`)) {
-            db.ref('accounts/'+currentUser.tel+'/balance').transaction(b => b - price);
-            db.ref('accounts/'+sellerTel+'/balance').transaction(b => (b || 0) + price);
-            alert("Achat réussi !");
-        }
+    function switchAuth(mode) {
+        document.getElementById('view-auth').classList.toggle('hidden', mode !== 'login');
+        document.getElementById('view-signup').classList.toggle('hidden', mode !== 'signup');
     }
 </script>
 </body>
