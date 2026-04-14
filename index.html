@@ -3,12 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>BOLOLO Pro</title>
-     
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="bololo.png">
-
+    <title>BOLOLO Pro - Emulator</title>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
@@ -20,20 +16,43 @@
         body.theme-masculin { --primary: #0ea5e9; --glam: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%); --bg: #f0f9ff; }
         body.theme-dark { --primary: #64748b; --glam: linear-gradient(135deg, #334155 0%, #0f172a 100%); --bg: #1e293b; --text: #f8fafc; }
         
-        body { margin: 0; font-family: 'Inter', sans-serif; background: #000; min-height: 100vh; display: flex; justify-content: center; align-items: center; color: var(--text); overscroll-behavior: none; }
-        .iphone-xs-screen { width: 100vw; height: 100vh; background: white; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        /* STYLE DE L'EMULATEUR SANS BORDURES */
+        body { 
+            margin: 0; 
+            padding: 0;
+            background: #2d3436; /* Fond extérieur */
+            height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            font-family: 'Inter', sans-serif;
+        }
+
+        .phone-frame { 
+            width: 375px; 
+            height: 812px; 
+            background: white; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); /* Ombre pour l'effet flottant */
+            border-radius: 4px; /* Un angle très léger pour le rendu propre */
+        }
         
-        header { background: var(--glam); color: white; padding: env(safe-area-inset-top, 45px) 20px 15px; text-align: center; font-weight: bold; font-size: 0.9rem; position: relative; z-index: 1000; }
+        header { background: var(--glam); color: white; padding: 45px 20px 15px; text-align: center; font-weight: bold; font-size: 0.9rem; position: relative; z-index: 1000; }
         .btn-logout { position: absolute; right: 15px; bottom: 12px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 5px 10px; border-radius: 8px; font-size: 0.6rem; cursor: pointer; }
         
-        .content { flex: 1; overflow-y: auto; padding: 20px; background: var(--bg); position: relative; }
+        .content { flex: 1; overflow-y: auto; padding: 20px; background: var(--bg); color: var(--text); }
+        .content::-webkit-scrollbar { display: none; } /* Cache le scroll pour l'effet app */
+
         .card { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #eee; }
 
         .product-card { background: white; border-radius: 15px; overflow: hidden; margin-bottom: 20px; border: 1px solid #eee; color: #1e293b; }
         .product-img-container { width: 100%; display: flex; align-items: center; justify-content: center; background: #f8fafc; min-height: 200px; }
         .product-img-display { width: 100%; height: auto; max-height: 500px; object-fit: contain; display: block; }
         
-        .nav-bar { background: white; display: flex; border-top: 1px solid #eee; padding: 10px 0 calc(env(safe-area-inset-bottom, 10px) + 20px); } 
+        .nav-bar { background: white; display: flex; border-top: 1px solid #eee; padding: 10px 0 30px; } 
         .nav-item { flex: 1; text-align: center; font-size: 0.65rem; color: #94a3b8; cursor: pointer; font-weight: bold; }
         .nav-item.active { color: var(--primary); }
 
@@ -41,14 +60,11 @@
         .btn-action { background: var(--glam); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; }
         .hidden { display: none !important; }
         .qr-box { background: white; padding: 10px; border-radius: 12px; display: inline-block; margin: 10px auto; border: 1px solid #eee; }
-        .badge { font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; margin-left: 5px; font-weight: bold; }
-        .badge-vendeur { background: var(--primary); color: white; }
-        .badge-client { background: #e2e8f0; color: #475569; }
     </style>
 </head>
 <body class="theme-glamour">
 
-<div class="iphone-xs-screen">
+<div class="phone-frame">
     <header>
         <span id="title-text">BOLOLO Pro</span>
         <button id="logout-btn" class="btn-logout hidden" onclick="location.reload()">SORTIR</button>
@@ -75,9 +91,7 @@
         </div>
 
         <div id="dash-params" class="hidden">
-            <div class="card" style="text-align:center;">
-                <div id="qr-admin" class="qr-box"></div>
-            </div>
+            <div class="card" style="text-align:center;"><div id="qr-admin" class="qr-box"></div></div>
             <div class="card">
                 <select id="theme-selector" onchange="changeTheme()">
                     <option value="theme-glamour">✨ Glamour</option>
@@ -86,7 +100,6 @@
                     <option value="theme-dark">🌙 Sombre</option>
                 </select>
                 <input type="text" id="set-name" placeholder="Nom de la Boutique">
-                <label style="font-size:0.7rem;">LOGO (IMAGE)</label>
                 <input type="file" id="logo-file" accept="image/*">
                 <button class="btn-action" onclick="saveSettings()">ENREGISTRER</button>
             </div>
@@ -96,7 +109,6 @@
             <div class="card">
                 <input type="text" id="p-name" placeholder="Nom Article">
                 <input type="number" id="p-price" placeholder="Prix (FCFA)">
-                <textarea id="p-desc" placeholder="Description..."></textarea>
                 <input type="file" id="p-img-file" accept="image/*">
                 <button class="btn-action" onclick="addProduct()">PUBLIER</button>
             </div>
@@ -121,7 +133,6 @@
     const firebaseConfig = { databaseURL: "https://bololoshop-bf59b-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-
     let currentUser = null;
     let viewedTel = "";
 
@@ -137,20 +148,6 @@
         el.classList.add('active');
     }
 
-    function drawQR(inputId, containerId) {
-        const val = document.getElementById(inputId).value;
-        const container = document.getElementById(containerId);
-        container.innerHTML = "";
-        if(val.length >= 4) new QRCode(container, { text: val, width: 120, height: 120 });
-    }
-
-    function doSignup() {
-        const tel = document.getElementById('s-tel').value;
-        const pass = document.getElementById('s-pass').value;
-        if (tel.length < 4 || pass !== document.getElementById('s-confirm').value) return alert("Erreur");
-        db.ref('accounts/' + tel).set({ tel, pass, limit: 5, shopName: "", shopLogo: "", catalog: [] }).then(() => switchTab('login'));
-    }
-
     function doLogin() {
         const tel = document.getElementById('l-tel').value;
         const pass = document.getElementById('l-pass').value;
@@ -161,45 +158,22 @@
             document.getElementById('view-auth').classList.add('hidden');
             document.getElementById('bottom-nav').classList.remove('hidden');
             document.getElementById('logout-btn').classList.remove('hidden');
-            document.getElementById('set-name').value = user.shopName || "";
             showSection('params', document.querySelector('.nav-item'));
             new QRCode(document.getElementById('qr-admin'), { text: user.tel, width: 140, height: 140 });
             renderAdminList();
         });
     }
 
-    // SAUVEGARDE SANS STOCKAGE LOCAL INTERMÉDIAIRE
-    async function saveSettings() {
-        const name = document.getElementById('set-name').value;
-        const file = document.getElementById('logo-file').files[0];
-        let base64 = currentUser.shopLogo || "";
-
-        if(file) {
-            base64 = await toBase64(file);
-        }
-
-        db.ref('accounts/' + currentUser.tel).update({ shopName: name, shopLogo: base64 })
-          .then(() => alert("Réussi !"));
-    }
-
-    // AJOUT PRODUIT DIRECT
     async function addProduct() {
         const name = document.getElementById('p-name').value;
         const price = document.getElementById('p-price').value;
-        const desc = document.getElementById('p-desc').value;
         const file = document.getElementById('p-img-file').files[0];
-        
-        if(!name || !file) return alert("Nom et Image requis");
-
+        if(!name || !file) return alert("Infos manquantes");
         const imgData = await toBase64(file);
-        
         db.ref('accounts/' + currentUser.tel + '/catalog').once('value', snap => {
             const catalog = snap.val() || [];
-            catalog.push({ id: Date.now(), name, price, desc, img: imgData, likes: 0, dislikes: 0, comments: [] });
-            db.ref('accounts/' + currentUser.tel + '/catalog').set(catalog).then(() => {
-                document.getElementById('p-img-file').value = "";
-                alert("Publié !");
-            });
+            catalog.push({ id: Date.now(), name, price, img: imgData, likes: 0, dislikes: 0 });
+            db.ref('accounts/' + currentUser.tel + '/catalog').set(catalog).then(() => alert("Ajouté !"));
         });
     }
 
@@ -209,48 +183,10 @@
             document.getElementById('admin-list').innerHTML = catalog.map((it, i) => `
                 <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
                     <img src="${it.img}" style="width:40px;height:40px;object-fit:cover;border-radius:5px;">
-                    <span><b>${it.name}</b></span>
+                    <span>${it.name}</span>
                     <button onclick="deleteProduct(${i})" style="color:red;border:none;background:none;">🗑️</button>
                 </div>`).join('');
         });
-    }
-
-    function deleteProduct(i) {
-        if(!confirm("Supprimer ?")) return;
-        db.ref('accounts/' + currentUser.tel + '/catalog').once('value', snap => {
-            let cat = snap.val(); cat.splice(i, 1);
-            db.ref('accounts/' + currentUser.tel + '/catalog').set(cat);
-        });
-    }
-
-    function searchShop(tel) {
-        if(tel.length < 4) return;
-        viewedTel = tel;
-        renderShop();
-    }
-
-    function viewCurrentShop() { viewedTel = currentUser.tel; renderShop(); }
-
-    function renderShop() {
-        db.ref('accounts/' + viewedTel).on('value', snap => {
-            const u = snap.val(); if(!u) return;
-            const catalog = u.catalog || [];
-            document.getElementById('shop-header').innerHTML = `<div class="card" style="display:flex;align-items:center;gap:15px;"><img src="${u.shopLogo || 'bololo.png'}" style="width:50px;height:50px;border-radius:50%;object-fit:cover;"><b>${u.shopName || 'Boutique'} (${u.tel})</b></div>`;
-            document.getElementById('shop-list').innerHTML = catalog.map((it, i) => `
-                <div class="product-card">
-                    <div class="product-img-container"><img src="${it.img}" class="product-img-display"></div>
-                    <div style="padding:15px;">
-                        <b>${it.name}</b> - <span style="color:var(--primary)">${it.price} F</span>
-                        <p style="font-size:0.8rem">${it.desc || ''}</p>
-                        <button onclick="vote(${i}, 'likes')">👍 ${it.likes || 0}</button>
-                        <button onclick="vote(${i}, 'dislikes')">👎 ${it.dislikes || 0}</button>
-                    </div>
-                </div>`).join('');
-        });
-    }
-
-    function vote(idx, type) {
-        db.ref('accounts/' + viewedTel + '/catalog/' + idx + '/' + type).transaction(v => (v || 0) + 1);
     }
 
     const toBase64 = file => new Promise((resolve, reject) => {
