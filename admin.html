@@ -5,46 +5,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BOLOLO MASTER - Administration</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+
     <style>
         :root { --primary: #6366f1; --sidebar-bg: #0f172a; --bg-main: #f1f5f9; }
         body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg-main); display: flex; min-height: 100vh; }
-        .sidebar { width: 260px; background: var(--sidebar-bg); color: white; position: fixed; height: 100vh; }
-        .sidebar-header { padding: 30px; font-size: 1.2rem; font-weight: 800; color: var(--primary); }
+        
+        /* SIDEBAR */
+        .sidebar { width: 260px; background: var(--sidebar-bg); color: white; position: fixed; height: 100vh; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 30px 20px; font-size: 1.2rem; font-weight: 800; color: var(--primary); border-bottom: 1px solid #1e293b; }
+        .nav-item { padding: 15px 25px; color: #94a3b8; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 10px; }
+        .nav-item.active { background: #1e293b; color: white; border-left: 4px solid var(--primary); }
+
+        /* MAIN CONTENT */
         .main-content { margin-left: 260px; flex: 1; padding: 40px; }
+        
+        /* STATS */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
         .stat-card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 16px; overflow: hidden; margin-top: 20px; }
-        th, td { text-align: left; padding: 15px; border-bottom: 1px solid #f1f5f9; }
-        .btn { border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.7rem; margin-right: 5px; }
+        .stat-card h3 { margin: 0; font-size: 0.8rem; color: #64748b; text-transform: uppercase; }
+        .stat-card p { margin: 10px 0 0; font-size: 1.5rem; font-weight: 800; color: #0f172a; }
+
+        /* TABLE */
+        .data-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 15px; color: #64748b; border-bottom: 2px solid #f1f5f9; font-size: 0.8rem; }
+        td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.85rem; }
+        
+        .u-info { display: flex; align-items: center; gap: 10px; }
+        .u-logo { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #eee; }
+
+        /* BOUTONS ACTIONS */
+        .btn { border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.7rem; transition: 0.2s; margin-right: 4px; }
         .btn-deposit { background: #22c55e; color: white; }
+        .btn-quota { background: #6366f1; color: white; }
         .btn-block { background: #f59e0b; color: white; }
-        .btn-delete { background: #ef4444; color: white; }
-        .u-logo { width: 40px; height: 40px; border-radius: 50%; vertical-align: middle; margin-right: 10px; object-fit: cover; background: #eee; }
+        .btn-unblock { background: #94a3b8; color: white; }
+        .btn-del { background: #ef4444; color: white; }
+        .btn:hover { opacity: 0.8; transform: translateY(-1px); }
+
+        .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.6rem; font-weight: 800; }
+        .badge-active { background: #dcfce7; color: #15803d; }
+        .badge-blocked { background: #fee2e2; color: #b91c1c; }
     </style>
 </head>
 <body>
+
 <div class="sidebar">
     <div class="sidebar-header">BOLOLO MASTER</div>
+    <div class="nav-item active">👤 Gestion Boutiques</div>
 </div>
+
 <div class="main-content">
-    <h1>Administration Boutiques</h1>
-    <div id="stats" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:20px; margin-bottom:30px;">
+    <h1>Administration Système</h1>
+
+    <div class="stats-grid">
         <div class="stat-card"><h3>Utilisateurs</h3><p id="stat-u">0</p></div>
         <div class="stat-card"><h3>Total BLL</h3><p id="stat-b">0</p></div>
-        <div class="stat-card"><h3>Articles Total</h3><p id="stat-a">0</p></div>
+        <div class="stat-card"><h3>Articles</h3><p id="stat-a">0</p></div>
+        <div class="stat-card"><h3>Bloqués</h3><p id="stat-bl" style="color:red">0</p></div>
     </div>
-    <table>
-        <thead>
-            <tr>
-                <th>BOUTIQUE</th>
-                <th>SOLDE</th>
-                <th>CATALOGUE</th>
-                <th>ACTIONS</th>
-            </tr>
-        </thead>
-        <tbody id="user-list"></tbody>
-    </table>
+
+    <div class="data-card">
+        <table>
+            <thead>
+                <tr>
+                    <th>BOUTIQUE</th>
+                    <th>SOLDE</th>
+                    <th>PLAN / STATUT</th>
+                    <th>CATALOGUE</th>
+                    <th>ACTIONS</th>
+                </tr>
+            </thead>
+            <tbody id="user-list"></tbody>
+        </table>
+    </div>
 </div>
 
 <script>
@@ -57,50 +94,72 @@
             const data = snap.val() || {};
             const accounts = Object.values(data);
             
+            // Stats
             document.getElementById('stat-u').innerText = accounts.length;
             document.getElementById('stat-b').innerText = accounts.reduce((s, a) => s + (a.balance || 0), 0).toLocaleString() + " BLL";
             document.getElementById('stat-a').innerText = accounts.reduce((s, a) => s + (a.catalog ? a.catalog.length : 0), 0);
+            document.getElementById('stat-bl').innerText = accounts.filter(a => a.blocked).length;
 
+            // Liste
             document.getElementById('user-list').innerHTML = accounts.map(u => `
                 <tr>
                     <td>
-                        <img src="${u.shopLogo || 'bololo.png'}" class="u-logo" onerror="this.src='https://via.placeholder.com/40'">
-                        <div style="display:inline-block; vertical-align:middle;">
-                            <b>${u.shopName || 'Sans Nom'}</b><br>
-                            <small>${u.tel} ${u.blocked ? '<b style="color:red">(BLOQUÉ)</b>' : ''}</small>
+                        <div class="u-info">
+                            <img src="${u.shopLogo || 'bololo.png'}" class="u-logo" onerror="this.src='https://via.placeholder.com/40'">
+                            <div>
+                                <b>${u.shopName || 'Sans Nom'}</b><br>
+                                <small>${u.tel}</small>
+                            </div>
                         </div>
                     </td>
                     <td><b style="color:var(--primary)">${(u.balance || 0).toLocaleString()} BLL</b></td>
-                    <td>${u.catalog ? u.catalog.length : 0} / ${u.limit || 10}</td>
                     <td>
-                        <button class="btn btn-deposit" onclick="deposit('${u.tel}')">+ Recharger</button>
-                        <button class="btn btn-block" onclick="toggleBlock('${u.tel}', ${u.blocked})">${u.blocked ? 'Débloquer' : 'Bloquer'}</button>
-                        <button class="btn btn-delete" onclick="deleteUser('${u.tel}')">🗑️ Supprimer</button>
+                        <b>${u.plan || 'Gratuit'}</b><br>
+                        <span class="badge ${u.blocked ? 'badge-blocked' : 'badge-active'}">
+                            ${u.blocked ? 'BLOQUÉ' : 'ACTIF'}
+                        </span>
+                    </td>
+                    <td><b>${u.catalog ? u.catalog.length : 0}</b> / ${u.limit || 10}</td>
+                    <td>
+                        <button class="btn btn-deposit" onclick="deposit('${u.tel}')" title="Recharger">+ BLL</button>
+                        <button class="btn btn-quota" onclick="updateQuota('${u.tel}', ${u.limit || 10})">Quota</button>
+                        <button class="btn ${u.blocked ? 'btn-unblock' : 'btn-block'}" onclick="toggleBlock('${u.tel}', ${u.blocked})">
+                            ${u.blocked ? 'Débloquer' : 'Bloquer'}
+                        </button>
+                        <button class="btn btn-del" onclick="deleteUser('${u.tel}')">🗑️</button>
                     </td>
                 </tr>
             `).join('');
         });
     }
 
-    // FONCTION POUR RECHARGER LE COMPTE
+    // FONCTION RECHARGER
     function deposit(tel) {
-        const amt = prompt("Montant du dépôt pour " + tel + " :");
+        const amt = prompt("Montant à créditer pour " + tel + " :");
         if (amt && !isNaN(amt)) {
             db.ref('accounts/' + tel + '/balance').transaction(b => (b || 0) + parseInt(amt));
         }
     }
 
-    // FONCTION POUR BLOQUER/DÉBLOQUER
+    // FONCTION QUOTA
+    function updateQuota(tel, current) {
+        const n = prompt("Nouvelle limite d'articles :", current);
+        if (n && !isNaN(n)) {
+            db.ref('accounts/' + tel).update({ limit: parseInt(n) });
+        }
+    }
+
+    // FONCTION BLOQUER
     function toggleBlock(tel, status) {
         db.ref('accounts/' + tel).update({ blocked: !status });
     }
 
-    // FONCTION POUR SUPPRIMER DÉFINITIVEMENT (CORRIGÉE)
+    // FONCTION SUPPRIMER (LE BOUTON POUBELLE)
     function deleteUser(tel) {
-        if (confirm("⚠️ Êtes-vous sûr de vouloir supprimer DÉFINITIVEMENT la boutique " + tel + " ? Cette action est irréversible.")) {
+        if(confirm("⚠️ Supprimer DÉFINITIVEMENT la boutique " + tel + " ?")) {
             db.ref('accounts/' + tel).remove()
-                .then(() => alert("Compte supprimé avec succès."))
-                .catch(err => alert("Erreur lors de la suppression : " + err.message));
+                .then(() => alert("Supprimé !"))
+                .catch(e => alert("Erreur"));
         }
     }
 
