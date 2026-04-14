@@ -2,307 +2,265 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>BOLOLO BROKER - Professionnal Trading Platform</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>BOLOLO Pro</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="bololo.png">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
     <style>
-        :root { 
-            --bg-dark: #12171f; 
-            --bg-panel: #191e28;
-            --bull: #00c853; /* Vert IQ */
-            --bear: #ff3d00; /* Rouge IQ */
-            --text-main: #ced4da;
-            --text-dim: #707a8a;
-            --border: #2a2f3a;
-            --accent: #2962ff;
-        }
-
-        * { box-sizing: border-box; font-family: 'Roboto', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; background: var(--bg-dark); color: var(--text-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-
-        /* TOP HEADER */
-        header { height: 50px; background: var(--bg-panel); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; z-index: 10; }
-        .logo-area { font-weight: 700; color: white; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; }
-        .logo-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 10px var(--accent); }
+        :root { --primary: #6366f1; --glam: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); --bg: #f1f5f9; --text: #1e293b; }
+        body.theme-glamour { --primary: #a855f7; --glam: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); --bg: #f1f5f9; }
+        body.theme-feminin { --primary: #ec4899; --glam: linear-gradient(135deg, #f472b6 0%, #ec4899 100%); --bg: #fff1f2; }
+        body.theme-masculin { --primary: #0ea5e9; --glam: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%); --bg: #f0f9ff; }
+        body.theme-dark { --primary: #64748b; --glam: linear-gradient(135deg, #334155 0%, #0f172a 100%); --bg: #1e293b; --text: #f8fafc; }
         
-        .user-area { display: flex; align-items: center; gap: 15px; }
-        .balance-box { background: rgba(0,200,83,0.1); color: var(--bull); padding: 5px 10px; border-radius: 4px; font-weight: 500; font-size: 0.85rem; border: 1px solid rgba(0,200,83,0.3); }
-
-        /* MAIN LAYOUT */
-        .main-wrapper { flex: 1; display: flex; overflow: hidden; }
-
-        /* 1. ASSET LIST (LEFT) */
-        .asset-sidebar { width: 280px; background: var(--bg-panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
-        .sidebar-header { padding: 10px 15px; border-bottom: 1px solid var(--border); color: var(--text-dim); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
-        .asset-list { flex: 1; overflow-y: auto; scrollbar-width: none; }
-        .asset-list::-webkit-scrollbar { display: none; }
+        body { margin: 0; font-family: 'Inter', sans-serif; background: #000; min-height: 100vh; display: flex; justify-content: center; align-items: center; color: var(--text); overscroll-behavior: none; }
+        .iphone-xs-screen { width: 100vw; height: 100vh; background: white; display: flex; flex-direction: column; overflow: hidden; position: relative; }
         
-        .asset-item { padding: 12px 15px; border-bottom: 1px solid var(--border); cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
-        .asset-item:hover { background: rgba(255,255,255,0.03); }
-        .asset-item.active { background: rgba(41,98,255,0.1); border-left: 3px solid var(--accent); }
-        .asset-name { font-weight: 500; color: white; font-size: 0.85rem; }
-        .asset-id { color: var(--text-dim); font-size: 0.7rem; }
-        .asset-price { text-align: right; font-size: 0.85rem; font-weight: 500; }
-        .trend-up { color: var(--bull); }
-        .trend-down { color: var(--bear); }
-
-        /* 2. CHART AREA (CENTER) */
-        .chart-container { flex: 1; position: relative; background: var(--bg-dark); display: flex; flex-direction: column; padding: 20px; }
-        .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .current-asset-title { font-size: 1.2rem; font-weight: 700; color: white; }
+        header { background: var(--glam); color: white; padding: env(safe-area-inset-top, 45px) 20px 15px; text-align: center; font-weight: bold; font-size: 0.9rem; position: relative; z-index: 1000; }
+        .btn-logout { position: absolute; right: 15px; bottom: 12px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 5px 10px; border-radius: 8px; font-size: 0.6rem; cursor: pointer; }
         
-        /* Simulation Graphique (IQ Style) */
-        .mock-chart { flex: 1; width: 100%; position: relative; overflow: hidden; border-bottom: 1px solid var(--border); }
-        .chart-line { position: absolute; bottom: 30px; left: 0; width: 100%; height: 60%; stroke: var(--accent); stroke-width: 2; fill: none; }
-        .chart-gradient { position: absolute; bottom: 30px; left: 0; width: 100%; height: 60%; fill: url(#grad); opacity: 0.2; }
-        .price-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; position: absolute; right: 0; top: 40%; box-shadow: 0 0 10px var(--accent); }
-        .time-axis { height: 25px; display: flex; justify-content: space-between; color: var(--text-dim); font-size: 0.7rem; padding-top: 5px; }
+        .content { flex: 1; overflow-y: auto; padding: 20px; background: var(--bg); position: relative; }
+        .card { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #eee; }
 
-        /* 3. TRADE PANEL (RIGHT) */
-        .trade-panel { width: 240px; background: var(--bg-panel); border-left: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-        .panel-label { color: var(--text-dim); font-size: 0.75rem; margin-bottom: 5px; }
+        .product-card { background: white; border-radius: 15px; overflow: hidden; margin-bottom: 20px; border: 1px solid #eee; color: #1e293b; }
+        .product-img-container { width: 100%; display: flex; align-items: center; justify-content: center; background: #f8fafc; min-height: 200px; }
+        .product-img-display { width: 100%; height: auto; max-height: 500px; object-fit: contain; display: block; }
         
-        .input-box { background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 4px; display: flex; align-items: center; padding: 5px; }
-        .input-box input { flex: 1; background: transparent; border: none; color: white; font-size: 1.1rem; font-weight: 700; text-align: center; outline: none; padding: 5px; }
-        .input-btn { background: #2a2f3a; color: white; border: none; width: 30px; height: 30px; border-radius: 4px; cursor: pointer; font-size: 1.2rem; }
+        .nav-bar { background: white; display: flex; border-top: 1px solid #eee; padding: 10px 0 calc(env(safe-area-inset-bottom, 10px) + 20px); } 
+        .nav-item { flex: 1; text-align: center; font-size: 0.65rem; color: #94a3b8; cursor: pointer; font-weight: bold; }
+        .nav-item.active { color: var(--primary); }
 
-        .profit-info { text-align: center; margin: 10px 0; }
-        .profit-percent { color: var(--bull); font-size: 1.8rem; font-weight: 700; }
-        .profit-amount { color: var(--text-dim); font-size: 0.8rem; }
-
-        .btn-trade { border: none; border-radius: 4px; padding: 15px; color: white; font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.2s; position: relative; overflow: hidden; }
-        .btn-buy { background: var(--bull); }
-        .btn-buy:hover { background: #00e676; }
-        .btn-sell { background: var(--bear); }
-        .btn-sell:hover { background: #ff5722; }
-        .btn-icon { position: absolute; left: 15px; font-size: 1.2rem; }
-
-        /* AUTH SCREEN */
-        #auth-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-dark); z-index: 100; display: flex; justify-content: center; align-items: center; }
-        .auth-card { background: var(--bg-panel); padding: 40px; border-radius: 8px; border: 1px solid var(--border); text-align: center; width: 320px; }
-        .auth-input { width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--border); color: white; padding: 12px; border-radius: 4px; margin-bottom: 15px; font-size: 1rem; outline: none; text-align: center; }
-
+        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; box-sizing: border-box; }
+        .btn-action { background: var(--glam); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; }
         .hidden { display: none !important; }
+        .qr-box { background: white; padding: 10px; border-radius: 12px; display: inline-block; margin: 10px auto; border: 1px solid #eee; }
+        .badge { font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; margin-left: 5px; font-weight: bold; }
+        .badge-vendeur { background: var(--primary); color: white; }
+        .badge-client { background: #e2e8f0; color: #475569; }
     </style>
 </head>
-<body>
+<body class="theme-glamour">
 
-<div id="auth-screen">
-    <div class="auth-card">
-        <div class="logo-area" style="justify-content:center; margin-bottom:30px; font-size:1.2rem;">
-            <div class="logo-dot"></div> BOLOLO <span style="font-weight:300">BROKER</span>
-        </div>
-        <input type="tel" id="user-tel" class="auth-input" placeholder="N° Téléphone">
-        <button class="btn-trade btn-buy" style="width:100%" onclick="login()">CONNEXION TRADER</button>
-    </div>
-</div>
-
-<header>
-    <div class="logo-area"><div class="logo-dot"></div> BOLOLO <span style="font-weight:300">BROKER</span></div>
-    <div class="user-area">
-        <div class="balance-box" id="my-bll">0.00 BLL</div>
-        <img src="https://via.placeholder.com/30" style="border-radius:50%; border:1px solid var(--border)">
-    </div>
-</header>
-
-<div class="main-wrapper hidden" id="broker-screen">
+<div class="iphone-xs-screen">
+    <header>
+        <span id="title-text">BOLOLO Pro</span>
+        <button id="logout-btn" class="btn-logout hidden" onclick="location.reload()">SORTIR</button>
+    </header>
     
-    <div class="asset-sidebar">
-        <div class="sidebar-header">Actifs Boutiques</div>
-        <div class="asset-list" id="asset-list">
+    <div class="content" id="main-content">
+        <div id="view-auth">
+            <div style="display:flex; gap:5px; margin-bottom:25px; border-bottom:1px solid #eee;">
+                <span id="t-login" style="flex:1; text-align:center; padding:12px; cursor:pointer; font-weight:bold;" onclick="switchTab('login')">LOGIN</span>
+                <span id="t-signup" style="flex:1; text-align:center; padding:12px; cursor:pointer; font-weight:bold; color:#999;" onclick="switchTab('signup')">CREER</span>
             </div>
-    </div>
-
-    <div class="chart-container">
-        <div class="chart-header">
-            <div id="active-asset-title" class="current-asset-title">Sélectionnez un actif</div>
-            <div class="balance-box" style="background:var(--bg-panel); color:white; border-color:var(--border)">Compte Réel</div>
-        </div>
-        
-        <div class="mock-chart">
-            <svg width="100%" height="100%" viewBox="0 0 500 200" preserveAspectRatio="none">
-                <defs>
-                    <linearGradient id="grad" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" style="stop-color:var(--accent);stop-opacity:1" />
-                        <stop offset="100%" style="stop-color:var(--bg-dark);stop-opacity:0" />
-                    </linearGradient>
-                </defs>
-                <path class="chart-gradient" d="M0,150 L50,130 L100,140 L150,110 L200,120 L250,90 L300,100 L350,70 L400,80 L450,50 L500,60 L500,200 L0,200 Z" />
-                <path class="chart-line" d="M0,150 L50,130 L100,140 L150,110 L200,120 L250,90 L300,100 L350,70 L400,80 L450,50 L500,60" />
-            </svg>
-            <div class="price-dot"></div>
-        </div>
-        
-        <div class="time-axis">
-            <span>10:30</span><span>10:35</span><span>10:40</span><span>10:45</span><span>10:50</span><span>10:55</span>
-        </div>
-    </div>
-
-    <div class="trade-panel">
-        <div>
-            <div class="panel-label">Montant de l'investissement</div>
-            <div class="input-box">
-                <button class="input-btn" onclick="adjustAmount(-10)">-</button>
-                <input type="number" id="trade-amount" value="50" min="10" step="10">
-                <button class="input-btn" onclick="adjustAmount(10)">+</button>
+            <div id="area-login">
+                <input type="tel" id="l-tel" placeholder="Numéro">
+                <input type="password" id="l-pass" placeholder="Mot de passe">
+                <button class="btn-action" onclick="doLogin()">SE CONNECTER</button>
+            </div>
+            <div id="area-signup" class="hidden">
+                <input type="tel" id="s-tel" placeholder="Votre numéro" oninput="drawQR('s-tel', 'qr-signup')">
+                <center><div id="qr-signup" class="qr-box"></div></center>
+                <input type="password" id="s-pass" placeholder="Mot de passe">
+                <input type="password" id="s-confirm" placeholder="Confirmer">
+                <button class="btn-action" onclick="doSignup()">CREER LE COMPTE</button>
             </div>
         </div>
 
-        <div class="profit-info">
-            <div class="panel-label">Revenu</div>
-            <div class="profit-percent">+87%</div>
-            <div class="profit-amount" id="profit-bll">93.50 BLL</div>
+        <div id="dash-params" class="hidden">
+            <div class="card" style="text-align:center;">
+                <div id="qr-admin" class="qr-box"></div>
+            </div>
+            <div class="card">
+                <select id="theme-selector" onchange="changeTheme()">
+                    <option value="theme-glamour">✨ Glamour</option>
+                    <option value="theme-feminin">🌸 Féminin</option>
+                    <option value="theme-masculin">👔 Masculin</option>
+                    <option value="theme-dark">🌙 Sombre</option>
+                </select>
+                <input type="text" id="set-name" placeholder="Nom de la Boutique">
+                <label style="font-size:0.7rem;">LOGO (IMAGE)</label>
+                <input type="file" id="logo-file" accept="image/*">
+                <button class="btn-action" onclick="saveSettings()">ENREGISTRER</button>
+            </div>
         </div>
 
-        <button class="btn-trade btn-buy" onclick="placeOrder('UP')">
-            <span class="btn-icon">▲</span> ACHAT (HAUSSE)
-        </button>
-        
-        <button class="btn-trade btn-sell" onclick="placeOrder('DOWN')">
-            <span class="btn-icon">▼</span> VENTE (BAISSE)
-        </button>
+        <div id="dash-articles" class="hidden">
+            <div class="card">
+                <input type="text" id="p-name" placeholder="Nom Article">
+                <input type="number" id="p-price" placeholder="Prix (FCFA)">
+                <textarea id="p-desc" placeholder="Description..."></textarea>
+                <input type="file" id="p-img-file" accept="image/*">
+                <button class="btn-action" onclick="addProduct()">PUBLIER</button>
+            </div>
+            <div id="admin-list"></div>
+        </div>
+
+        <div id="dash-view" class="hidden">
+            <input type="tel" id="search-tel" placeholder="Chercher boutique..." oninput="searchShop(this.value)">
+            <div id="shop-header"></div>
+            <div id="shop-list"></div>
+        </div>
     </div>
+
+    <nav id="bottom-nav" class="nav-bar hidden">
+        <div class="nav-item" onclick="showSection('params', this)">⚙️<br>CONFIG</div>
+        <div class="nav-item" onclick="showSection('articles', this)">📦<br>ARTICLES</div>
+        <div class="nav-item" onclick="showSection('view', this); viewCurrentShop();">🛒<br>VUE</div>
+    </nav>
 </div>
 
 <script>
-    // Configuration Firebase
     const firebaseConfig = { databaseURL: "https://bololoshop-bf59b-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
     let currentUser = null;
-    let selectedShopTel = null;
-    let currentSharePrice = 0;
+    let viewedTel = "";
 
-    // 1. CONNEXION
-    function login() {
-        const tel = document.getElementById('user-tel').value;
-        if(!tel) return alert("Entrez votre numéro BOLOLO");
-        
-        db.ref('accounts/' + tel).once('value', s => {
-            if(s.exists()) {
-                currentUser = s.val();
-                document.getElementById('auth-screen').classList.add('hidden');
-                document.getElementById('broker-screen').classList.remove('hidden');
-                initTradingPlatform();
-            } else { alert("Compte BOLOLO Pro non trouvé."); }
+    function switchTab(t) {
+        document.getElementById('area-login').classList.toggle('hidden', t !== 'login');
+        document.getElementById('area-signup').classList.toggle('hidden', t !== 'signup');
+    }
+
+    function showSection(id, el) {
+        ['params', 'articles', 'view'].forEach(s => document.getElementById('dash-'+s).classList.add('hidden'));
+        document.getElementById('dash-'+id).classList.remove('hidden');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    function drawQR(inputId, containerId) {
+        const val = document.getElementById(inputId).value;
+        const container = document.getElementById(containerId);
+        container.innerHTML = "";
+        if(val.length >= 4) new QRCode(container, { text: val, width: 120, height: 120 });
+    }
+
+    function doSignup() {
+        const tel = document.getElementById('s-tel').value;
+        const pass = document.getElementById('s-pass').value;
+        if (tel.length < 4 || pass !== document.getElementById('s-confirm').value) return alert("Erreur");
+        db.ref('accounts/' + tel).set({ tel, pass, limit: 5, shopName: "", shopLogo: "", catalog: [] }).then(() => switchTab('login'));
+    }
+
+    function doLogin() {
+        const tel = document.getElementById('l-tel').value;
+        const pass = document.getElementById('l-pass').value;
+        db.ref('accounts/' + tel).once('value', (snap) => {
+            const user = snap.val();
+            if (!user || user.pass !== pass) return alert("Erreur");
+            currentUser = user; viewedTel = tel;
+            document.getElementById('view-auth').classList.add('hidden');
+            document.getElementById('bottom-nav').classList.remove('hidden');
+            document.getElementById('logout-btn').classList.remove('hidden');
+            document.getElementById('set-name').value = user.shopName || "";
+            showSection('params', document.querySelector('.nav-item'));
+            new QRCode(document.getElementById('qr-admin'), { text: user.tel, width: 140, height: 140 });
+            renderAdminList();
         });
     }
 
-    // 2. INITIALISATION PLATEFORME
-    function initTradingPlatform() {
-        // Solde en temps réel
-        db.ref('accounts/' + currentUser.tel + '/balance').on('value', s => {
-            const bal = s.val() || 0;
-            document.getElementById('my-bll').innerText = bal.toLocaleString('fr-FR', {minimumFractionDigits: 2}) + " BLL";
+    // SAUVEGARDE SANS STOCKAGE LOCAL INTERMÉDIAIRE
+    async function saveSettings() {
+        const name = document.getElementById('set-name').value;
+        const file = document.getElementById('logo-file').files[0];
+        let base64 = currentUser.shopLogo || "";
+
+        if(file) {
+            base64 = await toBase64(file);
+        }
+
+        db.ref('accounts/' + currentUser.tel).update({ shopName: name, shopLogo: base64 })
+          .then(() => alert("Réussi !"));
+    }
+
+    // AJOUT PRODUIT DIRECT
+    async function addProduct() {
+        const name = document.getElementById('p-name').value;
+        const price = document.getElementById('p-price').value;
+        const desc = document.getElementById('p-desc').value;
+        const file = document.getElementById('p-img-file').files[0];
+        
+        if(!name || !file) return alert("Nom et Image requis");
+
+        const imgData = await toBase64(file);
+        
+        db.ref('accounts/' + currentUser.tel + '/catalog').once('value', snap => {
+            const catalog = snap.val() || [];
+            catalog.push({ id: Date.now(), name, price, desc, img: imgData, likes: 0, dislikes: 0, comments: [] });
+            db.ref('accounts/' + currentUser.tel + '/catalog').set(catalog).then(() => {
+                document.getElementById('p-img-file').value = "";
+                alert("Publié !");
+            });
         });
+    }
 
-        // Calcul Profit sur changement d'input
-        document.getElementById('trade-amount').addEventListener('input', updateProfitDisplay);
-        updateProfitDisplay();
+    function renderAdminList() {
+        db.ref('accounts/' + currentUser.tel + '/catalog').on('value', snap => {
+            const catalog = snap.val() || [];
+            document.getElementById('admin-list').innerHTML = catalog.map((it, i) => `
+                <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+                    <img src="${it.img}" style="width:40px;height:40px;object-fit:cover;border-radius:5px;">
+                    <span><b>${it.name}</b></span>
+                    <button onclick="deleteProduct(${i})" style="color:red;border:none;background:none;">🗑️</button>
+                </div>`).join('');
+        });
+    }
 
-        // Charger Liste Actifs
-        db.ref('accounts').on('value', snap => {
-            const data = snap.val();
-            let html = "";
-            for(let tel in data) {
-                const shop = data[tel];
-                
-                // --- LOGIQUE PRIX ACTION (Simulée basée sur données Admin) ---
-                // Prix = (Solde / 100) + (Nombre Articles * 5)
-                const stockCount = shop.catalog ? shop.catalog.length : 0;
-                const cap = (shop.balance || 0) + (stockCount * 500);
-                const price = Math.max(5, Math.floor(cap / 50)); 
-                
-                // Simulation Tendance aléatoire pour le design
-                const trendClass = Math.random() > 0.4 ? 'trend-up' : 'trend-down';
-                const isActive = tel === selectedShopTel ? 'active' : '';
+    function deleteProduct(i) {
+        if(!confirm("Supprimer ?")) return;
+        db.ref('accounts/' + currentUser.tel + '/catalog').once('value', snap => {
+            let cat = snap.val(); cat.splice(i, 1);
+            db.ref('accounts/' + currentUser.tel + '/catalog').set(cat);
+        });
+    }
 
-                html += `
-                    <div class="asset-item ${isActive}" onclick="selectAsset('${tel}', '${shop.shopName || 'Boutique'}', ${price})">
-                        <div>
-                            <div class="asset-name">${shop.shopName || 'Boutique'}</div>
-                            <div class="asset-id">#${tel.slice(-4)}</div>
-                        </div>
-                        <div class="asset-price ${trendClass}">${price.toFixed(2)}</div>
+    function searchShop(tel) {
+        if(tel.length < 4) return;
+        viewedTel = tel;
+        renderShop();
+    }
+
+    function viewCurrentShop() { viewedTel = currentUser.tel; renderShop(); }
+
+    function renderShop() {
+        db.ref('accounts/' + viewedTel).on('value', snap => {
+            const u = snap.val(); if(!u) return;
+            const catalog = u.catalog || [];
+            document.getElementById('shop-header').innerHTML = `<div class="card" style="display:flex;align-items:center;gap:15px;"><img src="${u.shopLogo || 'bololo.png'}" style="width:50px;height:50px;border-radius:50%;object-fit:cover;"><b>${u.shopName || 'Boutique'} (${u.tel})</b></div>`;
+            document.getElementById('shop-list').innerHTML = catalog.map((it, i) => `
+                <div class="product-card">
+                    <div class="product-img-container"><img src="${it.img}" class="product-img-display"></div>
+                    <div style="padding:15px;">
+                        <b>${it.name}</b> - <span style="color:var(--primary)">${it.price} F</span>
+                        <p style="font-size:0.8rem">${it.desc || ''}</p>
+                        <button onclick="vote(${i}, 'likes')">👍 ${it.likes || 0}</button>
+                        <button onclick="vote(${i}, 'dislikes')">👎 ${it.dislikes || 0}</button>
                     </div>
-                `;
-            }
-            document.getElementById('asset-list').innerHTML = html;
+                </div>`).join('');
         });
     }
 
-    // 3. SÉLECTIONNER UN ACTIF
-    function selectAsset(tel, name, price) {
-        selectedShopTel = tel;
-        currentSharePrice = price;
-        document.getElementById('active-asset-title').innerText = name;
-        
-        // Relancer l'init pour mettre à jour la classe 'active' dans la liste
-        initTradingPlatform(); 
-        
-        // Simuler mouvement graphique IQ Style
-        animateChart();
+    function vote(idx, type) {
+        db.ref('accounts/' + viewedTel + '/catalog/' + idx + '/' + type).transaction(v => (v || 0) + 1);
     }
 
-    // 4. PASSER UN ORDRE (IQ STYLE - Hausse/Baisse simplifié)
-    function placeOrder(direction) {
-        if(!selectedShopTel) return alert("Sélectionnez une boutique à trader.");
-        
-        const investAmount = parseInt(document.getElementById('trade-amount').value);
-        if(investAmount < 10) return alert("Investissement minimum: 10 BLL");
+    const toBase64 = file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
 
-        db.ref('accounts/' + currentUser.tel + '/balance').get().then(s => {
-            const currentBalance = s.val() || 0;
-            if(currentBalance < investAmount) return alert("Solde insuffisant sur votre compte réel.");
-
-            // Débiter
-            db.ref('accounts/' + currentUser.tel + '/balance').set(currentBalance - investAmount);
-            
-            // Simulation Résultat rapide (IQ Style 3 secondes)
-            alert(`Ordre ${direction} placé sur ${document.getElementById('active-asset-title').innerText} pour ${investAmount} BLL.\nRésultat dans 3 secondes...`);
-            
-            setTimeout(() => {
-                const win = Math.random() > 0.45; // 55% de chance de perdre (Probabilité Broker)
-                if(win) {
-                    const profit = Math.floor(investAmount * 1.87); // Gain +87%
-                    db.ref('accounts/' + currentUser.tel + '/balance').transaction(b => (b || 0) + profit);
-                    alert(`✅ GAGNÉ ! +${profit} BLL crédités.`);
-                } else {
-                    alert(`❌ PERDU ! L'actif a expiré hors de votre prévision.`);
-                }
-            }, 3000);
-        });
-    }
-
-    // UTILITAIRES DESIGN
-    function adjustAmount(val) {
-        const inp = document.getElementById('trade-amount');
-        let newV = parseInt(inp.value) + val;
-        if(newV < 10) newV = 10;
-        inp.value = newV;
-        updateProfitDisplay();
-    }
-
-    function updateProfitDisplay() {
-        const amt = parseInt(document.getElementById('trade-amount').value) || 0;
-        const profit = (amt * 1.87).toFixed(2);
-        document.getElementById('profit-bll').innerText = profit + " BLL";
-    }
-
-    function animateChart() {
-        const dot = document.querySelector('.price-dot');
-        // Animation simpliste du point de prix
-        setInterval(() => {
-            const randomTop = 30 + Math.random() * 40; // entre 30% et 70%
-            dot.style.top = randomTop + '%';
-        }, 1000);
-    }
+    function changeTheme() { document.body.className = document.getElementById('theme-selector').value; }
 </script>
 </body>
 </html>
