@@ -8,7 +8,6 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BololoShop">
-    <link rel="apple-touch-icon" href="bololo.png">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
@@ -21,26 +20,24 @@
         body.theme-masculin { --primary: #0ea5e9; --glam: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%); --bg: #f0f9ff; }
         body.theme-dark { --primary: #64748b; --glam: linear-gradient(135deg, #334155 0%, #0f172a 100%); --bg: #1e293b; --text: #f8fafc; }
         
-        body { margin: 0; font-family: 'Inter', sans-serif; background: #000; min-height: 100vh; display: flex; justify-content: center; align-items: center; color: var(--text); overscroll-behavior: none; }
-        .iphone-xs-screen { width: 100vw; height: 100vh; background: white; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        body { margin: 0; font-family: 'Inter', sans-serif; background: #000; min-height: 100vh; display: flex; justify-content: center; align-items: center; color: var(--text); }
+        .iphone-xs-screen { width: 375px; height: 812px; background: white; border-radius: 40px; display: flex; flex-direction: column; overflow: hidden; position: relative; box-shadow: 0 0 30px rgba(255,255,255,0.1); }
         
-        header { background: var(--glam); color: white; padding: env(safe-area-inset-top, 45px) 20px 15px; text-align: center; font-weight: bold; font-size: 0.9rem; position: relative; z-index: 1000; }
+        header { background: var(--glam); color: white; padding: 55px 20px 15px; text-align: center; font-weight: bold; font-size: 0.9rem; position: relative; z-index: 100; }
         .btn-logout { position: absolute; right: 15px; bottom: 12px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 5px 10px; border-radius: 8px; font-size: 0.6rem; cursor: pointer; }
         
         .content { flex: 1; overflow-y: auto; padding: 20px; background: var(--bg); position: relative; }
         .card { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #eee; }
 
-        .sticky-area { position: sticky; top: -20px; background: var(--bg); z-index: 500; padding: 10px 0; margin-bottom: 15px; }
-        
         .product-card { background: white; border-radius: 15px; overflow: hidden; margin-bottom: 20px; border: 1px solid #eee; color: #1e293b; }
-        .product-img-container { width: 100%; aspect-ratio: 1 / 1; background: #f8fafc; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .product-img-display { width: 100%; height: 100%; object-fit: cover; }
+        .product-img-container { width: 100%; height: 180px; background: #f8fafc; display: flex; align-items: center; justify-content: center; }
+        .product-img-display { max-width: 100%; max-height: 100%; object-fit: contain; }
         
-        .btn-pay { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .nav-bar { background: white; display: flex; border-top: 1px solid #eee; padding: 10px 0 calc(env(safe-area-inset-bottom, 10px) + 20px); } 
+        .btn-action { background: var(--glam); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .nav-bar { background: white; display: flex; border-top: 1px solid #eee; padding: 10px 0 34px; } 
         .nav-item { flex: 1; text-align: center; font-size: 0.65rem; color: #94a3b8; cursor: pointer; font-weight: bold; }
         .nav-item.active { color: var(--primary); }
-
+        
         input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; box-sizing: border-box; }
         .hidden { display: none !important; }
         .qr-box { background: white; padding: 10px; border-radius: 12px; display: inline-block; margin: 10px auto; border: 1px solid #eee; }
@@ -61,29 +58,30 @@
                 <span id="t-signup" class="tab-item" style="flex:1; text-align:center; padding:12px; cursor:pointer; font-weight:bold; font-size:0.7rem; color:#999;" onclick="switchTab('signup')">CREER</span>
             </div>
             <div id="area-login">
-                <input type="tel" id="l-tel" placeholder="Téléphone">
+                <input type="tel" id="l-tel" placeholder="Numéro de téléphone">
                 <input type="password" id="l-pass" placeholder="Mot de passe">
-                <button class="btn-pay" style="background:var(--glam)" onclick="doLogin()">SE CONNECTER</button>
+                <button class="btn-action" onclick="doLogin()">SE CONNECTER</button>
+                <center><img src="bololo.png" alt="Logo" style="width: 130px; margin-top: 30px;"></center>
             </div>
             <div id="area-signup" class="hidden">
                 <input type="tel" id="s-tel" placeholder="Votre numéro" oninput="drawQR('s-tel', 'qr-signup')">
                 <center><div id="qr-signup" class="qr-box"></div></center>
                 <input type="password" id="s-pass" placeholder="Mot de passe">
                 <input type="password" id="s-confirm" placeholder="Confirmer">
-                <button class="btn-pay" style="background:var(--glam)" onclick="doSignup()">CREER LE COMPTE</button>
+                <button class="btn-action" onclick="doSignup()">CREER LE COMPTE</button>
             </div>
         </div>
 
         <div id="dash-params" class="hidden">
             <div class="card" style="text-align:center; background: var(--glam); color:white;">
-                <h1 id="user-balance" style="margin:0; font-size:2.5rem;">0 BLL</h1>
-                <p style="margin:0; font-size:0.8rem; opacity:0.8;">Monnaie Disponible</p>
+                <h1 id="user-balance" style="margin:0; font-size:2.2rem;">0 BLL</h1>
+                <p style="margin:0; font-size:0.7rem; opacity:0.8;">SOLDE PORTEFEUILLE</p>
             </div>
             <div class="card">
-                <h4 style="margin:0 0 10px 0">FORFAITS MENSUELS</h4>
+                <h4 style="margin:0 0 10px 0; font-size:0.8rem;">BOOSTER MA BOUTIQUE</h4>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                    <button class="btn-pay" onclick="buyPlan('Argent', 50, 2000)" style="background:#64748b; font-size:11px;">ARGENT (50) - 2000 BLL</button>
-                    <button class="btn-pay" onclick="buyPlan('Or', 100, 5000)" style="background:#f59e0b; font-size:11px;">OR (100) - 5000 BLL</button>
+                    <button onclick="buyPlan('Argent', 50, 2000)" style="font-size:10px; padding:10px; border-radius:10px; border:1px solid #ddd; background:#f8fafc;"><b>ARGENT (50)</b><br>2000 BLL</button>
+                    <button onclick="buyPlan('Or', 100, 5000)" style="font-size:10px; padding:10px; border-radius:10px; border:1px solid #ffd700; background:#fffdf0;"><b>OR (100)</b><br>5000 BLL</button>
                 </div>
             </div>
             <div class="card">
@@ -95,7 +93,7 @@
                 </select>
                 <input type="text" id="set-name" placeholder="Nom de la Boutique">
                 <input type="file" accept="image/*" onchange="handleLogo(event)">
-                <button class="btn-pay" onclick="saveSettings()">ENREGISTRER</button>
+                <button class="btn-action" onclick="saveSettings()">SAUVEGARDER CONFIG</button>
             </div>
         </div>
 
@@ -105,24 +103,21 @@
                 <input type="number" id="p-price" placeholder="Prix (BLL)">
                 <textarea id="p-desc" placeholder="Description..."></textarea>
                 <input type="file" id="p-img-input" accept="image/*" onchange="handleProdImg(event)">
-                <button class="btn-pay" onclick="addProduct()">PUBLIER SUR LE MARCHE</button>
+                <button class="btn-action" onclick="addProduct()">PUBLIER L'ARTICLE</button>
             </div>
             <div id="admin-list"></div>
         </div>
 
         <div id="dash-view" class="hidden">
-            <div class="sticky-area">
-                <input type="tel" id="search-tel" placeholder="Chercher boutique ou article..." oninput="autoComplete(this.value)">
-                <div id="suggest-box" class="autocomplete-results hidden"></div>
-            </div>
+            <div id="shop-header"></div>
             <div id="shop-list"></div>
         </div>
     </div>
 
     <nav id="bottom-nav" class="nav-bar hidden">
         <div class="nav-item active" onclick="showSection('params', this)">⚙️<br>PROFIL</div>
-        <div class="nav-item" onclick="showSection('articles', this)">📦<br>STOCK</div>
-        <div class="nav-item" onclick="showSection('view', this); renderGlobalShop();">🛒<br>MARCHÉ</div>
+        <div class="nav-item" onclick="showSection('articles', this)">📦<br>MES ARTICLES</div>
+        <div class="nav-item" onclick="showSection('view', this); renderMarket();">🛒<br>MARCHÉ</div>
     </nav>
 </div>
 
@@ -148,33 +143,25 @@
         el.classList.add('active');
     }
 
-    function doSignup() {
-        const tel = document.getElementById('s-tel').value;
-        const pass = document.getElementById('s-pass').value;
-        if (tel.length < 4 || pass !== document.getElementById('s-confirm').value) return alert("Erreur");
-        db.ref('accounts/' + tel).set({ tel, pass, limit: 10, balance: 0, plan: "Gratuit", catalog: [] })
-        .then(() => { alert("Compte prêt !"); switchTab('login'); });
-    }
-
     function doLogin() {
         const tel = document.getElementById('l-tel').value;
         const pass = document.getElementById('l-pass').value;
         db.ref('accounts/' + tel).once('value', snap => {
             const u = snap.val();
             if (u && u.pass === pass) {
-                if (u.blocked) return alert("Bloqué !");
+                if (u.blocked) return alert("❌ Votre compte est suspendu.");
                 currentUser = u;
                 document.getElementById('view-auth').classList.add('hidden');
                 document.getElementById('bottom-nav').classList.remove('hidden');
                 document.getElementById('logout-btn').classList.remove('hidden');
                 showSection('params', document.querySelector('.nav-item'));
-                syncUser();
+                syncUserData();
                 renderAdminList();
-            } else alert("Erreur d'accès");
+            } else alert("Identifiants incorrects");
         });
     }
 
-    function syncUser() {
+    function syncUserData() {
         db.ref('accounts/' + currentUser.tel).on('value', snap => {
             currentUser = snap.val();
             document.getElementById('user-balance').innerText = (currentUser.balance || 0) + " BLL";
@@ -182,23 +169,35 @@
     }
 
     function buyPlan(name, limit, price) {
-        if (currentUser.balance < price) return alert("BLL Insuffisants. Rechargez à l'agence.");
-        if (confirm(`Activer le plan ${name} pour ${price} BLL ?`)) {
-            db.ref('accounts/' + currentUser.tel).update({ balance: currentUser.balance - price, limit: limit, plan: name });
+        if ((currentUser.balance || 0) < price) return alert("Solde insuffisant. Rechargez à l'agence.");
+        if (confirm(`Acheter le Plan ${name} pour ${price} BLL ?`)) {
+            db.ref('accounts/' + currentUser.tel).update({
+                balance: currentUser.balance - price,
+                limit: limit,
+                plan: name
+            });
         }
     }
 
     function addProduct() {
-        const catalog = currentUser.catalog || [];
-        if (catalog.length >= currentUser.limit) return alert("Quota plein ! Payez un abonnement.");
-        const newItem = { id: Date.now(), name: document.getElementById('p-name').value, price: parseInt(document.getElementById('p-price').value), img: tempProdImg, likes: 0, dislikes: 0, comments: [] };
-        catalog.push(newItem);
-        db.ref('accounts/' + currentUser.tel + '/catalog').set(catalog).then(() => {
+        const cat = currentUser.catalog || [];
+        if (cat.length >= (currentUser.limit || 2)) return alert("Quota atteint ! Changez de forfait.");
+        const item = { 
+            id: Date.now(), 
+            name: document.getElementById('p-name').value, 
+            price: parseInt(document.getElementById('p-price').value), 
+            img: tempProdImg,
+            likes: 0, 
+            dislikes: 0, 
+            comments: [] 
+        };
+        cat.push(item);
+        db.ref('accounts/' + currentUser.tel + '/catalog').set(cat).then(() => {
             tempProdImg = ""; document.getElementById('p-img-input').value = "";
         });
     }
 
-    function renderGlobalShop() {
+    function renderMarket() {
         db.ref('accounts').on('value', snap => {
             const all = snap.val();
             let html = "";
@@ -209,26 +208,35 @@
                     <div class="product-card">
                         <div class="product-img-container"><img src="${it.img}" class="product-img-display"></div>
                         <div style="padding:15px;">
-                            <small>Boutique: ${shop.shopName || tel}</small><br>
-                            <b>${it.name}</b><br><span style="color:var(--primary); font-weight:900;">${it.price} BLL</span>
-                            <button class="btn-pay" onclick="buyProduct('${tel}', ${i}, ${it.price})">ACHETER AVEC MES BLL</button>
+                            <small style="color:var(--primary)">Boutique: ${shop.shopName || tel}</small><br>
+                            <b>${it.name}</b><br>
+                            <span style="font-weight:900; font-size:1.2rem;">${it.price} BLL</span>
+                            
+                            <div style="display:flex; gap:10px; margin:10px 0;">
+                                <button onclick="vote('${tel}', ${i}, 'likes')" style="border:none; background:none;">👍 ${it.likes||0}</button>
+                                <button onclick="vote('${tel}', ${i}, 'dislikes')" style="border:none; background:none;">👎 ${it.dislikes||0}</button>
+                            </div>
+
+                            <button class="btn-action" onclick="buyItem('${tel}', ${i}, ${it.price})">ACHETER MAINTENANT</button>
                         </div>
                     </div>`;
                 });
             }
-            document.getElementById('shop-list').innerHTML = html || "<center>Rien à vendre pour le moment</center>";
+            document.getElementById('shop-list').innerHTML = html || "<center>Aucun article</center>";
         });
     }
 
-    function buyProduct(sellerTel, idx, price) {
-        if (sellerTel === currentUser.tel) return alert("C'est votre produit !");
-        if (currentUser.balance < price) return alert("Pas assez de BLL !");
-        if (confirm("Valider l'achat ? Les BLL seront transférés au vendeur.")) {
+    function buyItem(sellerTel, idx, price) {
+        if (sellerTel === currentUser.tel) return alert("C'est votre propre article !");
+        if ((currentUser.balance || 0) < price) return alert("Solde insuffisant.");
+        if (confirm(`Payer ${price} BLL à cette boutique ?`)) {
             db.ref('accounts/' + currentUser.tel + '/balance').transaction(b => b - price);
             db.ref('accounts/' + sellerTel + '/balance').transaction(b => (b || 0) + price);
-            alert("Merci pour votre achat !");
+            alert("✅ Achat réussi !");
         }
     }
+
+    function vote(tel, idx, type) { db.ref('accounts/' + tel + '/catalog/' + idx + '/' + type).transaction(v => (v || 0) + 1); }
 
     function renderAdminList() {
         db.ref('accounts/' + currentUser.tel + '/catalog').on('value', snap => {
@@ -242,10 +250,10 @@
         });
     }
 
-    function deleteProduct(i) { if(confirm("Supprimer ?")) { let c = currentUser.catalog; c.splice(i,1); db.ref('accounts/'+currentUser.tel+'/catalog').set(c); } }
+    function deleteProduct(i) { let c = currentUser.catalog; c.splice(i,1); db.ref('accounts/'+currentUser.tel+'/catalog').set(c); }
     function handleLogo(e) { const r = new FileReader(); r.onload = () => tempLogo = r.result; r.readAsDataURL(e.target.files[0]); }
     function handleProdImg(e) { const r = new FileReader(); r.onload = () => tempProdImg = r.result; r.readAsDataURL(e.target.files[0]); }
-    function saveSettings() { db.ref('accounts/'+currentUser.tel).update({ shopName: document.getElementById('set-name').value, shopLogo: tempLogo }); alert("Sauvé"); }
+    function saveSettings() { db.ref('accounts/'+currentUser.tel).update({ shopName: document.getElementById('set-name').value, shopLogo: tempLogo }); alert("Config sauvée"); }
     function changeTheme() { document.body.className = document.getElementById('theme-selector').value; }
     function drawQR(id, cont) { const v = document.getElementById(id).value; document.getElementById(cont).innerHTML = ""; if(v.length>3) new QRCode(document.getElementById(cont), {text:v, width:120, height:120}); }
 </script>
