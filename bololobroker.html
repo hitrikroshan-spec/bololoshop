@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOLOLO BROKER - Bourse des Boutiques</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+
+    <style>
+        :root { --bull: #00ff88; --bear: #ff3e3e; --bg: #0a0e17; --card: #161b28; }
+        body { margin: 0; font-family: 'JetBrains Mono', monospace; background: var(--bg); color: white; }
+        
+        header { padding: 20px; border-bottom: 1px solid #2d3343; display: flex; justify-content: space-between; align-items: center; background: var(--card); }
+        .balance-box { color: var(--bull); font-weight: bold; }
+
+        .market-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 20px; }
+        
+        .stock-card { background: var(--card); border-radius: 12px; padding: 20px; border: 1px solid #2d3343; transition: 0.3s; }
+        .stock-card:hover { border-color: var(--bull); }
+
+        .stock-header { display: flex; justify-content: space-between; margin-bottom: 15px; }
+        .stock-price { font-size: 1.5rem; font-weight: bold; }
+        .trend-up { color: var(--bull); }
+        .trend-down { color: var(--bear); }
+
+        .btn-trade { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-buy { background: var(--bull); color: #000; }
+        .btn-sell { background: transparent; border: 1px solid var(--bear); color: var(--bear); }
+
+        .stats-row { display: flex; justify-content: space-between; font-size: 0.8rem; color: #8b949e; margin: 5px 0; }
+        
+        input { width: 100%; background: #0a0e17; border: 1px solid #2d3343; color: white; padding: 10px; border-radius: 5px; margin-top: 10px; box-sizing: border-box; }
+        
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div><span style="color:var(--bull)">●</span> BOLOLO STOCK EXCHANGE</div>
+    <div class="balance-box" id="my-bll">Wallet: 0 BLL</div>
+</header>
+
+<div id="auth-screen" style="max-width: 400px; margin: 100px auto; text-align: center;">
+    <h2>Connexion Trader</h2>
+    <input type="tel" id="user-tel" placeholder="N° Téléphone">
+    <button class="btn-trade btn-buy" onclick="login()">SE CONNECTER</button>
+</div>
+
+<div id="broker-screen" class="hidden">
+    <div style="padding: 20px 20px 0 20px;">
+        <h3>Marché en Direct</h3>
+        <p style="font-size: 0.7rem; color: #8b949e;">La valeur dépend du solde de la boutique et du nombre de produits en stock.</p>
+    </div>
+    <div class="market-grid" id="market-grid">
+        </div>
+</div>
+
+<script>
+    const firebaseConfig = { databaseURL: "https://bololoshop-bf59b-default-rtdb.firebaseio.com/" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let currentUser = null;
+
+    function login() {
+        const tel = document.getElementById('user-tel').value;
+        db.ref('accounts/' + tel).once('value', s => {
+            if(s.exists()) {
+                currentUser = s.val();
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('broker-screen').classList.remove('hidden');
+                initMarket();
+            } else { alert("Compte non trouvé sur BOLOLO"); }
+        });
+    }
+
+    function initMarket() {
+        // Observer les changements du portefeuille
+        db.ref('accounts/' + currentUser.tel + '/balance').on('value', s => {
+            document.getElementById('my-bll').innerText = "Wallet: " + s.val() + " BLL";
+        });
+
+        // Charger toutes les boutiques pour simuler les actions
+        db.ref('accounts').on('value', snap => {
+            const data = snap.val();
+            let html = "";
+            for(let tel in data) {
+                const shop = data[tel];
+                const stockCount = shop.catalog ? shop.catalog.length : 0;
+                
+                // Calcul du prix de l'action (Exemple: Solde / 10 + Articles * 100)
+                const marketCap = (shop.balance || 0) + (stockCount * 500);
+                const sharePrice = Math.max(10, Math.floor(marketCap / 100)); // Une boutique a 100 parts
+                
+                const trend = Math.random() > 0.5 ? 'trend-up' : 'trend-down';
+                const sign = trend === 'trend-up' ? '+' : '-';
+
+                html += `
+                    <div class="stock-card">
+                        <div class="stock-header">
+                            <div>
+                                <b>${shop.shopName || 'Boutique'}</b><br>
+                                <small style="color:#8b949e">Ticker: ${tel.slice(-4)}</small>
+                            </div>
+                            <div class="trend-tag ${trend}">${sign}${Math.floor(Math.random()*10)}%</div>
+                        </div>
+                        <div class="stock-price">${sharePrice} BLL</div>
+                        <div class="stats-row"><span>Parts dispo:</span><span>${Math.floor(Math.random()*100)} / 100</span></div>
+                        <div class="stats-row"><span>Volume:</span><span>${marketCap} BLL</span></div>
+                        
+                        <input type="number" id="qty-${tel}" placeholder="Nombre de parts" min="1">
+                        <button class="btn-trade btn-buy" onclick="trade('${tel}', ${sharePrice}, 'BUY')">ACHETER PARTS</button>
+                        <button class="btn-trade btn-sell" onclick="trade('${tel}', ${sharePrice}, 'SELL')">VENDRE PARTS</button>
+                    </div>
+                `;
+            }
+            document.getElementById('market-grid').innerHTML = html;
+        });
+    }
+
+    function trade(shopTel, price, type) {
+        const qty = parseInt(document.getElementById('qty-' + shopTel).value);
+        if(!qty || qty <= 0) return alert("Quantité invalide");
+        
+        const total = price * qty;
+        
+        db.ref('accounts/' + currentUser.tel + '/balance').get().then(s => {
+            const currentBalance = s.val();
+            
+            if(type === 'BUY') {
+                if(currentBalance < total) return alert("Fonds insuffisants sur votre compte BOLOLO");
+                db.ref('accounts/' + currentUser.tel + '/balance').set(currentBalance - total);
+                alert(`Achat de ${qty} parts de la boutique ${shopTel} réussi !`);
+            } else {
+                db.ref('accounts/' + currentUser.tel + '/balance').set(currentBalance + (total * 0.95)); // Commission de 5% à la vente
+                alert(`Vente réussie ! +${total * 0.95} BLL crédités.`);
+            }
+        });
+    }
+</script>
+</body>
+</html>
