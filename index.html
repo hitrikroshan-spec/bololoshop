@@ -35,35 +35,32 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 100; transition: background 0.5s ease;
         }
         header.theme-female { background: var(--female-gradient); }
-        .btn-exit { background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 12px; border-radius: 12px; font-weight: bold; font-size: 0.8rem; cursor: pointer; }
 
         .main-content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; }
         .main-content::-webkit-scrollbar { display: none; }
 
         .card { background: white; border-radius: 20px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
         
-        .home-logo { width: 120px; height: auto; margin-top: 30px; opacity: 0.9; }
+        /* PANIER & COMMANDES */
+        .order-card { display: flex; gap: 12px; padding: 15px; background: white; border-radius: 18px; margin-bottom: 12px; border: 1px solid #e5e7eb; }
+        .order-img { width: 80px; height: 80px; border-radius: 12px; object-fit: cover; }
+        .order-info { flex: 1; font-size: 0.85rem; }
+        .status-badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: bold; margin-top: 5px; }
+        .pending { background: #fef3c7; color: #92400e; }
+        .delivered { background: #dcfce7; color: #166534; }
 
+        /* PRODUITS */
         .product-item { background: white; border-radius: 24px; overflow: hidden; margin-bottom: 25px; border: 1px solid #e5e7eb; position: relative; }
         .img-wrap { width: 100%; height: 260px; background: #fff; display: flex; align-items: center; justify-content: center; position: relative; }
         .product-img { max-width: 100%; max-height: 100%; object-fit: contain; }
         .badge-price { position: absolute; top: 15px; right: 15px; background: var(--primary); color: white; padding: 8px 15px; border-radius: 50px; font-weight: 800; }
 
-        /* VOTE BAR */
-        .vote-bar { display: flex; gap: 20px; padding: 10px 0; margin-top: 10px; border-top: 1px solid #f1f5f9; }
-        .vote-btn { cursor: pointer; font-weight: 700; color: #64748b; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; }
-
-        /* CHAT BOX */
-        .chat-box { background: #f8fafc; border-radius: 15px; padding: 12px; margin-top: 5px; border: 1px solid #e2e8f0; max-height: 120px; overflow-y: auto; }
-        .msg { font-size: 0.75rem; margin-bottom: 4px; padding: 6px 10px; border-radius: 10px; width: fit-content; max-width: 90%; }
-        .msg-v { background: #dcfce7; color: #166534; align-self: flex-start; }
-        .msg-c { background: #e0e7ff; color: #3730a3; margin-left: auto; }
-
-        .btn-buy { background: #10b981; color: white; border: none; padding: 16px; width: 100%; border-radius: 18px; font-weight: bold; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); }
+        .btn-buy { background: #10b981; color: white; border: none; padding: 16px; width: 100%; border-radius: 18px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .btn-prime { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; border-radius: 15px; font-weight: bold; cursor: pointer; }
+        .btn-confirm { background: var(--primary); color: white; border: none; padding: 8px; border-radius: 8px; font-size: 0.75rem; cursor: pointer; margin-top: 5px; width: 100%; }
 
         nav { background: white; display: flex; padding: 10px 0 calc(10px + env(safe-area-inset-bottom)); border-top: 1px solid #e5e7eb; }
-        .nav-tab { flex: 1; text-align: center; color: #9ca3af; font-size: 0.7rem; font-weight: 700; cursor: pointer; }
+        .nav-tab { flex: 1; text-align: center; color: #9ca3af; font-size: 0.65rem; font-weight: 700; cursor: pointer; }
         .nav-tab.active { color: var(--primary); }
 
         input, textarea, select { width: 100%; padding: 12px; margin-bottom: 10px; border: 1.5px solid #e5e7eb; border-radius: 12px; outline: none; }
@@ -75,72 +72,67 @@
 <div class="app-shell">
     <header id="app-header">
         <h2>BOLOLO <span style="font-weight: 200;">PRO</span></h2>
-        <button id="logout-btn" class="btn-exit hidden" onclick="location.reload()">🚪 Quitter</button>
+        <button id="logout-btn" class="btn-exit hidden" onclick="location.reload()" style="background:none; border:none; color:white; font-size:1.5rem;">🚪</button>
     </header>
 
     <div class="main-content">
         <div id="view-login" class="card" style="text-align:center;">
-            <h2>Espace Business</h2>
+            <h2>Connexion</h2>
             <input type="tel" id="l-tel" placeholder="N° Téléphone">
             <input type="password" id="l-pass" placeholder="Mot de passe">
-            <button class="btn-prime" onclick="doLogin()">ACCÉDER À MA BOUTIQUE</button>
-            <br>
-            <img src="bololo.png" alt="Logo Bololo" class="home-logo" onerror="this.style.display='none'">
-            <p onclick="switchAuth('signup')" style="color:var(--primary); cursor:pointer; font-weight:bold; margin-top:20px;">Créer un compte marchand</p>
+            <button class="btn-prime" onclick="doLogin()">OUVRIR LA BOUTIQUE</button>
+            <br><img src="bololo.png" class="home-logo" style="width:100px; margin-top:20px;">
+            <p onclick="switchAuth('signup')" style="color:var(--primary); cursor:pointer; font-weight:bold; margin-top:15px;">Créer une boutique</p>
         </div>
 
-        <div id="view-signup" class="card hidden" style="text-align:center;">
-            <h2>Inscription</h2>
-            <input type="tel" id="s-tel" placeholder="Votre numéro" oninput="genQR(this.value)">
-            <div id="qr-area" style="margin: 10px 0;"></div>
+        <div id="view-signup" class="card hidden">
+            <input type="tel" id="s-tel" placeholder="N° Téléphone" oninput="genQR(this.value)">
+            <center><div id="qr-area"></div></center>
             <input type="password" id="s-pass" placeholder="Mot de passe">
-            <button class="btn-prime" onclick="doSignup()">CRÉER MON COMPTE</button>
-            <p onclick="switchAuth('login')" style="color:var(--primary); cursor:pointer; font-weight:bold; margin-top:20px;">Retour</p>
+            <button class="btn-prime" onclick="doSignup()">S'INSCRIRE</button>
         </div>
 
         <div id="dash-params" class="hidden">
-            <div class="card" style="background:var(--primary); color:white; text-align:center; box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4);">
-                <small>CAPITAL BLL</small>
-                <h1 id="user-balance" style="margin:5px 0; font-size: 2.5rem;">0 BLL</h1>
+            <div class="card" style="background:var(--primary); color:white; text-align:center;">
+                <small>MON SOLDE</small>
+                <h1 id="user-balance" style="margin:5px 0">0 BLL</h1>
             </div>
             <div class="card">
-                <h3>Style & Identité</h3>
-                <label>Ambiance visuelle :</label>
+                <h3>Paramètres</h3>
                 <select id="set-theme" onchange="updateThemeStyle(this.value)">
-                    <option value="male">Homme (Bleu Business)</option>
-                    <option value="female">Femme (Rose Glamour)</option>
+                    <option value="male">Thème Homme</option>
+                    <option value="female">Thème Femme</option>
                 </select>
-                <input type="text" id="set-name" placeholder="Nom de l'entreprise">
+                <input type="text" id="set-name" placeholder="Nom Boutique">
                 <input type="file" accept="image/*" onchange="handleFile(event, 'logo')">
-                <button class="btn-prime" onclick="saveProfile()">METTRE À JOUR LA BOUTIQUE</button>
+                <button class="btn-prime" onclick="saveProfile()">SAUVEGARDER</button>
             </div>
         </div>
 
         <div id="dash-articles" class="hidden">
             <div class="card">
-                <h3>Publier un Article</h3>
-                <input type="text" id="p-name" placeholder="Nom du produit">
+                <input type="text" id="p-name" placeholder="Produit">
                 <input type="number" id="p-price" placeholder="Prix">
-                <textarea id="p-desc" placeholder="Décrivez votre article..."></textarea>
-                <input type="file" accept="image/*" onchange="handleFile(event, 'prod')">
-                <button class="btn-prime" onclick="addProduct()">PUBLIER L'ANNONCE</button>
+                <textarea id="p-desc" placeholder="Description"></textarea>
+                <input type="file" onchange="handleFile(event, 'prod')">
+                <button class="btn-prime" onclick="addProduct()">PUBLIER ARTICLE</button>
             </div>
-            <h4 style="padding-left:10px;">Mes articles en ligne</h4>
             <div id="my-stock-list"></div>
         </div>
 
         <div id="dash-view" class="hidden">
-            <input type="text" id="search" placeholder="🔍 Rechercher une boutique..." oninput="searchShop(this.value)">
-            <div id="search-res" class="hidden" style="background:white; border-radius:12px; border:1px solid #ddd; margin-bottom:10px; position:absolute; width:calc(100% - 30px); z-index:50;"></div>
-
-            <div class="card" style="display:flex; align-items:center; gap:15px; border-left: 6px solid var(--primary); margin-top:10px;">
-                <img id="v-logo" src="bololo.png" style="width:55px; height:55px; border-radius:12px; object-fit:cover;">
-                <div>
-                    <b id="v-name" style="font-size:1.1rem;">Boutique Bololo</b><br>
-                    <small id="v-tel" style="color: #64748b;"></small>
-                </div>
+            <input type="text" id="search" placeholder="🔍 Chercher boutique..." oninput="searchShop(this.value)">
+            <div id="search-res" class="hidden"></div>
+            <div class="card" style="display:flex; align-items:center; gap:10px;">
+                <img id="v-logo" src="bololo.png" style="width:50px; height:50px; border-radius:10px;">
+                <b id="v-name">...</b>
             </div>
             <div id="market-list"></div>
+        </div>
+
+        <div id="dash-cart" class="hidden">
+            <h3>🛒 Mes Achats</h3>
+            <div id="cart-list"></div>
         </div>
     </div>
 
@@ -148,6 +140,7 @@
         <div class="nav-tab active" onclick="showSection('params', this)">⚙️<br>PROFIL</div>
         <div class="nav-tab" onclick="showSection('articles', this); renderMyStock();">📦<br>STOCK</div>
         <div class="nav-tab" onclick="showSection('view', this); renderMarket();">🛒<br>MARCHÉ</div>
+        <div class="nav-tab" onclick="showSection('cart', this); renderCart();">🛍️<br>PANIER</div>
     </nav>
 </div>
 
@@ -165,146 +158,102 @@
 
     function genQR(v) {
         document.getElementById('qr-area').innerHTML = "";
-        if(v.length > 2) new QRCode(document.getElementById('qr-area'), { text: v, width: 80, height: 80 });
+        if(v.length > 2) new QRCode(document.getElementById('qr-area'), { text: v, width: 70, height: 70 });
     }
 
     function doSignup() {
-        const tel = document.getElementById('s-tel').value, pass = document.getElementById('s-pass').value;
-        if(!tel || !pass) return alert("Remplissez tout");
-        db.ref('accounts/'+tel).set({ tel, pass, balance: 2000, theme: 'male', shopName: "Shop "+tel, shopLogo: "", catalog: [] })
-        .then(() => { alert("Compte créé avec succès !"); switchAuth('login'); });
+        const tel = document.getElementById('s-tel').value;
+        db.ref('accounts/'+tel).set({ tel, pass: document.getElementById('s-pass').value, balance: 2000, theme: 'male', shopName: "Shop "+tel, catalog: [], orders: [] })
+        .then(() => switchAuth('login'));
     }
 
     function doLogin() {
         const tel = document.getElementById('l-tel').value, pass = document.getElementById('l-pass').value;
         db.ref('accounts/'+tel).once('value', s => {
-            const data = s.val();
-            if(data && data.pass === pass) {
-                user = data; viewedTel = tel;
+            const d = s.val();
+            if(d && d.pass === pass) {
+                user = d; viewedTel = tel;
                 document.getElementById('view-login').classList.add('hidden');
                 document.getElementById('navbar').classList.remove('hidden');
                 document.getElementById('logout-btn').classList.remove('hidden');
                 updateThemeStyle(user.theme || 'male');
                 showSection('params', document.querySelectorAll('.nav-tab')[0]);
-                syncUserData();
-            } else alert("Identifiants incorrects");
+                db.ref('accounts/'+user.tel).on('value', snap => { user = snap.val(); document.getElementById('user-balance').innerText = user.balance + " BLL"; });
+            } else alert("Erreur");
         });
     }
 
     function updateThemeStyle(t) {
-        const h = document.getElementById('app-header');
-        h.className = (t === 'female') ? 'theme-female' : '';
+        document.getElementById('app-header').className = (t === 'female') ? 'theme-female' : '';
         document.documentElement.style.setProperty('--primary', t === 'female' ? '#db2777' : '#4f46e5');
-    }
-
-    function syncUserData() {
-        db.ref('accounts/'+user.tel).on('value', s => {
-            user = s.val();
-            document.getElementById('user-balance').innerText = (user.balance || 0) + " BLL";
-            document.getElementById('set-name').value = user.shopName;
-            document.getElementById('set-theme').value = user.theme || 'male';
-        });
     }
 
     function renderMarket() {
         db.ref('accounts/'+viewedTel).on('value', s => {
             const shop = s.val();
-            if(!shop) return;
             document.getElementById('v-name').innerText = shop.shopName;
-            document.getElementById('v-tel').innerText = "Vendeur: " + viewedTel;
             document.getElementById('v-logo').src = shop.shopLogo || 'bololo.png';
-            
             let h = "";
             (shop.catalog || []).forEach((it, i) => {
-                h += `
-                <div class="product-item">
-                    <div class="img-wrap">
-                        <img src="${it.img || 'bololo.png'}" class="product-img">
-                        <span class="badge-price">${it.price} BLL</span>
-                    </div>
+                h += `<div class="product-item">
+                    <div class="img-wrap"><img src="${it.img || 'bololo.png'}" class="product-img"><span class="badge-price">${it.price} BLL</span></div>
                     <div style="padding:15px;">
-                        <h3 style="margin:0">${it.name}</h3>
-                        <p style="color:#64748b; font-size:0.8rem; margin:5px 0;">${it.desc || ''}</p>
-                        
-                        <div class="vote-bar">
-                            <span class="vote-btn" onclick="handleVote('${viewedTel}', ${i}, 'likes')">👍 ${it.likes||0}</span>
-                            <span class="vote-btn" onclick="handleVote('${viewedTel}', ${i}, 'dislikes')">👎 ${it.dislikes||0}</span>
-                        </div>
-
-                        <div class="chat-box">
-                            ${(it.messages || []).map(m => `<div class="msg ${m.s==='V'?'msg-v':'msg-c'}"><b>${m.u}:</b> ${m.t}</div>`).join('')}
-                        </div>
-                        <div style="display:flex; gap:5px; margin-top:8px;">
-                            <input type="text" id="in-${i}" placeholder="Négocier..." style="margin:0; font-size:0.8rem;">
-                            <button onclick="sendMsg('${viewedTel}', ${i})" style="padding:0 12px; border-radius:10px; border:none; background:var(--primary); color:white;">✈️</button>
-                        </div>
-                        <button class="btn-buy" onclick="buyItem('${viewedTel}', ${it.price}, '${it.name}')">ACHETER MAINTENANT</button>
+                        <b>${it.name}</b>
+                        <button class="btn-buy" onclick="buyItem('${viewedTel}', ${it.price}, '${it.name}', '${it.img||''}', '${shop.shopName}')">ACHETER</button>
                     </div>
                 </div>`;
             });
-            document.getElementById('market-list').innerHTML = h || "<center style='padding:40px; color:gray;'>Boutique vide</center>";
+            document.getElementById('market-list').innerHTML = h;
         });
     }
 
-    function handleVote(seller, idx, type) {
-        if(seller === user.tel) return alert("Impossible de voter pour vos propres produits");
-        db.ref('accounts/'+seller+'/catalog/'+idx+'/'+type).transaction(v => (v || 0) + 1);
-    }
-
-    function sendMsg(seller, idx) {
-        const t = document.getElementById('in-'+idx).value; if(!t) return;
-        db.ref('accounts/'+seller+'/catalog/'+idx+'/messages').once('value', s => {
-            let m = s.val() || [];
-            m.push({ u: user.shopName, t: t, s: (seller === user.tel ? 'V' : 'C') });
-            db.ref('accounts/'+seller+'/catalog/'+idx+'/messages').set(m).then(() => {
-                document.getElementById('in-'+idx).value = "";
-            });
-        });
-    }
-
-    function buyItem(seller, price, name) {
-        if(seller === user.tel) return alert("C'est votre boutique");
-        if(user.balance < price) return alert("Solde BLL insuffisant");
-        if(confirm("Confirmer le paiement de "+price+" BLL pour "+name+" ?")) {
+    function buyItem(sellerTel, price, name, img, sellerName) {
+        if(user.balance < price) return alert("Solde insuffisant");
+        if(confirm("Confirmer l'achat ?")) {
+            const date = new Date().toLocaleString();
+            const order = { name, price, img, sellerTel, sellerName, date, status: "En attente" };
+            
             db.ref('accounts/'+user.tel+'/balance').transaction(b => b - price);
-            db.ref('accounts/'+seller+'/balance').transaction(b => (b || 0) + price);
-            alert("Achat validé !");
+            db.ref('accounts/'+sellerTel+'/balance').transaction(b => (b || 0) + price);
+            
+            let myOrders = user.orders || [];
+            myOrders.push(order);
+            db.ref('accounts/'+user.tel+'/orders').set(myOrders).then(() => alert("Achat réussi !"));
         }
     }
 
+    function renderCart() {
+        const ord = user.orders || [];
+        document.getElementById('cart-list').innerHTML = ord.map((o, i) => `
+            <div class="order-card">
+                <img src="${o.img || 'bololo.png'}" class="order-img">
+                <div class="order-info">
+                    <b>${o.name}</b><br>
+                    <small>Vendeur: ${o.sellerName} (${o.sellerTel})</small><br>
+                    <small>Date: ${o.date}</small><br>
+                    <b>${o.price} BLL</b><br>
+                    <span class="status-badge ${o.status === 'Livré' ? 'delivered' : 'pending'}">${o.status}</span>
+                    ${o.status === 'En attente' ? `<button class="btn-confirm" onclick="confirmDelivery(${i})">Confirmer Livraison</button>` : ''}
+                </div>
+            </div>
+        `).reverse().join('');
+    }
+
+    function confirmDelivery(i) {
+        let ords = [...user.orders];
+        ords[i].status = "Livré";
+        db.ref('accounts/'+user.tel+'/orders').set(ords).then(() => renderCart());
+    }
+
     function addProduct() {
-        const cat = user.catalog || [];
-        cat.push({ 
-            name: document.getElementById('p-name').value, 
-            price: parseInt(document.getElementById('p-price').value), 
-            desc: document.getElementById('p-desc').value, 
-            img: tempProd, 
-            likes: 0, 
-            dislikes: 0, 
-            messages: [] 
-        });
-        db.ref('accounts/'+user.tel+'/catalog').set(cat).then(() => {
-            alert("Article publié !");
-            renderMyStock();
-        });
+        let cat = user.catalog || [];
+        cat.push({ name: document.getElementById('p-name').value, price: parseInt(document.getElementById('p-price').value), desc: document.getElementById('p-desc').value, img: tempProd });
+        db.ref('accounts/'+user.tel+'/catalog').set(cat).then(() => renderMyStock());
     }
 
     function renderMyStock() {
         const cat = user.catalog || [];
-        document.getElementById('my-stock-list').innerHTML = cat.map((it, i) => `
-            <div class="card" style="display:flex; align-items:center; gap:12px; padding:10px;">
-                <img src="${it.img || 'bololo.png'}" style="width:45px; height:45px; border-radius:10px; object-fit:cover;">
-                <div style="flex:1"><b>${it.name}</b><br><small>${it.price} BLL</small></div>
-                <button onclick="delItem(${i})" style="color:red; border:none; background:none; font-weight:bold;">🗑️</button>
-            </div>
-        `).join('');
-    }
-
-    function delItem(i) {
-        if(confirm("Retirer cet article du marché ?")) {
-            let c = [...user.catalog]; c.splice(i,1);
-            db.ref('accounts/'+user.tel+'/catalog').set(c);
-        }
+        document.getElementById('my-stock-list').innerHTML = cat.map((it, i) => `<div class="card">${it.name} - ${it.price} BLL</div>`).join('');
     }
 
     function searchShop(v) {
@@ -312,28 +261,17 @@
         if(!v) return res.classList.add('hidden');
         db.ref('accounts').once('value', s => {
             let all = s.val(), h = "";
-            for(let t in all) if(all[t].shopName.toLowerCase().includes(v.toLowerCase())) h += `<div onclick="goShop('${t}')" style="padding:15px; border-bottom:1px solid #eee; cursor:pointer;">${all[t].shopName}</div>`;
+            for(let t in all) if(all[t].shopName.toLowerCase().includes(v.toLowerCase())) h += `<div onclick="goShop('${t}')" style="padding:10px; border-bottom:1px solid #eee; background:white;">${all[t].shopName}</div>`;
             res.innerHTML = h; res.classList.remove('hidden');
         });
     }
 
     function goShop(t) { viewedTel = t; document.getElementById('search-res').classList.add('hidden'); renderMarket(); }
-    
-    function handleFile(e, type) { 
-        const r = new FileReader(); 
-        r.onload = () => { if(type==='logo') tempLogo=r.result; else tempProd=r.result; }; 
-        r.readAsDataURL(e.target.files[0]); 
-    }
-    
-    function saveProfile() { 
-        const t = document.getElementById('set-theme').value;
-        const n = document.getElementById('set-name').value;
-        db.ref('accounts/'+user.tel).update({ shopName: n, shopLogo: tempLogo || user.shopLogo, theme: t })
-        .then(() => { updateThemeStyle(t); alert("Boutique mise à jour !"); });
-    }
+    function handleFile(e, type) { const r = new FileReader(); r.onload = () => { if(type==='logo') tempLogo=r.result; else tempProd=r.result; }; r.readAsDataURL(e.target.files[0]); }
+    function saveProfile() { db.ref('accounts/'+user.tel).update({ shopName: document.getElementById('set-name').value, shopLogo: tempLogo || user.shopLogo || "", theme: document.getElementById('set-theme').value }); }
 
     function showSection(id, el) {
-        ['params', 'articles', 'view'].forEach(s => document.getElementById('dash-'+s).classList.add('hidden'));
+        ['params', 'articles', 'view', 'cart'].forEach(s => document.getElementById('dash-'+s).classList.add('hidden'));
         document.getElementById('dash-'+id).classList.remove('hidden');
         document.querySelectorAll('.nav-tab').forEach(n => n.classList.remove('active'));
         el.classList.add('active');
