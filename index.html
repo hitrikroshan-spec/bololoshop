@@ -7,7 +7,7 @@
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#4f46e5"> 
+    <meta name="theme-color" content="#4f46e5">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
@@ -42,7 +42,6 @@
 
         .card { background: white; border-radius: 20px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
         
-        /* LOGO ACCUEIL */
         .home-logo { width: 120px; height: auto; margin-top: 30px; opacity: 0.9; }
 
         .product-item { background: white; border-radius: 24px; overflow: hidden; margin-bottom: 25px; border: 1px solid #e5e7eb; position: relative; }
@@ -50,13 +49,17 @@
         .product-img { max-width: 100%; max-height: 100%; object-fit: contain; }
         .badge-price { position: absolute; top: 15px; right: 15px; background: var(--primary); color: white; padding: 8px 15px; border-radius: 50px; font-weight: 800; }
 
+        /* VOTE BAR */
+        .vote-bar { display: flex; gap: 20px; padding: 10px 0; margin-top: 10px; border-top: 1px solid #f1f5f9; }
+        .vote-btn { cursor: pointer; font-weight: 700; color: #64748b; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; }
+
         /* CHAT BOX */
-        .chat-box { background: #f8fafc; border-radius: 15px; padding: 12px; margin-top: 15px; border: 1px solid #e2e8f0; max-height: 150px; overflow-y: auto; }
-        .msg { font-size: 0.8rem; margin-bottom: 6px; padding: 8px; border-radius: 10px; max-width: 85%; }
+        .chat-box { background: #f8fafc; border-radius: 15px; padding: 12px; margin-top: 5px; border: 1px solid #e2e8f0; max-height: 120px; overflow-y: auto; }
+        .msg { font-size: 0.75rem; margin-bottom: 4px; padding: 6px 10px; border-radius: 10px; width: fit-content; max-width: 90%; }
         .msg-v { background: #dcfce7; color: #166534; align-self: flex-start; }
         .msg-c { background: #e0e7ff; color: #3730a3; margin-left: auto; }
 
-        .btn-buy { background: #10b981; color: white; border: none; padding: 16px; width: 100%; border-radius: 18px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-buy { background: #10b981; color: white; border: none; padding: 16px; width: 100%; border-radius: 18px; font-weight: bold; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); }
         .btn-prime { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; border-radius: 15px; font-weight: bold; cursor: pointer; }
 
         nav { background: white; display: flex; padding: 10px 0 calc(10px + env(safe-area-inset-bottom)); border-top: 1px solid #e5e7eb; }
@@ -77,13 +80,13 @@
 
     <div class="main-content">
         <div id="view-login" class="card" style="text-align:center;">
-            <h2>Connexion</h2>
+            <h2>Espace Business</h2>
             <input type="tel" id="l-tel" placeholder="N° Téléphone">
             <input type="password" id="l-pass" placeholder="Mot de passe">
-            <button class="btn-prime" onclick="doLogin()">OUVRIR MA SESSION</button>
+            <button class="btn-prime" onclick="doLogin()">ACCÉDER À MA BOUTIQUE</button>
             <br>
             <img src="bololo.png" alt="Logo Bololo" class="home-logo" onerror="this.style.display='none'">
-            <p onclick="switchAuth('signup')" style="color:var(--primary); cursor:pointer; font-weight:bold; margin-top:20px;">Créer une boutique</p>
+            <p onclick="switchAuth('signup')" style="color:var(--primary); cursor:pointer; font-weight:bold; margin-top:20px;">Créer un compte marchand</p>
         </div>
 
         <div id="view-signup" class="card hidden" style="text-align:center;">
@@ -91,49 +94,50 @@
             <input type="tel" id="s-tel" placeholder="Votre numéro" oninput="genQR(this.value)">
             <div id="qr-area" style="margin: 10px 0;"></div>
             <input type="password" id="s-pass" placeholder="Mot de passe">
-            <button class="btn-prime" onclick="doSignup()">S'INSCRIRE</button>
+            <button class="btn-prime" onclick="doSignup()">CRÉER MON COMPTE</button>
             <p onclick="switchAuth('login')" style="color:var(--primary); cursor:pointer; font-weight:bold; margin-top:20px;">Retour</p>
         </div>
 
         <div id="dash-params" class="hidden">
-            <div class="card" style="background:var(--primary); color:white; text-align:center;">
-                <small>MON SOLDE</small>
-                <h1 id="user-balance" style="margin:5px 0">0 BLL</h1>
+            <div class="card" style="background:var(--primary); color:white; text-align:center; box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4);">
+                <small>CAPITAL BLL</small>
+                <h1 id="user-balance" style="margin:5px 0; font-size: 2.5rem;">0 BLL</h1>
             </div>
             <div class="card">
-                <h3>Paramètres Vitrine</h3>
-                <label>Genre du thème :</label>
+                <h3>Style & Identité</h3>
+                <label>Ambiance visuelle :</label>
                 <select id="set-theme" onchange="updateThemeStyle(this.value)">
-                    <option value="male">Homme (Bleu)</option>
-                    <option value="female">Femme (Rose)</option>
+                    <option value="male">Homme (Bleu Business)</option>
+                    <option value="female">Femme (Rose Glamour)</option>
                 </select>
-                <input type="text" id="set-name" placeholder="Nom Commercial">
+                <input type="text" id="set-name" placeholder="Nom de l'entreprise">
                 <input type="file" accept="image/*" onchange="handleFile(event, 'logo')">
-                <button class="btn-prime" onclick="saveProfile()">SAUVEGARDER LES MODIFS</button>
+                <button class="btn-prime" onclick="saveProfile()">METTRE À JOUR LA BOUTIQUE</button>
             </div>
         </div>
 
         <div id="dash-articles" class="hidden">
             <div class="card">
-                <h3>Ajouter un Article</h3>
-                <input type="text" id="p-name" placeholder="Nom de l'article">
+                <h3>Publier un Article</h3>
+                <input type="text" id="p-name" placeholder="Nom du produit">
                 <input type="number" id="p-price" placeholder="Prix">
-                <textarea id="p-desc" placeholder="Détails de l'offre..."></textarea>
+                <textarea id="p-desc" placeholder="Décrivez votre article..."></textarea>
                 <input type="file" accept="image/*" onchange="handleFile(event, 'prod')">
-                <button class="btn-prime" onclick="addProduct()">PUBLIER SUR LE MARCHÉ</button>
+                <button class="btn-prime" onclick="addProduct()">PUBLIER L'ANNONCE</button>
             </div>
+            <h4 style="padding-left:10px;">Mes articles en ligne</h4>
             <div id="my-stock-list"></div>
         </div>
 
         <div id="dash-view" class="hidden">
-            <input type="text" id="search" placeholder="🔍 Trouver une boutique..." oninput="searchShop(this.value)">
-            <div id="search-res" class="hidden" style="background:white; border-radius:12px; border:1px solid #ddd; margin-bottom:10px;"></div>
+            <input type="text" id="search" placeholder="🔍 Rechercher une boutique..." oninput="searchShop(this.value)">
+            <div id="search-res" class="hidden" style="background:white; border-radius:12px; border:1px solid #ddd; margin-bottom:10px; position:absolute; width:calc(100% - 30px); z-index:50;"></div>
 
-            <div class="card" style="display:flex; align-items:center; gap:15px; border-left: 6px solid var(--primary);">
+            <div class="card" style="display:flex; align-items:center; gap:15px; border-left: 6px solid var(--primary); margin-top:10px;">
                 <img id="v-logo" src="bololo.png" style="width:55px; height:55px; border-radius:12px; object-fit:cover;">
                 <div>
-                    <b id="v-name" style="font-size:1.1rem;">...</b><br>
-                    <small id="v-tel"></small>
+                    <b id="v-name" style="font-size:1.1rem;">Boutique Bololo</b><br>
+                    <small id="v-tel" style="color: #64748b;"></small>
                 </div>
             </div>
             <div id="market-list"></div>
@@ -167,8 +171,8 @@
     function doSignup() {
         const tel = document.getElementById('s-tel').value, pass = document.getElementById('s-pass').value;
         if(!tel || !pass) return alert("Remplissez tout");
-        db.ref('accounts/'+tel).set({ tel, pass, balance: 1000, theme: 'male', shopName: "Shop "+tel, shopLogo: "", catalog: [] })
-        .then(() => { alert("Compte créé !"); switchAuth('login'); });
+        db.ref('accounts/'+tel).set({ tel, pass, balance: 2000, theme: 'male', shopName: "Shop "+tel, shopLogo: "", catalog: [] })
+        .then(() => { alert("Compte créé avec succès !"); switchAuth('login'); });
     }
 
     function doLogin() {
@@ -183,7 +187,7 @@
                 updateThemeStyle(user.theme || 'male');
                 showSection('params', document.querySelectorAll('.nav-tab')[0]);
                 syncUserData();
-            } else alert("Erreur identifiants");
+            } else alert("Identifiants incorrects");
         });
     }
 
@@ -205,8 +209,9 @@
     function renderMarket() {
         db.ref('accounts/'+viewedTel).on('value', s => {
             const shop = s.val();
+            if(!shop) return;
             document.getElementById('v-name').innerText = shop.shopName;
-            document.getElementById('v-tel').innerText = viewedTel;
+            document.getElementById('v-tel').innerText = "Vendeur: " + viewedTel;
             document.getElementById('v-logo').src = shop.shopLogo || 'bololo.png';
             
             let h = "";
@@ -219,21 +224,31 @@
                     </div>
                     <div style="padding:15px;">
                         <h3 style="margin:0">${it.name}</h3>
-                        <p style="color:#64748b; font-size:0.8rem;">${it.desc || ''}</p>
+                        <p style="color:#64748b; font-size:0.8rem; margin:5px 0;">${it.desc || ''}</p>
                         
-                        <div class="chat-box" id="chat-${i}">
+                        <div class="vote-bar">
+                            <span class="vote-btn" onclick="handleVote('${viewedTel}', ${i}, 'likes')">👍 ${it.likes||0}</span>
+                            <span class="vote-btn" onclick="handleVote('${viewedTel}', ${i}, 'dislikes')">👎 ${it.dislikes||0}</span>
+                        </div>
+
+                        <div class="chat-box">
                             ${(it.messages || []).map(m => `<div class="msg ${m.s==='V'?'msg-v':'msg-c'}"><b>${m.u}:</b> ${m.t}</div>`).join('')}
                         </div>
                         <div style="display:flex; gap:5px; margin-top:8px;">
-                            <input type="text" id="in-${i}" placeholder="Ecrire..." style="margin:0;">
-                            <button onclick="sendMsg('${viewedTel}', ${i})" style="padding:0 15px; border-radius:10px; border:none; background:var(--primary); color:white;">✈️</button>
+                            <input type="text" id="in-${i}" placeholder="Négocier..." style="margin:0; font-size:0.8rem;">
+                            <button onclick="sendMsg('${viewedTel}', ${i})" style="padding:0 12px; border-radius:10px; border:none; background:var(--primary); color:white;">✈️</button>
                         </div>
                         <button class="btn-buy" onclick="buyItem('${viewedTel}', ${it.price}, '${it.name}')">ACHETER MAINTENANT</button>
                     </div>
                 </div>`;
             });
-            document.getElementById('market-list').innerHTML = h || "<center style='padding:40px;'>Aucun article en ligne</center>";
+            document.getElementById('market-list').innerHTML = h || "<center style='padding:40px; color:gray;'>Boutique vide</center>";
         });
+    }
+
+    function handleVote(seller, idx, type) {
+        if(seller === user.tel) return alert("Impossible de voter pour vos propres produits");
+        db.ref('accounts/'+seller+'/catalog/'+idx+'/'+type).transaction(v => (v || 0) + 1);
     }
 
     function sendMsg(seller, idx) {
@@ -249,17 +264,25 @@
 
     function buyItem(seller, price, name) {
         if(seller === user.tel) return alert("C'est votre boutique");
-        if(user.balance < price) return alert("Solde insuffisant");
-        if(confirm("Confirmer l'achat ?")) {
+        if(user.balance < price) return alert("Solde BLL insuffisant");
+        if(confirm("Confirmer le paiement de "+price+" BLL pour "+name+" ?")) {
             db.ref('accounts/'+user.tel+'/balance').transaction(b => b - price);
             db.ref('accounts/'+seller+'/balance').transaction(b => (b || 0) + price);
-            alert("Transaction réussie !");
+            alert("Achat validé !");
         }
     }
 
     function addProduct() {
         const cat = user.catalog || [];
-        cat.push({ name: document.getElementById('p-name').value, price: parseInt(document.getElementById('p-price').value), desc: document.getElementById('p-desc').value, img: tempProd, messages: [] });
+        cat.push({ 
+            name: document.getElementById('p-name').value, 
+            price: parseInt(document.getElementById('p-price').value), 
+            desc: document.getElementById('p-desc').value, 
+            img: tempProd, 
+            likes: 0, 
+            dislikes: 0, 
+            messages: [] 
+        });
         db.ref('accounts/'+user.tel+'/catalog').set(cat).then(() => {
             alert("Article publié !");
             renderMyStock();
@@ -278,7 +301,7 @@
     }
 
     function delItem(i) {
-        if(confirm("Supprimer l'article ?")) {
+        if(confirm("Retirer cet article du marché ?")) {
             let c = [...user.catalog]; c.splice(i,1);
             db.ref('accounts/'+user.tel+'/catalog').set(c);
         }
@@ -289,19 +312,24 @@
         if(!v) return res.classList.add('hidden');
         db.ref('accounts').once('value', s => {
             let all = s.val(), h = "";
-            for(let t in all) if(all[t].shopName.toLowerCase().includes(v.toLowerCase())) h += `<div onclick="goShop('${t}')" style="padding:15px; border-bottom:1px solid #eee;">${all[t].shopName}</div>`;
+            for(let t in all) if(all[t].shopName.toLowerCase().includes(v.toLowerCase())) h += `<div onclick="goShop('${t}')" style="padding:15px; border-bottom:1px solid #eee; cursor:pointer;">${all[t].shopName}</div>`;
             res.innerHTML = h; res.classList.remove('hidden');
         });
     }
 
     function goShop(t) { viewedTel = t; document.getElementById('search-res').classList.add('hidden'); renderMarket(); }
-    function handleFile(e, type) { const r = new FileReader(); r.onload = () => { if(type==='logo') tempLogo=r.result; else tempProd=r.result; }; r.readAsDataURL(e.target.files[0]); }
+    
+    function handleFile(e, type) { 
+        const r = new FileReader(); 
+        r.onload = () => { if(type==='logo') tempLogo=r.result; else tempProd=r.result; }; 
+        r.readAsDataURL(e.target.files[0]); 
+    }
     
     function saveProfile() { 
         const t = document.getElementById('set-theme').value;
         const n = document.getElementById('set-name').value;
         db.ref('accounts/'+user.tel).update({ shopName: n, shopLogo: tempLogo || user.shopLogo, theme: t })
-        .then(() => { updateThemeStyle(t); alert("Modifications appliquées !"); });
+        .then(() => { updateThemeStyle(t); alert("Boutique mise à jour !"); });
     }
 
     function showSection(id, el) {
