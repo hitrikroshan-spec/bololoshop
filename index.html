@@ -5,57 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>BOLOLO Pro</title>
     
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="bololo.png">
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
     <style>
         :root { --primary: #6366f1; --glam: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); --bg: #f1f5f9; --text: #1e293b; }
-        body.theme-glamour { --primary: #a855f7; --glam: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); --bg: #f1f5f9; }
-        body.theme-feminin { --primary: #ec4899; --glam: linear-gradient(135deg, #f472b6 0%, #ec4899 100%); --bg: #fff1f2; }
-        body.theme-masculin { --primary: #0ea5e9; --glam: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%); --bg: #f0f9ff; }
-        body.theme-dark { --primary: #64748b; --glam: linear-gradient(135deg, #334155 0%, #0f172a 100%); --bg: #1e293b; --text: #f8fafc; }
-        
         body { margin: 0; font-family: 'Inter', sans-serif; background: #000; min-height: 100vh; display: flex; justify-content: center; align-items: center; color: var(--text); }
         .iphone-xs-screen { width: 375px; height: 812px; background: white; border-radius: 40px; display: flex; flex-direction: column; overflow: hidden; position: relative; }
         
-        header { background: var(--glam); color: white; padding: 55px 20px 15px; text-align: center; font-weight: bold; position: relative; z-index: 100; }
-        .content { flex: 1; overflow-y: auto; padding: 20px; background: var(--bg); position: relative; }
+        header { background: var(--glam); color: white; padding: 55px 20px 15px; text-align: center; font-weight: bold; }
+        .content { flex: 1; overflow-y: auto; padding: 20px; background: var(--bg); }
         
         .card { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #eee; }
         
-        .market-header-sticky { position: sticky; top: -20px; background: var(--bg); z-index: 50; padding: 10px 0; }
-        .search-results { background: white; border-radius: 10px; position: absolute; width: 100%; box-shadow: 0 10px 20px rgba(0,0,0,0.1); z-index: 100; max-height: 200px; overflow-y: auto; border: 1px solid #eee; }
-        .search-item { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 0.8rem; }
+        /* STYLE POUR LES ARTICLES DANS LA SECTION AJOUTER */
+        .my-item-card { display: flex; align-items: center; gap: 10px; background: white; padding: 10px; border-radius: 15px; margin-bottom: 10px; border: 1px solid #ddd; }
+        .my-item-img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; }
+        .btn-del { background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 8px; font-size: 0.7rem; cursor: pointer; }
 
-        .product-card { background: white; border-radius: 20px; overflow: hidden; margin-bottom: 25px; border: 1px solid #eee; position: relative; }
-        .product-img { width: 100%; height: 220px; object-fit: cover; background: #f8fafc; }
-        
-        .btn-action { background: var(--glam); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-action:active { transform: scale(0.98); }
-
+        .btn-action { background: var(--glam); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .nav-bar { background: white; display: flex; border-top: 1px solid #eee; padding: 10px 0 34px; } 
         .nav-item { flex: 1; text-align: center; font-size: 0.65rem; color: #94a3b8; cursor: pointer; font-weight: bold; }
         .nav-item.active { color: var(--primary); }
         
-        .plan-box { border: 2px solid #eee; padding: 10px; border-radius: 15px; margin-bottom: 10px; cursor: pointer; transition: 0.3s; }
-        .plan-box.active { border-color: var(--primary); background: #f5f3ff; }
-
-        .btn-delete-item { position: absolute; top: 10px; right: 10px; background: rgba(239, 68, 68, 0.9); color: white; border: none; padding: 8px; border-radius: 10px; font-size: 0.7rem; cursor: pointer; }
-
-        input, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; box-sizing: border-box; font-family: inherit; }
+        input, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 12px; box-sizing: border-box; }
         .hidden { display: none !important; }
-        .qr-box { background: white; padding: 10px; border-radius: 15px; display: inline-block; border: 1px solid #eee; margin: 15px 0; }
+        .plan-box { border: 2px solid #eee; padding: 10px; border-radius: 15px; margin-bottom: 10px; cursor: pointer; }
+        .plan-box.active { border-color: var(--primary); background: #f5f3ff; }
     </style>
 </head>
-<body class="theme-glamour">
+<body>
 
 <div class="iphone-xs-screen">
-    <header id="app-header">BOLOLO Pro</header>
+    <header>BOLOLO Pro</header>
     
     <div class="content">
         <div id="view-auth">
@@ -63,75 +46,45 @@
             <input type="tel" id="l-tel" placeholder="Numéro de téléphone">
             <input type="password" id="l-pass" placeholder="Mot de passe">
             <button class="btn-action" onclick="doLogin()">SE CONNECTER</button>
-            <p onclick="switchAuth('signup')" style="text-align:center; font-size:0.8rem; margin-top:20px; color:var(--primary); cursor:pointer;">Nouveau ? Créer un compte</p>
-        </div>
-
-        <div id="view-signup" class="hidden">
-            <h2 style="text-align:center;">Inscription</h2>
-            <input type="tel" id="s-tel" placeholder="Entrez votre numéro" oninput="generateQR(this.value)">
-            <center><div id="qr-signup" class="qr-box"></div></center>
-            <input type="password" id="s-pass" placeholder="Mot de passe">
-            <input type="password" id="s-confirm" placeholder="Confirmer mot de passe">
-            <button class="btn-action" onclick="doSignup()">S'INSCRIRE SUR BOLOLO</button>
-            <p onclick="switchAuth('login')" style="text-align:center; font-size:0.8rem; margin-top:20px; color:var(--primary); cursor:pointer;">Déjà inscrit ? Connexion</p>
         </div>
 
         <div id="dash-params" class="hidden">
-            <div class="card" style="text-align:center; background: var(--glam); color:white; padding: 25px;">
+            <div class="card" style="text-align:center; background: var(--glam); color:white; padding: 25px; border-radius:25px;">
                 <h1 id="user-balance" style="margin:0; font-size: 2.5rem;">0 BLL</h1>
                 <p style="margin:0; font-size:0.8rem; opacity: 0.9;">SOLDE PORTEFEUILLE</p>
             </div>
             
             <div class="card">
-                <h3>Votre Forfait (Quota : <span id="user-limit">0</span>)</h3>
-                <div class="plan-box" id="plan-bronze" onclick="buyPlan('Bronze', 500, 20)">
-                    <b>BRONZE (500 BLL)</b><br><small>Jusqu'à 20 articles</small>
-                </div>
-                <div class="plan-box" id="plan-argent" onclick="buyPlan('Argent', 1200, 50)">
-                    <b>ARGENT (1200 BLL)</b><br><small>Jusqu'à 50 articles</small>
-                </div>
-                <div class="plan-box" id="plan-or" onclick="buyPlan('Or', 3000, 100)">
-                    <b>OR (3000 BLL)</b><br><small>Jusqu'à 100 articles</small>
-                </div>
-            </div>
-
-            <div class="card">
-                <label style="font-size: 0.8rem; font-weight: bold;">Logo & Nom :</label>
-                <input type="file" accept="image/*" onchange="handleFile(event, 'logo')" style="margin-top:5px;">
-                <input type="text" id="set-name" placeholder="Nom de la boutique">
-                <button class="btn-action" onclick="saveSettings()">METTRE À JOUR</button>
+                <h3>Forfaits de Publication</h3>
+                <div class="plan-box" onclick="buyPlan('Bronze', 500, 20)"><b>BRONZE (500 BLL)</b><br><small>Quota: 20 articles</small></div>
+                <div class="plan-box" onclick="buyPlan('Argent', 1200, 50)"><b>ARGENT (1200 BLL)</b><br><small>Quota: 50 articles</small></div>
+                <div class="plan-box" onclick="buyPlan('Or', 3000, 100)"><b>OR (3000 BLL)</b><br><small>Quota: 100 articles</small></div>
             </div>
         </div>
 
         <div id="dash-articles" class="hidden">
             <div class="card">
-                <h3>Nouvel Article</h3>
+                <h3>Publier un article</h3>
                 <input type="text" id="p-name" placeholder="Nom de l'article">
-                <input type="number" id="p-price" placeholder="Prix en BLL">
-                <textarea id="p-desc" placeholder="Description..." rows="3"></textarea>
+                <input type="number" id="p-price" placeholder="Prix (BLL)">
+                <textarea id="p-desc" placeholder="Description..."></textarea>
                 <input type="file" accept="image/*" onchange="handleFile(event, 'prod')">
-                <button class="btn-action" onclick="addProduct()">PUBLIER L'ARTICLE</button>
+                <button class="btn-action" onclick="addProduct()">PUBLIER DANS LE MARCHÉ</button>
             </div>
-            <h4 style="margin-left:10px;">Mes articles publiés :</h4>
-            <div id="my-articles-list"></div>
+
+            <h3 style="margin-top:20px;">Mes articles en ligne</h3>
+            <div id="my-articles-list">
+                </div>
         </div>
 
         <div id="dash-view" class="hidden">
-            <div class="market-header-sticky">
-                <input type="text" id="search-box" placeholder="Rechercher..." oninput="autoSearch(this.value)">
-                <div id="search-results" class="search-results hidden"></div>
-                <div class="card" style="display:flex; align-items:center; gap:15px; margin-top:10px; padding:12px;">
-                    <img id="banner-logo" src="bololo.png" style="width:50px; height:50px; border-radius:10px; object-fit:cover;">
-                    <div><b id="banner-name">Boutique</b><br><small id="banner-tel">---</small></div>
-                </div>
-            </div>
             <div id="market-list"></div>
         </div>
     </div>
 
     <nav id="bottom-nav" class="nav-bar hidden">
         <div class="nav-item active" onclick="showSection('params', this)">⚙️<br>PROFIL</div>
-        <div class="nav-item" onclick="showSection('articles', this); renderMyArticles();">📦<br>MES ARTICLES</div>
+        <div class="nav-item" onclick="showSection('articles', this); renderMyArticles();">📦<br>AJOUTER</div>
         <div class="nav-item" onclick="showSection('view', this); renderMarket();">🛒<br>MARCHÉ</div>
     </nav>
 </div>
@@ -142,24 +95,7 @@
     const db = firebase.database();
 
     let currentUser = null;
-    let tempLogo = "";
     let tempProdImg = "";
-
-    function generateQR(val) {
-        const container = document.getElementById('qr-signup');
-        container.innerHTML = "";
-        if(val.length > 2) new QRCode(container, { text: val, width: 110, height: 110 });
-    }
-
-    function doSignup() {
-        const tel = document.getElementById('s-tel').value;
-        const pass = document.getElementById('s-pass').value;
-        if (tel.length < 4 || pass.length < 4) return alert("Infos invalides");
-
-        db.ref('accounts/' + tel).set({
-            tel, pass, balance: 100, limit: 5, plan: "Gratuit", shopName: "Boutique " + tel, shopLogo: "", catalog: [], blocked: false
-        }).then(() => { alert("Bienvenue sur Bololo (100 BLL offerts!)"); switchAuth('login'); });
-    }
 
     function doLogin() {
         const tel = document.getElementById('l-tel').value;
@@ -167,7 +103,6 @@
         db.ref('accounts/' + tel).once('value', snap => {
             const u = snap.val();
             if(u && u.pass === pass) {
-                if(u.blocked) return alert("Compte bloqué");
                 currentUser = u;
                 document.getElementById('view-auth').classList.add('hidden');
                 document.getElementById('bottom-nav').classList.remove('hidden');
@@ -181,101 +116,74 @@
         db.ref('accounts/' + currentUser.tel).on('value', snap => {
             currentUser = snap.val();
             document.getElementById('user-balance').innerText = (currentUser.balance || 0) + " BLL";
-            document.getElementById('user-limit').innerText = (currentUser.limit || 5);
-            document.getElementById('banner-name').innerText = currentUser.shopName;
-            if(currentUser.shopLogo) document.getElementById('banner-logo').src = currentUser.shopLogo;
+            if(document.getElementById('dash-articles').classList.contains('hidden') === false) {
+                renderMyArticles();
+            }
         });
     }
 
-    // ACHETER FORFAIT
-    function buyPlan(name, price, limit) {
-        if(currentUser.balance < price) return alert("Solde insuffisant");
-        if(confirm(`Activer le forfait ${name} pour ${price} BLL ?`)) {
-            db.ref('accounts/' + currentUser.tel).update({
-                balance: currentUser.balance - price,
-                limit: limit,
-                plan: name
-            }).then(() => alert("Forfait activé !"));
+    // --- FONCTION POUR AFFICHER VOS ARTICLES AVEC BOUTON SUPPRIMER ---
+    function renderMyArticles() {
+        const cat = currentUser.catalog || [];
+        let html = "";
+        cat.forEach((it, i) => {
+            html += `
+            <div class="my-item-card">
+                <img src="${it.img || 'bololo.png'}" class="my-item-img">
+                <div style="flex:1">
+                    <b>${it.name}</b><br>
+                    <small>${it.price} BLL</small>
+                </div>
+                <button class="btn-del" onclick="deleteMyItem(${i})">Supprimer</button>
+            </div>`;
+        });
+        document.getElementById('my-articles-list').innerHTML = html || "<p style='text-align:center; color:gray;'>Aucun article publié.</p>";
+    }
+
+    // --- FONCTION SUPPRIMER ---
+    function deleteMyItem(index) {
+        if(confirm("Voulez-vous vraiment retirer cet article du marché ?")) {
+            let newCat = [...currentUser.catalog];
+            newCat.splice(index, 1);
+            db.ref('accounts/' + currentUser.tel + '/catalog').set(newCat)
+                .then(() => alert("Article supprimé"));
         }
     }
 
     function addProduct() {
         const cat = currentUser.catalog || [];
-        if(cat.length >= (currentUser.limit || 5)) return alert("Quota plein ! Achetez un forfait.");
+        if(cat.length >= (currentUser.limit || 5)) return alert("Quota atteint !");
         
         const newItem = {
             id: Date.now(),
             name: document.getElementById('p-name').value,
             price: parseInt(document.getElementById('p-price').value),
             desc: document.getElementById('p-desc').value,
-            img: tempProdImg,
-            likes: 0, comments: []
+            img: tempProdImg
         };
         
         cat.push(newItem);
         db.ref('accounts/' + currentUser.tel + '/catalog').set(cat).then(() => {
             alert("Article publié !");
-            renderMyArticles();
+            document.getElementById('p-name').value = "";
+            document.getElementById('p-price').value = "";
         });
     }
 
-    // RENDRE ET SUPPRIMER SES PROPRES ARTICLES
-    function renderMyArticles() {
-        const cat = currentUser.catalog || [];
-        let html = "";
-        cat.forEach((it, i) => {
-            html += `
-            <div class="product-card">
-                <button class="btn-delete-item" onclick="deleteMyItem(${i})">🗑️ Supprimer</button>
-                <img src="${it.img || 'bololo.png'}" class="product-img">
-                <div style="padding:10px;">
-                    <b>${it.name}</b> - ${it.price} BLL
-                </div>
-            </div>`;
-        });
-        document.getElementById('my-articles-list').innerHTML = html || "<small style='margin-left:15px;'>Aucun article</small>";
-    }
-
-    function deleteMyItem(index) {
-        if(confirm("Supprimer cet article ?")) {
-            let cat = currentUser.catalog;
-            cat.splice(index, 1);
-            db.ref('accounts/' + currentUser.tel + '/catalog').set(cat).then(() => renderMyArticles());
+    function buyPlan(name, price, limit) {
+        if(currentUser.balance < price) return alert("Solde insuffisant");
+        if(confirm(`Activer le forfait ${name} (${price} BLL) ?`)) {
+            db.ref('accounts/' + currentUser.tel).update({
+                balance: currentUser.balance - price,
+                limit: limit,
+                plan: name
+            });
         }
-    }
-
-    function renderMarket() {
-        db.ref('accounts').on('value', snap => {
-            const all = snap.val();
-            let html = "";
-            for(let tel in all) {
-                const shop = all[tel];
-                (shop.catalog || []).forEach((it, i) => {
-                    html += `<div class="product-card">
-                        <img src="${it.img || 'bololo.png'}" class="product-img">
-                        <div style="padding:15px;">
-                            <b>${it.name}</b> | <span style="color:var(--primary)">${it.price} BLL</span>
-                            <p style="font-size:0.7rem; color:gray;">Vendeur: ${shop.shopName}</p>
-                            <button class="btn-action" onclick="buyItem('${tel}', ${it.price})">ACHETER</button>
-                        </div>
-                    </div>`;
-                });
-            }
-            document.getElementById('market-list').innerHTML = html;
-        });
-    }
-
-    function saveSettings() {
-        const name = document.getElementById('set-name').value || currentUser.shopName;
-        db.ref('accounts/' + currentUser.tel).update({
-            shopName: name,
-            shopLogo: tempLogo || currentUser.shopLogo
-        }).then(() => alert("Profil enregistré"));
     }
 
     function handleFile(e, type) {
         const reader = new FileReader();
-        reader.onload = () => { if(type === 'logo') tempLogo = reader.result; else tempProdImg = reader.result; };
+        reader.onload = () => { tempProdImg = reader.result; };
         reader.readAsDataURL(e.target.files[0]);
     }
 
@@ -286,9 +194,8 @@
         el.classList.add('active');
     }
 
-    function switchAuth(mode) {
-        document.getElementById('view-auth').classList.toggle('hidden', mode !== 'login');
-        document.getElementById('view-signup').classList.toggle('hidden', mode !== 'signup');
+    function renderMarket() {
+        // Logique de rendu du marché global...
     }
 </script>
 </body>
