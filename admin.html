@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">  
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,23 +14,35 @@
         .sidebar-header { padding: 30px; font-size: 1.2rem; font-weight: 800; color: var(--primary); }
         .main-content { margin-left: 260px; flex: 1; padding: 40px; }
         .stat-card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 16px; overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 16px; overflow: hidden; margin-top: 20px; }
         th, td { text-align: left; padding: 15px; border-bottom: 1px solid #f1f5f9; }
-        .btn { border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.7rem; }
+        .btn { border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.7rem; margin-right: 5px; }
         .btn-deposit { background: #22c55e; color: white; }
-        .btn-block { background: #ef4444; color: white; }
+        .btn-block { background: #f59e0b; color: white; }
+        .btn-delete { background: #ef4444; color: white; }
+        .u-logo { width: 40px; height: 40px; border-radius: 50%; vertical-align: middle; margin-right: 10px; object-fit: cover; background: #eee; }
     </style>
 </head>
 <body>
-<div class="sidebar"><div class="sidebar-header">BOLOLO MASTER</div></div>
+<div class="sidebar">
+    <div class="sidebar-header">BOLOLO MASTER</div>
+</div>
 <div class="main-content">
     <h1>Administration Boutiques</h1>
     <div id="stats" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:20px; margin-bottom:30px;">
         <div class="stat-card"><h3>Utilisateurs</h3><p id="stat-u">0</p></div>
         <div class="stat-card"><h3>Total BLL</h3><p id="stat-b">0</p></div>
+        <div class="stat-card"><h3>Articles Total</h3><p id="stat-a">0</p></div>
     </div>
     <table>
-        <thead><tr><th>BOUTIQUE</th><th>SOLDE</th><th>PLAN</th><th>ACTIONS</th></tr></thead>
+        <thead>
+            <tr>
+                <th>BOUTIQUE</th>
+                <th>SOLDE</th>
+                <th>CATALOGUE</th>
+                <th>ACTIONS</th>
+            </tr>
+        </thead>
         <tbody id="user-list"></tbody>
     </table>
 </div>
@@ -46,29 +58,50 @@
             const accounts = Object.values(data);
             
             document.getElementById('stat-u').innerText = accounts.length;
-            document.getElementById('stat-b').innerText = accounts.reduce((s, a) => s + (a.balance || 0), 0) + " BLL";
+            document.getElementById('stat-b').innerText = accounts.reduce((s, a) => s + (a.balance || 0), 0).toLocaleString() + " BLL";
+            document.getElementById('stat-a').innerText = accounts.reduce((s, a) => s + (a.catalog ? a.catalog.length : 0), 0);
 
             document.getElementById('user-list').innerHTML = accounts.map(u => `
                 <tr>
-                    <td><b>${u.shopName || 'Sans Nom'}</b><br><small>${u.tel}</small></td>
-                    <td><b style="color:var(--primary)">${u.balance || 0} BLL</b></td>
-                    <td>${u.plan || 'Gratuit'} (${u.catalog ? u.catalog.length : 0}/${u.limit || 10})</td>
+                    <td>
+                        <img src="${u.shopLogo || 'bololo.png'}" class="u-logo" onerror="this.src='https://via.placeholder.com/40'">
+                        <div style="display:inline-block; vertical-align:middle;">
+                            <b>${u.shopName || 'Sans Nom'}</b><br>
+                            <small>${u.tel} ${u.blocked ? '<b style="color:red">(BLOQUÉ)</b>' : ''}</small>
+                        </div>
+                    </td>
+                    <td><b style="color:var(--primary)">${(u.balance || 0).toLocaleString()} BLL</b></td>
+                    <td>${u.catalog ? u.catalog.length : 0} / ${u.limit || 10}</td>
                     <td>
                         <button class="btn btn-deposit" onclick="deposit('${u.tel}')">+ Recharger</button>
                         <button class="btn btn-block" onclick="toggleBlock('${u.tel}', ${u.blocked})">${u.blocked ? 'Débloquer' : 'Bloquer'}</button>
+                        <button class="btn btn-delete" onclick="deleteUser('${u.tel}')">🗑️ Supprimer</button>
                     </td>
                 </tr>
             `).join('');
         });
     }
 
+    // FONCTION POUR RECHARGER LE COMPTE
     function deposit(tel) {
-        const amt = prompt("Montant du dépôt :");
-        if (amt) db.ref('accounts/' + tel + '/balance').transaction(b => (b || 0) + parseInt(amt));
+        const amt = prompt("Montant du dépôt pour " + tel + " :");
+        if (amt && !isNaN(amt)) {
+            db.ref('accounts/' + tel + '/balance').transaction(b => (b || 0) + parseInt(amt));
+        }
     }
 
+    // FONCTION POUR BLOQUER/DÉBLOQUER
     function toggleBlock(tel, status) {
         db.ref('accounts/' + tel).update({ blocked: !status });
+    }
+
+    // FONCTION POUR SUPPRIMER DÉFINITIVEMENT (CORRIGÉE)
+    function deleteUser(tel) {
+        if (confirm("⚠️ Êtes-vous sûr de vouloir supprimer DÉFINITIVEMENT la boutique " + tel + " ? Cette action est irréversible.")) {
+            db.ref('accounts/' + tel).remove()
+                .then(() => alert("Compte supprimé avec succès."))
+                .catch(err => alert("Erreur lors de la suppression : " + err.message));
+        }
     }
 
     loadData();
