@@ -5,12 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BOLOLO MASTER - Administration</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
-    
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
     <style>
-        /* Vos styles originaux conservés */
         :root { --primary: #6366f1; --sidebar-bg: #0f172a; --bg-main: #f1f5f9; }
         body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg-main); display: flex; min-height: 100vh; }
         .sidebar { width: 260px; background: var(--sidebar-bg); color: white; position: fixed; height: 100vh; display: flex; flex-direction: column; }
@@ -19,24 +17,21 @@
         .nav-item.active { background: #1e293b; color: white; border-left: 4px solid var(--primary); }
         .main-content { margin-left: 260px; flex: 1; padding: 40px; }
         header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
         .stat-card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         .stat-card h3 { margin: 0; font-size: 0.8rem; color: #64748b; text-transform: uppercase; }
-        .stat-card p { margin: 10px 0 0; font-size: 1.8rem; font-weight: 800; color: #0f172a; }
+        .stat-card p { margin: 10px 0 0; font-size: 1.5rem; font-weight: 800; color: #0f172a; }
         .data-card { background: white; border-radius: 16px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th { text-align: left; padding: 15px; color: #64748b; border-bottom: 2px solid #f1f5f9; }
         td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
         .user-cell { display: flex; align-items: center; gap: 12px; }
         .u-logo { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: #eee; }
-        .badge { padding: 5px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 700; }
-        .badge-active { background: #dcfce7; color: #15803d; }
-        .badge-blocked { background: #fee2e2; color: #b91c1c; }
-        .btn { border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.8rem; }
+        .btn { border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.7rem; margin-right: 5px; }
+        .btn-deposit { background: #22c55e; color: white; }
         .btn-quota { background: var(--primary); color: white; }
         .btn-block { background: #ef4444; color: white; }
-        .btn-unblock { background: #22c55e; color: white; }
-        .btn-del { background: #f1f5f9; color: #64748b; }
+        .btn-unblock { background: #475569; color: white; }
     </style>
 </head>
 <body>
@@ -48,13 +43,14 @@
 
 <div class="main-content">
     <header>
-        <h1>Gestion des Boutiques</h1>
-        <button class="btn btn-quota" onclick="refreshList()">Actualiser</button>
+        <h1>Tableau de Bord</h1>
+        <button class="btn btn-quota" onclick="location.reload()">Actualiser</button>
     </header>
 
     <div class="stats-grid">
         <div class="stat-card"><h3>Inscrits</h3><p id="stat-users">0</p></div>
         <div class="stat-card"><h3>Articles</h3><p id="stat-articles">0</p></div>
+        <div class="stat-card"><h3>Total BLL</h3><p id="stat-balance">0 BLL</p></div>
         <div class="stat-card"><h3>Bloqués</h3><p id="stat-blocked" style="color:#ef4444">0</p></div>
     </div>
 
@@ -63,9 +59,8 @@
             <thead>
                 <tr>
                     <th>UTILISATEUR</th>
-                    <th>STATUT</th>
-                    <th>ARTICLES</th>
-                    <th>QUOTA</th>
+                    <th>SOLDE</th>
+                    <th>INFOS</th>
                     <th>ACTIONS</th>
                 </tr>
             </thead>
@@ -75,74 +70,63 @@
 </div>
 
 <script>
-    // INITIALISATION FIREBASE
-    const firebaseConfig = {
-        databaseURL: "https://bololoshop-bf59b-default-rtdb.firebaseio.com/"
-    };
+    const firebaseConfig = { databaseURL: "https://bololoshop-bf59b-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    function refreshList() {
-        const tbody = document.getElementById('user-list');
-        
-        // On écoute la base de données en temps réel
-        db.ref('accounts').on('value', (snapshot) => {
-            const data = snapshot.val() || {};
+    function init() {
+        db.ref('accounts').on('value', (snap) => {
+            const data = snap.val() || {};
             const accounts = Object.values(data);
             
-            // Stats
             document.getElementById('stat-users').innerText = accounts.length;
             document.getElementById('stat-blocked').innerText = accounts.filter(a => a.blocked).length;
             document.getElementById('stat-articles').innerText = accounts.reduce((sum, a) => sum + (a.catalog ? a.catalog.length : 0), 0);
+            document.getElementById('stat-balance').innerText = accounts.reduce((sum, a) => sum + (a.balance || 0), 0) + " BLL";
 
-            tbody.innerHTML = accounts.map((user) => `
+            document.getElementById('user-list').innerHTML = accounts.map((user) => `
                 <tr>
                     <td>
                         <div class="user-cell">
                             <img src="${user.shopLogo || 'https://via.placeholder.com/45'}" class="u-logo">
                             <div>
                                 <div style="font-weight:700;">${user.shopName || 'Boutique'}</div>
-                                <div style="font-size:0.75rem; color:#64748b;">${user.tel}</div>
+                                <div style="font-size:0.75rem;">${user.tel}</div>
                             </div>
                         </div>
                     </td>
+                    <td><b style="color:var(--primary); font-size:1rem;">${user.balance || 0} BLL</b></td>
                     <td>
-                        <span class="badge ${user.blocked ? 'badge-blocked' : 'badge-active'}">
-                            ${user.blocked ? 'BLOQUÉ' : 'ACTIF'}
-                        </span>
+                        Plan: <b>${user.plan || 'Gratuit'}</b><br>
+                        Quota: ${user.catalog ? user.catalog.length : 0} / ${user.limit || 2}
                     </td>
-                    <td><b>${user.catalog ? user.catalog.length : 0}</b></td>
-                    <td><b style="color:var(--primary)">${user.limit || 2}</b></td>
                     <td>
+                        <button class="btn btn-deposit" onclick="makeDeposit('${user.tel}')">+ Dépôt</button>
                         <button class="btn btn-quota" onclick="updateQuota('${user.tel}', ${user.limit || 2})">Quota</button>
                         <button class="btn ${user.blocked ? 'btn-unblock' : 'btn-block'}" onclick="toggleBlock('${user.tel}', ${user.blocked})">
                             ${user.blocked ? 'Débloquer' : 'Bloquer'}
                         </button>
-                        <button class="btn btn-del" onclick="deleteUser('${user.tel}')">🗑️</button>
                     </td>
                 </tr>
             `).join('');
         });
     }
 
-    function toggleBlock(tel, currentStatus) {
-        db.ref('accounts/' + tel).update({ blocked: !currentStatus });
-    }
-
-    function updateQuota(tel, currentQuota) {
-        const n = prompt("Nouveau quota pour " + tel, currentQuota);
-        if (n !== null) {
-            db.ref('accounts/' + tel).update({ limit: parseInt(n) });
+    function makeDeposit(tel) {
+        const montant = prompt("Montant du versement physique (FCFA / BLL) :");
+        if (montant && !isNaN(montant)) {
+            db.ref('accounts/' + tel + '/balance').transaction(b => (b || 0) + parseInt(montant));
+            alert("Versement effectué avec succès !");
         }
     }
 
-    function deleteUser(tel) {
-        if(confirm("Supprimer définitivement cette boutique ?")) {
-            db.ref('accounts/' + tel).remove();
-        }
+    function toggleBlock(tel, current) { db.ref('accounts/' + tel).update({ blocked: !current }); }
+    function updateQuota(tel, current) {
+        const n = prompt("Nouveau quota d'articles :", current);
+        if (n) db.ref('accounts/' + tel).update({ limit: parseInt(n) });
     }
 
-    refreshList();
+    init();
 </script>
 </body>
 </html>
