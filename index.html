@@ -5,10 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>BOLOLO Pro</title>
     
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="bololo.png">
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
@@ -24,95 +20,92 @@
         .iphone-xs-screen { width: 375px; height: 812px; background: white; border-radius: 40px; display: flex; flex-direction: column; overflow: hidden; position: relative; }
         
         header { background: var(--glam); color: white; padding: 55px 20px 15px; text-align: center; font-weight: bold; position: relative; z-index: 100; }
-        .btn-logout { position: absolute; right: 15px; bottom: 12px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 5px 10px; border-radius: 8px; font-size: 0.6rem; }
-        
-        .content { flex: 1; overflow-y: auto; padding: 20px; background: var(--bg); position: relative; }
+        .content { flex: 1; overflow-y: auto; padding: 20px; background: var(--bg); }
         .card { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #eee; color: #1e293b; }
 
+        .market-header-sticky { position: sticky; top: -20px; background: var(--bg); z-index: 50; padding: 10px 0; }
+        .search-results { background: white; border-radius: 10px; position: absolute; width: 100%; box-shadow: 0 10px 20px rgba(0,0,0,0.1); z-index: 100; max-height: 200px; overflow-y: auto; }
+        .search-item { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+
         .product-card { background: white; border-radius: 15px; overflow: hidden; margin-bottom: 20px; border: 1px solid #eee; }
-        .product-img-container { width: 100%; height: 180px; background: #f8fafc; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .product-img-display { width: 100%; height: 100%; object-fit: cover; }
+        .product-img { width: 100%; height: 200px; object-fit: cover; }
         
+        .comm-bubble { display: flex; gap: 8px; margin-top: 5px; font-size: 0.75rem; align-items: flex-start; }
+        .comm-logo { width: 25px; height: 25px; border-radius: 50%; object-fit: cover; }
+        .comm-text { background: #f1f5f9; padding: 8px; border-radius: 10px; flex: 1; }
+
         .btn-action { background: var(--glam); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; }
         .nav-bar { background: white; display: flex; border-top: 1px solid #eee; padding: 10px 0 34px; } 
         .nav-item { flex: 1; text-align: center; font-size: 0.65rem; color: #94a3b8; cursor: pointer; font-weight: bold; }
         .nav-item.active { color: var(--primary); }
         
-        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; box-sizing: border-box; }
+        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; font-size: 14px; box-sizing: border-box; }
         .hidden { display: none !important; }
-        .qr-box { background: white; padding: 10px; border-radius: 12px; display: inline-block; border: 1px solid #eee; }
     </style>
 </head>
 <body class="theme-glamour">
 
 <div class="iphone-xs-screen">
-    <header>
-        <span>BOLOLO Pro</span>
-        <button id="logout-btn" class="btn-logout hidden" onclick="location.reload()">SORTIR</button>
-    </header>
+    <header><span>BOLOLO Pro</span></header>
     
     <div class="content">
         <div id="view-auth">
-            <div style="display:flex; border-bottom:1px solid #eee; margin-bottom:20px;">
-                <div id="t-login" style="flex:1; text-align:center; padding:10px; font-weight:bold; cursor:pointer;" onclick="switchAuth('login')">CONNEXION</div>
-                <div id="t-signup" style="flex:1; text-align:center; padding:10px; color:#999; cursor:pointer;" onclick="switchAuth('signup')">INSCRIPTION</div>
-            </div>
-            <div id="area-login">
-                <input type="tel" id="l-tel" placeholder="Numéro de téléphone">
-                <input type="password" id="l-pass" placeholder="Mot de passe">
-                <button class="btn-action" onclick="doLogin()">SE CONNECTER</button>
-            </div>
-            <div id="area-signup" class="hidden">
-                <input type="tel" id="s-tel" placeholder="Votre numéro" oninput="generateQR(this.value)">
-                <center><div id="qr-signup" class="qr-box"></div></center>
-                <input type="password" id="s-pass" placeholder="Mot de passe">
-                <input type="password" id="s-confirm" placeholder="Confirmer">
-                <button class="btn-action" onclick="doSignup()">CREER MON COMPTE</button>
-            </div>
+            <input type="tel" id="l-tel" placeholder="Téléphone">
+            <input type="password" id="l-pass" placeholder="Mot de passe">
+            <button class="btn-action" onclick="doLogin()">ENTRER</button>
+            <p onclick="document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-signup').classList.remove('hidden')" style="text-align:center; font-size:0.8rem; margin-top:15px; color:var(--primary)">Pas de compte ? Créer</p>
+        </div>
+
+        <div id="view-signup" class="hidden">
+            <input type="tel" id="s-tel" placeholder="Votre numéro">
+            <input type="password" id="s-pass" placeholder="Mot de passe">
+            <button class="btn-action" onclick="doSignup()">S'INSCRIRE</button>
         </div>
 
         <div id="dash-params" class="hidden">
             <div class="card" style="text-align:center; background: var(--glam); color:white;">
-                <h1 id="user-balance" style="margin:0; font-size:2.2rem;">0 BLL</h1>
-                <p style="margin:0; font-size:0.7rem;">SOLDE ACTUEL</p>
+                <h1 id="user-balance" style="margin:0;">0 BLL</h1>
+                <p style="font-size:0.7rem;">PORTEFEUILLE</p>
             </div>
             <div class="card">
-                <h4 style="margin:0 0 10px 0;">ABONNEMENTS</h4>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                    <button onclick="buyPlan('Argent', 50, 2000)" style="font-size:10px; padding:10px; border-radius:10px; border:1px solid #ddd;"><b>ARGENT</b><br>2000 BLL</button>
-                    <button onclick="buyPlan('Or', 100, 5000)" style="font-size:10px; padding:10px; border-radius:10px; border:1px solid #ffd700;"><b>OR</b><br>5000 BLL</button>
-                </div>
-            </div>
-            <div class="card">
-                <select id="theme-selector" onchange="changeTheme()">
-                    <option value="theme-glamour">✨ Glamour</option>
-                    <option value="theme-feminin">🌸 Féminin</option>
-                    <option value="theme-masculin">👔 Masculin</option>
-                    <option value="theme-dark">🌙 Sombre</option>
-                </select>
-                <input type="text" id="set-name" placeholder="Nom de la Boutique">
-                <button class="btn-action" onclick="saveSettings()">SAUVEGARDER</button>
+                <p>Logo de l'entreprise :</p>
+                <input type="file" accept="image/*" onchange="handleFile(event, 'logo')">
+                <input type="text" id="set-name" placeholder="Nom de l'entreprise">
+                <button class="btn-action" onclick="saveSettings()">METTRE À JOUR</button>
             </div>
         </div>
 
         <div id="dash-articles" class="hidden">
             <div class="card">
-                <input type="text" id="p-name" placeholder="Nom de l'article">
-                <input type="number" id="p-price" placeholder="Prix en BLL">
-                <input type="file" accept="image/*" onchange="handleProdImg(event)">
+                <input type="text" id="p-name" placeholder="Nom du produit">
+                <input type="number" id="p-price" placeholder="Prix (BLL)">
+                <textarea id="p-desc" placeholder="Description complète du produit..." rows="3"></textarea>
+                <input type="file" accept="image/*" onchange="handleFile(event, 'prod')">
                 <button class="btn-action" onclick="addProduct()">PUBLIER L'ARTICLE</button>
             </div>
-            <div id="my-products-list"></div>
+            <div id="my-list"></div>
         </div>
 
         <div id="dash-view" class="hidden">
-            <div id="global-market"></div>
+            <div class="market-header-sticky">
+                <input type="text" id="search-box" placeholder="Rechercher un client ou boutique..." oninput="autoSearch(this.value)">
+                <div id="search-results" class="search-results hidden"></div>
+                
+                <div id="shop-banner" class="card" style="display:flex; align-items:center; gap:15px; margin-top:10px; padding:10px;">
+                    <img id="banner-logo" src="bololo.png" style="width:50px; height:50px; border-radius:10px; object-fit:cover;">
+                    <div>
+                        <b id="banner-name">Marché Global</b><br>
+                        <small id="banner-tel">Faites vos achats</small>
+                    </div>
+                </div>
+            </div>
+            <div id="market-list"></div>
         </div>
     </div>
 
     <nav id="bottom-nav" class="nav-bar hidden">
         <div class="nav-item active" onclick="showSection('params', this)">⚙️<br>PROFIL</div>
-        <div class="nav-item" onclick="showSection('articles', this)">📦<br>STOCK</div>
+        <div class="nav-item" onclick="showSection('articles', this)">📦<br>AJOUTER</div>
         <div class="nav-item" onclick="showSection('view', this); renderMarket();">🛒<br>MARCHÉ</div>
     </nav>
 </div>
@@ -123,24 +116,15 @@
     const db = firebase.database();
 
     let currentUser = null;
+    let tempLogo = "";
     let tempProdImg = "";
 
-    function switchAuth(mode) {
-        document.getElementById('area-login').classList.toggle('hidden', mode !== 'login');
-        document.getElementById('area-signup').classList.toggle('hidden', mode !== 'signup');
-    }
-
+    // --- AUTHENTIFICATION ---
     function doSignup() {
         const tel = document.getElementById('s-tel').value;
         const pass = document.getElementById('s-pass').value;
-        if (tel.length < 4 || pass !== document.getElementById('s-confirm').value) return alert("Erreur saisie");
-
-        db.ref('accounts/' + tel).once('value', s => {
-            if (s.exists()) return alert("Numéro déjà utilisé");
-            db.ref('accounts/' + tel).set({
-                tel, pass, balance: 0, limit: 10, plan: "Gratuit", catalog: [], blocked: false
-            }).then(() => { alert("Compte créé !"); switchAuth('login'); });
-        });
+        db.ref('accounts/' + tel).set({ tel, pass, balance:0, limit:10, shopName:"Ma Boutique", shopLogo:"", catalog:[] })
+        .then(() => { alert("Compte créé !"); location.reload(); });
     }
 
     function doLogin() {
@@ -148,86 +132,140 @@
         const pass = document.getElementById('l-pass').value;
         db.ref('accounts/' + tel).once('value', snap => {
             const u = snap.val();
-            if (u && u.pass === pass) {
-                if (u.blocked) return alert("Compte bloqué");
+            if(u && u.pass === pass) {
                 currentUser = u;
                 document.getElementById('view-auth').classList.add('hidden');
                 document.getElementById('bottom-nav').classList.remove('hidden');
-                document.getElementById('logout-btn').classList.remove('hidden');
                 showSection('params', document.querySelector('.nav-item'));
-                syncUser();
-            } else alert("Échec connexion");
+                sync();
+            } else alert("Erreur");
         });
     }
 
-    function syncUser() {
+    function sync() {
         db.ref('accounts/' + currentUser.tel).on('value', snap => {
             currentUser = snap.val();
             document.getElementById('user-balance').innerText = (currentUser.balance || 0) + " BLL";
-            renderMyProducts();
+            document.getElementById('banner-name').innerText = currentUser.shopName;
+            document.getElementById('banner-tel').innerText = currentUser.tel;
+            if(currentUser.shopLogo) document.getElementById('banner-logo').src = currentUser.shopLogo;
         });
     }
 
-    function buyPlan(name, limit, price) {
-        if (currentUser.balance < price) return alert("Solde insuffisant");
-        db.ref('accounts/' + currentUser.tel).update({ balance: currentUser.balance - price, limit, plan: name });
+    // --- PARAMETRES ---
+    function saveSettings() {
+        db.ref('accounts/'+currentUser.tel).update({
+            shopName: document.getElementById('set-name').value,
+            shopLogo: tempLogo || currentUser.shopLogo
+        });
+        alert("Profil mis à jour");
     }
 
+    // --- PRODUITS ---
     function addProduct() {
-        const catalog = currentUser.catalog || [];
-        if (catalog.length >= (currentUser.limit || 10)) return alert("Quota atteint");
-        const item = { id: Date.now(), name: document.getElementById('p-name').value, price: parseInt(document.getElementById('p-price').value), img: tempProdImg };
-        catalog.push(item);
-        db.ref('accounts/' + currentUser.tel + '/catalog').set(catalog).then(() => { tempProdImg = ""; });
+        const cat = currentUser.catalog || [];
+        const newItem = {
+            id: Date.now(),
+            name: document.getElementById('p-name').value,
+            price: document.getElementById('p-price').value,
+            desc: document.getElementById('p-desc').value,
+            img: tempProdImg,
+            likes: 0, dislikes: 0, comments: []
+        };
+        cat.push(newItem);
+        db.ref('accounts/'+currentUser.tel+'/catalog').set(cat).then(() => alert("Produit ajouté"));
     }
 
-    function renderMyProducts() {
-        const list = document.getElementById('my-products-list');
-        list.innerHTML = (currentUser.catalog || []).map((it, i) => `
-            <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
-                <img src="${it.img}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;">
-                <b>${it.name}</b>
-                <button onclick="deleteProd(${i})" style="color:red; border:none; background:none;">🗑️</button>
-            </div>
-        `).join('');
-    }
-
-    function deleteProd(i) {
-        let cat = currentUser.catalog; cat.splice(i,1);
-        db.ref('accounts/' + currentUser.tel + '/catalog').set(cat);
-    }
-
+    // --- MARCHE ---
     function renderMarket() {
-        db.ref('accounts').once('value', snap => {
+        db.ref('accounts').on('value', snap => {
             const all = snap.val();
             let html = "";
-            for (let tel in all) {
+            for(let tel in all) {
                 const shop = all[tel];
                 (shop.catalog || []).forEach((it, i) => {
                     html += `
                     <div class="product-card">
-                        <div class="product-img-container"><img src="${it.img}" class="product-img-display"></div>
+                        <img src="${it.img}" class="product-img">
                         <div style="padding:15px;">
-                            <small>${shop.shopName || tel}</small><br>
-                            <b>${it.name}</b><br>
-                            <span style="font-weight:900;">${it.price} BLL</span>
-                            <button class="btn-action" onclick="buyItem('${tel}', ${i}, ${it.price})" style="margin-top:10px;">ACHETER MAINTENANT</button>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <b>${it.name}</b>
+                                <span style="color:var(--primary); font-weight:bold;">${it.price} BLL</span>
+                            </div>
+                            <p style="font-size:0.8rem; color:#666; margin:10px 0;">${it.desc || ''}</p>
+                            
+                            <div style="display:flex; gap:15px; margin-bottom:15px;">
+                                <button onclick="interact('${tel}', ${i}, 'likes')" style="border:none; background:none; cursor:pointer;">👍 ${it.likes||0}</button>
+                                <button onclick="interact('${tel}', ${i}, 'dislikes')" style="border:none; background:none; cursor:pointer;">👎 ${it.dislikes||0}</button>
+                            </div>
+
+                            <div style="border-top:1px solid #eee; padding-top:10px;">
+                                ${(it.comments || []).map(c => `
+                                    <div class="comm-bubble">
+                                        <img src="${c.logo || 'bololo.png'}" class="comm-logo">
+                                        <div class="comm-text">
+                                            <b>${c.name}</b><br>${c.text}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                                <div style="display:flex; gap:5px; margin-top:10px;">
+                                    <input type="text" id="comm-${tel}-${i}" placeholder="Votre commentaire..." style="margin:0; padding:8px; font-size:0.7rem;">
+                                    <button onclick="sendComm('${tel}', ${i})" style="background:var(--primary); color:white; border:none; border-radius:8px; padding:0 10px;">📩</button>
+                                </div>
+                            </div>
+
+                            <button class="btn-action" onclick="buy('${tel}', ${it.price})" style="margin-top:15px;">ACHETER</button>
                         </div>
                     </div>`;
                 });
             }
-            document.getElementById('global-market').innerHTML = html || "<center>Boutique vide</center>";
+            document.getElementById('market-list').innerHTML = html || "Aucun article";
         });
     }
 
-    function buyItem(sellerTel, idx, price) {
-        if (sellerTel === currentUser.tel) return alert("C'est votre article");
-        if (currentUser.balance < price) return alert("Solde insuffisant");
-        if (confirm("Payer " + price + " BLL ?")) {
-            db.ref('accounts/' + currentUser.tel + '/balance').transaction(b => b - price);
-            db.ref('accounts/' + sellerTel + '/balance').transaction(b => (b || 0) + price);
-            alert("Achat effectué !");
-        }
+    // --- LOGIQUE ACTIONS ---
+    function interact(tel, idx, type) {
+        db.ref('accounts/'+tel+'/catalog/'+idx+'/'+type).transaction(v => (v || 0) + 1);
+    }
+
+    function sendComm(tel, idx) {
+        const inp = document.getElementById(`comm-${tel}-${idx}`);
+        if(!inp.value) return;
+        db.ref('accounts/'+tel+'/catalog/'+idx+'/comments').once('value', s => {
+            let comms = s.val() || [];
+            comms.push({
+                name: currentUser.shopName,
+                logo: currentUser.shopLogo,
+                text: inp.value
+            });
+            db.ref('accounts/'+tel+'/catalog/'+idx+'/comments').set(comms);
+            inp.value = "";
+        });
+    }
+
+    function autoSearch(val) {
+        const box = document.getElementById('search-results');
+        if(!val) { box.classList.add('hidden'); return; }
+        db.ref('accounts').once('value', snap => {
+            const all = snap.val();
+            let html = "";
+            for(let tel in all) {
+                if(all[tel].shopName.toLowerCase().includes(val.toLowerCase()) || tel.includes(val)) {
+                    html += `<div class="search-item" onclick="selectShop('${tel}')">
+                        <img src="${all[tel].shopLogo || 'bololo.png'}" style="width:30px; height:30px; border-radius:50%;">
+                        <span>${all[tel].shopName} (${tel})</span>
+                    </div>`;
+                }
+            }
+            box.innerHTML = html;
+            box.classList.remove('hidden');
+        });
+    }
+
+    function selectShop(tel) {
+        document.getElementById('search-box').value = tel;
+        document.getElementById('search-results').classList.add('hidden');
+        // Optionnel: filtrer le marché pour ce shop
     }
 
     function showSection(id, el) {
@@ -237,10 +275,19 @@
         el.classList.add('active');
     }
 
-    function handleProdImg(e) { const r = new FileReader(); r.onload = () => tempProdImg = r.result; r.readAsDataURL(e.target.files[0]); }
-    function generateQR(v) { document.getElementById('qr-signup').innerHTML = ""; if(v) new QRCode(document.getElementById('qr-signup'), {text:v, width:100, height:100}); }
-    function changeTheme() { document.body.className = document.getElementById('theme-selector').value; }
-    function saveSettings() { db.ref('accounts/' + currentUser.tel).update({ shopName: document.getElementById('set-name').value }); }
+    function handleFile(e, type) {
+        const r = new FileReader();
+        r.onload = () => { if(type === 'logo') tempLogo = r.result; else tempProdImg = r.result; };
+        r.readAsDataURL(e.target.files[0]);
+    }
+
+    function buy(sellerTel, price) {
+        if(sellerTel === currentUser.tel) return alert("C'est à vous !");
+        if(currentUser.balance < price) return alert("Solde insuffisant");
+        db.ref('accounts/'+currentUser.tel+'/balance').transaction(b => b - price);
+        db.ref('accounts/'+sellerTel+'/balance').transaction(b => (b || 0) + parseInt(price));
+        alert("Achat réussi !");
+    }
 </script>
 </body>
 </html>
