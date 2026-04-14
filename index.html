@@ -30,32 +30,18 @@
         .content { flex: 1; overflow-y: auto; padding: 20px; background: var(--bg); position: relative; }
         .card { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #eee; }
 
-        /* RECHERCHE FIXE */
         .sticky-area { position: sticky; top: -20px; background: var(--bg); z-index: 500; padding: 10px 0; margin-bottom: 15px; }
-        .search-container { position: relative; margin-bottom: 15px; }
-        .autocomplete-results { position: absolute; top: 45px; left: 0; right: 0; background: white; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); z-index: 1100; max-height: 200px; overflow-y: auto; border: 1px solid #eee; }
-        .suggestion-item { display: flex; align-items: center; gap: 10px; padding: 10px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #000; }
-        .suggestion-item img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
-
-        /* OPTIMISATION DES IMAGES PRODUITS */
+        
         .product-card { background: white; border-radius: 15px; overflow: hidden; margin-bottom: 20px; border: 1px solid #eee; color: #1e293b; }
-        .product-img-container { width: 100%; height: auto; aspect-ratio: 1 / 1; min-height: 250px; max-height: 450px; background: #f8fafc; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .product-img-display { width: 100%; height: 100%; object-fit: cover; object-position: center; flex-shrink: 0; }
+        .product-img-container { width: 100%; aspect-ratio: 1 / 1; background: #f8fafc; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .product-img-display { width: 100%; height: 100%; object-fit: cover; }
         
-        .interactions { display: flex; gap: 15px; padding: 10px; border-top: 1px solid #eee; }
-        .btn-vote { border: none; background: none; cursor: pointer; font-size: 14px; font-weight: bold; color: #000 !important; }
-        .btn-vote:disabled { opacity: 0.4; cursor: default; }
-        
-        .badge { font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; margin-left: 5px; font-weight: bold; }
-        .badge-vendeur { background: var(--primary); color: white; }
-        .badge-client { background: #e2e8f0; color: #475569; }
-
+        .btn-pay { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .nav-bar { background: white; display: flex; border-top: 1px solid #eee; padding: 10px 0 calc(env(safe-area-inset-bottom, 10px) + 20px); } 
         .nav-item { flex: 1; text-align: center; font-size: 0.65rem; color: #94a3b8; cursor: pointer; font-weight: bold; }
         .nav-item.active { color: var(--primary); }
 
         input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; box-sizing: border-box; }
-        .btn-action { background: var(--glam); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; }
         .hidden { display: none !important; }
         .qr-box { background: white; padding: 10px; border-radius: 12px; display: inline-block; margin: 10px auto; border: 1px solid #eee; }
     </style>
@@ -75,24 +61,30 @@
                 <span id="t-signup" class="tab-item" style="flex:1; text-align:center; padding:12px; cursor:pointer; font-weight:bold; font-size:0.7rem; color:#999;" onclick="switchTab('signup')">CREER</span>
             </div>
             <div id="area-login">
-                <input type="tel" id="l-tel" placeholder="Numéro de téléphone">
+                <input type="tel" id="l-tel" placeholder="Téléphone">
                 <input type="password" id="l-pass" placeholder="Mot de passe">
-                <button class="btn-action" onclick="doLogin()">SE CONNECTER</button>
-                <center><img src="bololo.png" alt="Logo" style="width: 130px; margin-top: 30px;"></center>
+                <button class="btn-pay" style="background:var(--glam)" onclick="doLogin()">SE CONNECTER</button>
             </div>
             <div id="area-signup" class="hidden">
                 <input type="tel" id="s-tel" placeholder="Votre numéro" oninput="drawQR('s-tel', 'qr-signup')">
                 <center><div id="qr-signup" class="qr-box"></div></center>
                 <input type="password" id="s-pass" placeholder="Mot de passe">
                 <input type="password" id="s-confirm" placeholder="Confirmer">
-                <button class="btn-action" onclick="doSignup()">CREER LE COMPTE</button>
+                <button class="btn-pay" style="background:var(--glam)" onclick="doSignup()">CREER LE COMPTE</button>
             </div>
         </div>
 
         <div id="dash-params" class="hidden">
-            <div class="card" style="text-align:center;">
-                <label style="font-size:0.7rem; font-weight:bold; color:var(--primary)">VOTRE QR</label><br>
-                <div id="qr-admin" class="qr-box"></div>
+            <div class="card" style="text-align:center; background: var(--glam); color:white;">
+                <h1 id="user-balance" style="margin:0; font-size:2.5rem;">0 BLL</h1>
+                <p style="margin:0; font-size:0.8rem; opacity:0.8;">Monnaie Disponible</p>
+            </div>
+            <div class="card">
+                <h4 style="margin:0 0 10px 0">FORFAITS MENSUELS</h4>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <button class="btn-pay" onclick="buyPlan('Argent', 50, 2000)" style="background:#64748b; font-size:11px;">ARGENT (50) - 2000 BLL</button>
+                    <button class="btn-pay" onclick="buyPlan('Or', 100, 5000)" style="background:#f59e0b; font-size:11px;">OR (100) - 5000 BLL</button>
+                </div>
             </div>
             <div class="card">
                 <select id="theme-selector" onchange="changeTheme()">
@@ -102,62 +94,51 @@
                     <option value="theme-dark">🌙 Sombre</option>
                 </select>
                 <input type="text" id="set-name" placeholder="Nom de la Boutique">
-                <label style="font-size:0.7rem;">LOGO DE BOUTIQUE</label>
                 <input type="file" accept="image/*" onchange="handleLogo(event)">
-                <button class="btn-action" onclick="saveSettings()">ENREGISTRER</button>
+                <button class="btn-pay" onclick="saveSettings()">ENREGISTRER</button>
             </div>
         </div>
 
         <div id="dash-articles" class="hidden">
             <div class="card">
                 <input type="text" id="p-name" placeholder="Nom Article">
-                <input type="number" id="p-price" placeholder="Prix (FCFA)">
+                <input type="number" id="p-price" placeholder="Prix (BLL)">
                 <textarea id="p-desc" placeholder="Description..."></textarea>
                 <input type="file" id="p-img-input" accept="image/*" onchange="handleProdImg(event)">
-                <button class="btn-action" onclick="addProduct()">PUBLIER</button>
+                <button class="btn-pay" onclick="addProduct()">PUBLIER SUR LE MARCHE</button>
             </div>
             <div id="admin-list"></div>
         </div>
 
         <div id="dash-view" class="hidden">
             <div class="sticky-area">
-                <div class="search-container">
-                    <input type="tel" id="search-tel" placeholder="Chercher une boutique..." oninput="autoComplete(this.value)">
-                    <div id="suggest-box" class="autocomplete-results hidden"></div>
-                </div>
-                <div id="shop-header"></div>
+                <input type="tel" id="search-tel" placeholder="Chercher boutique ou article..." oninput="autoComplete(this.value)">
+                <div id="suggest-box" class="autocomplete-results hidden"></div>
             </div>
             <div id="shop-list"></div>
         </div>
     </div>
 
     <nav id="bottom-nav" class="nav-bar hidden">
-        <div class="nav-item active" onclick="showSection('params', this)">⚙️<br>CONFIG</div>
-        <div class="nav-item" onclick="showSection('articles', this)">📦<br>ARTICLES</div>
-        <div class="nav-item" onclick="showSection('view', this); viewCurrentShop();">🛒<br>VUE</div>
+        <div class="nav-item active" onclick="showSection('params', this)">⚙️<br>PROFIL</div>
+        <div class="nav-item" onclick="showSection('articles', this)">📦<br>STOCK</div>
+        <div class="nav-item" onclick="showSection('view', this); renderGlobalShop();">🛒<br>MARCHÉ</div>
     </nav>
 </div>
 
 <script>
-    // --- CONFIGURATION FIREBASE ---
-    const firebaseConfig = {
-        databaseURL: "https://bololoshop-bf59b-default-rtdb.firebaseio.com/"
-    };
+    const firebaseConfig = { databaseURL: "https://bololoshop-bf59b-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
     let currentUser = null;
-    let viewedTel = "";
     let tempLogo = "";
     let tempProdImg = "";
-    let userVotes = {}; 
+    let userVotes = {};
 
-    // --- NAVIGATION ---
     function switchTab(t) {
         document.getElementById('area-login').classList.toggle('hidden', t !== 'login');
         document.getElementById('area-signup').classList.toggle('hidden', t !== 'signup');
-        document.getElementById('t-login').classList.toggle('active', t === 'login');
-        document.getElementById('t-signup').classList.toggle('active', t === 'signup');
     }
 
     function showSection(id, el) {
@@ -167,91 +148,86 @@
         el.classList.add('active');
     }
 
-    // --- AUTHENTIFICATION ---
-    function drawQR(inputId, containerId) {
-        const val = document.getElementById(inputId).value;
-        const container = document.getElementById(containerId);
-        container.innerHTML = "";
-        if(val.length >= 4) new QRCode(container, { text: val, width: 120, height: 120 });
-    }
-
     function doSignup() {
         const tel = document.getElementById('s-tel').value;
         const pass = document.getElementById('s-pass').value;
-        if (tel.length < 4 || pass !== document.getElementById('s-confirm').value) return alert("Erreur saisie");
-        
-        db.ref('accounts/' + tel).set({
-            tel, pass, limit: 2, shopName: "", shopLogo: "", catalog: [], blocked: false
-        }).then(() => {
-            alert("Compte créé !"); switchTab('login');
-        });
+        if (tel.length < 4 || pass !== document.getElementById('s-confirm').value) return alert("Erreur");
+        db.ref('accounts/' + tel).set({ tel, pass, limit: 10, balance: 0, plan: "Gratuit", catalog: [] })
+        .then(() => { alert("Compte prêt !"); switchTab('login'); });
     }
 
     function doLogin() {
         const tel = document.getElementById('l-tel').value;
         const pass = document.getElementById('l-pass').value;
-        
-        db.ref('accounts/' + tel).once('value', (snap) => {
-            const user = snap.val();
-            if (!user || user.pass !== pass) return alert("Identifiants incorrects");
-            if (user.blocked) return alert("❌ COMPTE BLOQUÉ.");
-
-            currentUser = user; viewedTel = tel;
-            document.getElementById('view-auth').classList.add('hidden');
-            document.getElementById('bottom-nav').classList.remove('hidden');
-            document.getElementById('logout-btn').classList.remove('hidden');
-            document.getElementById('set-name').value = user.shopName || "";
-            tempLogo = user.shopLogo || "";
-            
-            showSection('params', document.querySelector('.nav-item'));
-            new QRCode(document.getElementById('qr-admin'), { text: user.tel, width: 140, height: 140 });
-            renderAdminList();
+        db.ref('accounts/' + tel).once('value', snap => {
+            const u = snap.val();
+            if (u && u.pass === pass) {
+                if (u.blocked) return alert("Bloqué !");
+                currentUser = u;
+                document.getElementById('view-auth').classList.add('hidden');
+                document.getElementById('bottom-nav').classList.remove('hidden');
+                document.getElementById('logout-btn').classList.remove('hidden');
+                showSection('params', document.querySelector('.nav-item'));
+                syncUser();
+                renderAdminList();
+            } else alert("Erreur d'accès");
         });
     }
 
-    // --- GESTION BOUTIQUE ---
-    function handleLogo(e) {
-        const reader = new FileReader();
-        reader.onload = () => tempLogo = reader.result;
-        reader.readAsDataURL(e.target.files[0]);
+    function syncUser() {
+        db.ref('accounts/' + currentUser.tel).on('value', snap => {
+            currentUser = snap.val();
+            document.getElementById('user-balance').innerText = (currentUser.balance || 0) + " BLL";
+        });
     }
 
-    function saveSettings() {
-        db.ref('accounts/' + currentUser.tel).update({
-            shopName: document.getElementById('set-name').value,
-            shopLogo: tempLogo
-        }).then(() => alert("Sauvegardé !"));
-    }
-
-    function handleProdImg(e) {
-        const reader = new FileReader();
-        reader.onload = () => tempProdImg = reader.result;
-        reader.readAsDataURL(e.target.files[0]);
+    function buyPlan(name, limit, price) {
+        if (currentUser.balance < price) return alert("BLL Insuffisants. Rechargez à l'agence.");
+        if (confirm(`Activer le plan ${name} pour ${price} BLL ?`)) {
+            db.ref('accounts/' + currentUser.tel).update({ balance: currentUser.balance - price, limit: limit, plan: name });
+        }
     }
 
     function addProduct() {
-        db.ref('accounts/' + currentUser.tel).once('value', snap => {
-            const user = snap.val();
-            const catalog = user.catalog || [];
-            if (catalog.length >= (user.limit || 2)) return alert("Quota atteint");
-
-            const newItem = { 
-                id: Date.now(), 
-                name: document.getElementById('p-name').value, 
-                price: document.getElementById('p-price').value, 
-                desc: document.getElementById('p-desc').value, 
-                img: tempProdImg, 
-                likes: 0, 
-                dislikes: 0, 
-                comments: [] 
-            };
-            
-            catalog.push(newItem);
-            db.ref('accounts/' + currentUser.tel + '/catalog').set(catalog).then(() => {
-                tempProdImg = ""; document.getElementById('p-img-input').value = "";
-                renderAdminList();
-            });
+        const catalog = currentUser.catalog || [];
+        if (catalog.length >= currentUser.limit) return alert("Quota plein ! Payez un abonnement.");
+        const newItem = { id: Date.now(), name: document.getElementById('p-name').value, price: parseInt(document.getElementById('p-price').value), img: tempProdImg, likes: 0, dislikes: 0, comments: [] };
+        catalog.push(newItem);
+        db.ref('accounts/' + currentUser.tel + '/catalog').set(catalog).then(() => {
+            tempProdImg = ""; document.getElementById('p-img-input').value = "";
         });
+    }
+
+    function renderGlobalShop() {
+        db.ref('accounts').on('value', snap => {
+            const all = snap.val();
+            let html = "";
+            for (let tel in all) {
+                const shop = all[tel];
+                (shop.catalog || []).forEach((it, i) => {
+                    html += `
+                    <div class="product-card">
+                        <div class="product-img-container"><img src="${it.img}" class="product-img-display"></div>
+                        <div style="padding:15px;">
+                            <small>Boutique: ${shop.shopName || tel}</small><br>
+                            <b>${it.name}</b><br><span style="color:var(--primary); font-weight:900;">${it.price} BLL</span>
+                            <button class="btn-pay" onclick="buyProduct('${tel}', ${i}, ${it.price})">ACHETER AVEC MES BLL</button>
+                        </div>
+                    </div>`;
+                });
+            }
+            document.getElementById('shop-list').innerHTML = html || "<center>Rien à vendre pour le moment</center>";
+        });
+    }
+
+    function buyProduct(sellerTel, idx, price) {
+        if (sellerTel === currentUser.tel) return alert("C'est votre produit !");
+        if (currentUser.balance < price) return alert("Pas assez de BLL !");
+        if (confirm("Valider l'achat ? Les BLL seront transférés au vendeur.")) {
+            db.ref('accounts/' + currentUser.tel + '/balance').transaction(b => b - price);
+            db.ref('accounts/' + sellerTel + '/balance').transaction(b => (b || 0) + price);
+            alert("Merci pour votre achat !");
+        }
     }
 
     function renderAdminList() {
@@ -259,100 +235,19 @@
             const catalog = snap.val() || [];
             document.getElementById('admin-list').innerHTML = catalog.map((it, i) => `
                 <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <img src="${it.img || ''}" style="width:40px;height:40px;border-radius:5px;object-fit:cover;">
-                        <span><b>${it.name}</b></span>
-                    </div>
-                    <button onclick="deleteProduct(${i})" style="color:red; border:none; background:none; font-size:1.2rem;">🗑️</button>
+                    <img src="${it.img}" style="width:40px;height:40px;border-radius:5px;object-fit:cover;">
+                    <span><b>${it.name}</b></span>
+                    <button onclick="deleteProduct(${i})" style="color:red; border:none; background:none;">🗑️</button>
                 </div>`).join('');
         });
     }
 
-    function deleteProduct(i) {
-        if(confirm("Supprimer ?")) {
-            db.ref('accounts/' + currentUser.tel + '/catalog').once('value', snap => {
-                let cat = snap.val();
-                cat.splice(i, 1);
-                db.ref('accounts/' + currentUser.tel + '/catalog').set(cat);
-            });
-        }
-    }
-
-    // --- RECHERCHE ET RENDER ---
-    function autoComplete(val) {
-        const box = document.getElementById('suggest-box');
-        if(val.length < 2) { box.classList.add('hidden'); return; }
-        db.ref('accounts').once('value', snap => {
-            const data = snap.val();
-            const filtered = Object.values(data).filter(a => a.tel.includes(val) || (a.shopName && a.shopName.toLowerCase().includes(val.toLowerCase())));
-            box.classList.toggle('hidden', filtered.length === 0);
-            box.innerHTML = filtered.map(a => `
-                <div class="suggestion-item" onclick="selectShop('${a.tel}')">
-                    <img src="${a.shopLogo || 'bololo.png'}">
-                    <div><b>${a.shopName || 'Boutique'}</b><br><small>${a.tel}</small></div>
-                </div>`).join('');
-        });
-    }
-
-    function selectShop(tel) { viewedTel = tel; document.getElementById('suggest-box').classList.add('hidden'); renderShop(); }
-
-    function viewCurrentShop() { viewedTel = currentUser.tel; renderShop(); }
-
-    function renderShop() {
-        db.ref('accounts/' + viewedTel).on('value', snap => {
-            const u = snap.val();
-            const catalog = u.catalog || [];
-            const isOwner = (currentUser.tel === viewedTel);
-
-            document.getElementById('shop-header').innerHTML = `
-                <div style="display:flex; align-items:center; gap:12px; background:white; padding:12px; border-radius:15px; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
-                    <img src="${u.shopLogo || 'bololo.png'}" style="width:50px; height:50px; border-radius:50%; object-fit:cover; border:2px solid var(--primary);">
-                    <div style="text-align:left"><h4 style="margin:0">${u.shopName || 'Boutique'}</h4><small>${u.tel}</small></div>
-                </div>`;
-
-            document.getElementById('shop-list').innerHTML = catalog.map((it, i) => {
-                const hasVoted = userVotes[it.id];
-                return `
-                <div class="product-card">
-                    <div class="product-img-container">${it.img ? `<img src="${it.img}" class="product-img-display">` : 'Image'}</div>
-                    <div style="padding:15px;">
-                        <b>${it.name}</b><br><span style="color:var(--primary); font-weight:bold;">${it.price} FCFA</span>
-                        <p style="font-size:0.75rem; color:#666; margin:5px 0;">${it.desc || ''}</p>
-                        <div class="interactions">
-                            <button class="btn-vote" ${ (isOwner || hasVoted) ? 'disabled' : '' } onclick="vote(${i}, 'likes', ${it.id})">👍 ${it.likes || 0}</button>
-                            <button class="btn-vote" ${ (isOwner || hasVoted) ? 'disabled' : '' } onclick="vote(${i}, 'dislikes', ${it.id})">👎 ${it.dislikes || 0}</button>
-                        </div>
-                        <div style="background:#f8fafc; padding:10px; border-radius:10px; font-size:11px;">
-                            <div id="comm-area-${i}">${(it.comments || []).map(c => `<div style="margin-bottom:4px; border-bottom:1px solid #eee;"><b>${c.text}</b> <span class="badge ${c.isOwner ? 'badge-vendeur' : 'badge-client'}">${c.isOwner ? 'Vendeur' : 'Client'}</span></div>`).join('')}</div>
-                            <div style="display:flex; gap:5px; margin-top:5px;">
-                                <input type="text" id="in-comm-${i}" placeholder="Commenter..." style="margin:0; padding:5px; font-size:11px;">
-                                <button onclick="sendComm(${i}, ${isOwner})" style="border:none; background:var(--primary); color:white; border-radius:5px; padding:5px 10px; cursor:pointer;">📩</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
-            }).join('');
-        });
-    }
-
-    // --- INTERACTIONS ---
-    function vote(idx, type, prodId) { 
-        userVotes[prodId] = true; 
-        db.ref('accounts/' + viewedTel + '/catalog/' + idx + '/' + type).transaction(v => (v || 0) + 1);
-    }
-
-    function sendComm(idx, isOwner) {
-        const input = document.getElementById('in-comm-'+idx);
-        if(!input.value) return;
-        db.ref('accounts/' + viewedTel + '/catalog/' + idx + '/comments').once('value', s => {
-            let comms = s.val() || [];
-            comms.push({ text: input.value, isOwner: isOwner });
-            db.ref('accounts/' + viewedTel + '/catalog/' + idx + '/comments').set(comms);
-            input.value = "";
-        });
-    }
-
+    function deleteProduct(i) { if(confirm("Supprimer ?")) { let c = currentUser.catalog; c.splice(i,1); db.ref('accounts/'+currentUser.tel+'/catalog').set(c); } }
+    function handleLogo(e) { const r = new FileReader(); r.onload = () => tempLogo = r.result; r.readAsDataURL(e.target.files[0]); }
+    function handleProdImg(e) { const r = new FileReader(); r.onload = () => tempProdImg = r.result; r.readAsDataURL(e.target.files[0]); }
+    function saveSettings() { db.ref('accounts/'+currentUser.tel).update({ shopName: document.getElementById('set-name').value, shopLogo: tempLogo }); alert("Sauvé"); }
     function changeTheme() { document.body.className = document.getElementById('theme-selector').value; }
+    function drawQR(id, cont) { const v = document.getElementById(id).value; document.getElementById(cont).innerHTML = ""; if(v.length>3) new QRCode(document.getElementById(cont), {text:v, width:120, height:120}); }
 </script>
 </body>
 </html>
