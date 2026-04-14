@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>BOLOLO Pro</title>
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
@@ -14,71 +15,106 @@
         .iphone-xs-screen { width: 375px; height: 812px; background: white; border-radius: 40px; display: flex; flex-direction: column; overflow: hidden; position: relative; }
         
         header { background: var(--glam); color: white; padding: 55px 20px 15px; text-align: center; font-weight: bold; }
-        .content { flex: 1; overflow-y: auto; padding: 20px; background: var(--bg); }
+        .content { flex: 1; overflow-y: auto; padding: 20px; background: var(--bg); position: relative; }
         
-        .card { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        .card { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #eee; }
 
-        /* REDIMENSIONNEMENT AUTOMATIQUE DES IMAGES DU MARCHÉ */
-        .img-container { width: 100%; height: 250px; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .product-img { max-width: 100%; max-height: 100%; object-fit: contain; } /* L'image s'adapte sans être coupée */
+        /* HEADER MARCHE STATIQUE */
+        .market-header { position: sticky; top: -20px; background: var(--bg); z-index: 100; padding-bottom: 10px; }
+        .search-res { background: white; border-radius: 12px; position: absolute; width: 100%; box-shadow: 0 10px 20px rgba(0,0,0,0.1); z-index: 110; max-height: 200px; overflow-y: auto; border: 1px solid #ddd; margin-top: -5px; }
+        .search-item { padding: 10px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.8rem; }
 
-        /* STYLE DES ARTICLES DANS L'ONGLET AJOUTER */
-        .my-item { display: flex; align-items: center; gap: 15px; background: white; padding: 10px; border-radius: 15px; margin-bottom: 10px; border: 1px solid #eee; }
-        .my-item img { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; }
-        .btn-del { background: #fee2e2; color: #ef4444; border: none; padding: 8px 12px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        /* IMAGES REDIMENSIONNÉES */
+        .img-container { width: 100%; height: 250px; background: #f8fafc; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .product-img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
+        /* ARTICLES PROPRES (ONGLET AJOUTER) */
+        .my-item-row { display: flex; align-items: center; gap: 10px; background: white; padding: 10px; border-radius: 15px; margin-bottom: 8px; border: 1px solid #eee; }
+        .my-item-row img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; }
+        .btn-del { background: #fee2e2; color: #ef4444; border: none; padding: 8px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.7rem; }
+
+        /* SOCIAL */
+        .comm-bubble { background: #f1f5f9; padding: 8px; border-radius: 10px; font-size: 0.75rem; margin-top: 5px; }
+        
         .btn-action { background: var(--glam); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .nav-bar { background: white; display: flex; border-top: 1px solid #eee; padding: 10px 0 34px; } 
         .nav-item { flex: 1; text-align: center; font-size: 0.65rem; color: #94a3b8; cursor: pointer; font-weight: bold; }
         .nav-item.active { color: var(--primary); }
         
-        .plan-box { border: 2px solid #eee; padding: 12px; border-radius: 15px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
-        .plan-box:active { background: #f5f3ff; border-color: var(--primary); }
-
         input, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 12px; box-sizing: border-box; }
         .hidden { display: none !important; }
+        .qr-box { background: white; padding: 10px; border-radius: 15px; display: inline-block; border: 1px solid #eee; margin: 10px 0; }
     </style>
 </head>
 <body>
 
 <div class="iphone-xs-screen">
-    <header>BOLOLO Pro</header>
+    <header id="app-header">BOLOLO Pro</header>
     
     <div class="content">
-        <div id="view-auth">
-            <h2 style="text-align:center;">Bienvenue</h2>
+        <div id="view-login">
+            <h2 style="text-align:center;">Connexion</h2>
             <input type="tel" id="l-tel" placeholder="Numéro de téléphone">
             <input type="password" id="l-pass" placeholder="Mot de passe">
             <button class="btn-action" onclick="doLogin()">SE CONNECTER</button>
+            <p onclick="switchAuth('signup')" style="text-align:center; color:var(--primary); cursor:pointer; font-size:0.8rem; margin-top:15px;">Pas de compte ? Créer un compte</p>
+        </div>
+
+        <div id="view-signup" class="hidden">
+            <h2 style="text-align:center;">Inscription</h2>
+            <input type="tel" id="s-tel" placeholder="Votre numéro" oninput="generateQR(this.value)">
+            <center><div id="qr-signup" class="qr-box"></div></center>
+            <input type="password" id="s-pass" placeholder="Mot de passe">
+            <button class="btn-action" onclick="doSignup()">S'INSCRIRE</button>
+            <p onclick="switchAuth('login')" style="text-align:center; color:var(--primary); cursor:pointer; font-size:0.8rem; margin-top:15px;">Retour</p>
         </div>
 
         <div id="dash-params" class="hidden">
             <div class="card" style="text-align:center; background: var(--glam); color:white; padding: 20px;">
                 <h1 id="user-balance">0 BLL</h1>
-                <p>SOLDE ACTUEL</p>
+                <p>SOLDE PORTEFEUILLE</p>
             </div>
-            <h3>Augmenter mon Quota</h3>
-            <div class="plan-box" onclick="buyPlan('Bronze', 500, 20)">🥉 <b>BRONZE</b> (500 BLL) - 20 articles</div>
-            <div class="plan-box" onclick="buyPlan('Argent', 1200, 50)">🥈 <b>ARGENT</b> (1200 BLL) - 50 articles</div>
-            <div class="plan-box" onclick="buyPlan('Or', 3000, 100)">🥇 <b>OR</b> (3000 BLL) - 100 articles</div>
+            <div class="card">
+                <h3>Paramètres Boutique</h3>
+                <label style="font-size:0.7rem">Logo de l'entreprise :</label>
+                <input type="file" accept="image/*" onchange="handleFile(event, 'logo')">
+                <input type="text" id="set-name" placeholder="Nom de l'entreprise">
+                <button class="btn-action" onclick="saveSettings()">ENREGISTRER</button>
+            </div>
+            <div class="card">
+                <h3>Forfaits</h3>
+                <button class="btn-action" style="background:#cd7f32" onclick="buyPlan('Bronze', 500, 20)">Bronze (20 articles)</button>
+                <button class="btn-action" style="background:#c0c0c0" onclick="buyPlan('Argent', 1200, 50)">Argent (50 articles)</button>
+                <button class="btn-action" style="background:#ffd700; color:black" onclick="buyPlan('Or', 3000, 100)">Or (100 articles)</button>
+            </div>
         </div>
 
         <div id="dash-articles" class="hidden">
             <div class="card">
-                <h3>Publier un article</h3>
-                <input type="text" id="p-name" placeholder="Nom de l'article">
-                <input type="number" id="p-price" placeholder="Prix (BLL)">
+                <h3>Ajouter un produit</h3>
+                <input type="text" id="p-name" placeholder="Nom">
+                <input type="number" id="p-price" placeholder="Prix">
                 <textarea id="p-desc" placeholder="Description..."></textarea>
-                <input type="file" accept="image/*" onchange="handleFile(event)">
-                <button class="btn-action" onclick="addProduct()">PUBLIER L'ARTICLE</button>
+                <input type="file" accept="image/*" onchange="handleFile(event, 'prod')">
+                <button class="btn-action" onclick="addProduct()">PUBLIER</button>
             </div>
-
-            <h3 style="margin-top:20px;">Gestion de mes articles</h3>
-            <div id="my-articles-list">
-                </div>
+            <h4>Mes articles</h4>
+            <div id="my-list-container"></div>
         </div>
 
         <div id="dash-view" class="hidden">
+            <div class="market-header">
+                <input type="text" id="search-box" placeholder="Chercher une boutique..." oninput="autoSearch(this.value)">
+                <div id="search-results" class="search-res hidden"></div>
+                
+                <div class="card" style="display:flex; align-items:center; gap:15px; margin-top:10px; padding:10px;">
+                    <img id="m-logo" src="bololo.png" style="width:45px; height:45px; border-radius:50%; object-fit:cover;">
+                    <div>
+                        <b id="m-name">Boutique Bololo</b><br>
+                        <small id="m-tel" style="color:gray">---</small>
+                    </div>
+                </div>
+            </div>
             <div id="market-list"></div>
         </div>
     </div>
@@ -86,7 +122,7 @@
     <nav id="bottom-nav" class="nav-bar hidden">
         <div class="nav-item" onclick="showSection('params', this)">⚙️<br>PROFIL</div>
         <div class="nav-item" onclick="showSection('articles', this)">📦<br>AJOUTER</div>
-        <div class="nav-item" onclick="showSection('view', this)">🛒<br>MARCHÉ</div>
+        <div class="nav-item" onclick="showSection('view', this); renderMarket();">🛒<br>MARCHÉ</div>
     </nav>
 </div>
 
@@ -96,117 +132,156 @@
     const db = firebase.database();
 
     let currentUser = null;
-    let tempImg = "";
+    let tempLogo = "", tempProd = "";
+    let viewedTel = "";
+
+    // AUTH & SYNC
+    function generateQR(val) {
+        const c = document.getElementById('qr-signup'); c.innerHTML = "";
+        if(val.length > 2) new QRCode(c, { text: val, width: 100, height: 100 });
+    }
+
+    function doSignup() {
+        const tel = document.getElementById('s-tel').value;
+        const pass = document.getElementById('s-pass').value;
+        db.ref('accounts/' + tel).set({ tel, pass, balance: 100, limit: 5, shopName: "Ma Boutique", shopLogo: "", catalog: [] })
+        .then(() => switchAuth('login'));
+    }
 
     function doLogin() {
-        const tel = document.getElementById('l-tel').value;
-        const pass = document.getElementById('l-pass').value;
+        const tel = document.getElementById('l-tel').value, pass = document.getElementById('l-pass').value;
         db.ref('accounts/' + tel).once('value', snap => {
             const u = snap.val();
             if(u && u.pass === pass) {
-                currentUser = u;
-                document.getElementById('view-auth').classList.add('hidden');
+                currentUser = u; viewedTel = tel;
+                document.getElementById('view-login').classList.add('hidden');
+                document.getElementById('view-signup').classList.add('hidden');
                 document.getElementById('bottom-nav').classList.remove('hidden');
                 showSection('params', document.querySelectorAll('.nav-item')[0]);
                 syncData();
-            } else alert("Identifiants incorrects");
+            } else alert("Erreur");
         });
     }
 
     function syncData() {
         db.ref('accounts/' + currentUser.tel).on('value', snap => {
             currentUser = snap.val();
-            document.getElementById('user-balance').innerText = (currentUser.balance || 0) + " BLL";
-            renderMyArticles(); 
-            renderMarket();
+            document.getElementById('user-balance').innerText = currentUser.balance + " BLL";
+            document.getElementById('set-name').value = currentUser.shopName;
+            renderMyArticles();
         });
     }
 
-    // --- AFFICHAGE AVEC BOUTON SUPPRIMER ---
-    function renderMyArticles() {
+    // PROFIL
+    function saveSettings() {
+        db.ref('accounts/' + currentUser.tel).update({
+            shopName: document.getElementById('set-name').value,
+            shopLogo: tempLogo || currentUser.shopLogo
+        }).then(() => alert("Profil mis à jour"));
+    }
+
+    // ARTICLES & SUPPRESSION
+    function addProduct() {
         const cat = currentUser.catalog || [];
-        let html = "";
-        cat.forEach((it, i) => {
-            html += `
-            <div class="my-item">
-                <img src="${it.img || 'bololo.png'}">
-                <div style="flex:1"><b>${it.name}</b><br><small>${it.price} BLL</small></div>
-                <button class="btn-del" onclick="deleteItem(${i})">Supprimer</button>
-            </div>`;
-        });
-        document.getElementById('my-articles-list').innerHTML = html || "<p style='text-align:center;'>Aucun article en ligne.</p>";
+        if(cat.length >= (currentUser.limit || 5)) return alert("Quota plein !");
+        cat.push({ id: Date.now(), name: document.getElementById('p-name').value, price: parseInt(document.getElementById('p-price').value), desc: document.getElementById('p-desc').value, img: tempProd, likes: 0, comments: [] });
+        db.ref('accounts/' + currentUser.tel + '/catalog').set(cat);
     }
 
-    function deleteItem(index) {
-        if(confirm("Supprimer cet article définitivement ?")) {
-            let cat = [...currentUser.catalog];
-            cat.splice(index, 1);
+    function renderMyArticles() {
+        const cat = currentUser.catalog || []; let html = "";
+        cat.forEach((it, i) => {
+            html += `<div class="my-item-row"><img src="${it.img || 'bololo.png'}"><div style="flex:1"><b>${it.name}</b></div><button class="btn-del" onclick="deleteItem(${i})">Supprimer</button></div>`;
+        });
+        document.getElementById('my-list-container').innerHTML = html;
+    }
+
+    function deleteItem(i) {
+        if(confirm("Supprimer ?")) {
+            let cat = [...currentUser.catalog]; cat.splice(i, 1);
             db.ref('accounts/' + currentUser.tel + '/catalog').set(cat);
         }
     }
 
-    function addProduct() {
-        const cat = currentUser.catalog || [];
-        if(cat.length >= (currentUser.limit || 5)) return alert("Quota atteint !");
-        
-        const newItem = {
-            id: Date.now(),
-            name: document.getElementById('p-name').value,
-            price: parseInt(document.getElementById('p-price').value),
-            desc: document.getElementById('p-desc').value,
-            img: tempImg
-        };
-        
-        cat.push(newItem);
-        db.ref('accounts/' + currentUser.tel + '/catalog').set(cat).then(() => {
-            alert("Article publié !");
-            document.getElementById('p-name').value = "";
-            document.getElementById('p-price').value = "";
-            tempImg = "";
+    // MARCHE & AUTOCOMPLETION
+    function autoSearch(val) {
+        const res = document.getElementById('search-results');
+        if(!val) return res.classList.add('hidden');
+        db.ref('accounts').once('value', snap => {
+            let all = snap.val(), html = "";
+            for(let t in all) {
+                if(all[t].shopName.toLowerCase().includes(val.toLowerCase())) {
+                    html += `<div class="search-item" onclick="viewShop('${t}')"><b>${all[t].shopName}</b> (${t})</div>`;
+                }
+            }
+            res.innerHTML = html; res.classList.remove('hidden');
         });
+    }
+
+    function viewShop(tel) {
+        viewedTel = tel;
+        document.getElementById('search-results').classList.add('hidden');
+        renderMarket();
     }
 
     function renderMarket() {
-        db.ref('accounts').once('value', snap => {
-            const all = snap.val();
+        db.ref('accounts/' + viewedTel).on('value', snap => {
+            const shop = snap.val();
+            document.getElementById('m-name').innerText = shop.shopName;
+            document.getElementById('m-tel').innerText = "Propriétaire: " + viewedTel;
+            document.getElementById('m-logo').src = shop.shopLogo || 'bololo.png';
+
             let html = "";
-            for(let tel in all) {
-                (all[tel].catalog || []).forEach(it => {
-                    html += `
-                    <div class="card" style="padding:0; overflow:hidden;">
-                        <div class="img-container">
-                            <img src="${it.img || 'bololo.png'}" class="product-img">
+            (shop.catalog || []).forEach((it, i) => {
+                html += `
+                <div class="card" style="padding:0; overflow:hidden;">
+                    <div class="img-container"><img src="${it.img || 'bololo.png'}" class="product-img"></div>
+                    <div style="padding:15px;">
+                        <div style="display:flex; justify-content:space-between;"><b>${it.name}</b><b>${it.price} BLL</b></div>
+                        <p style="font-size:0.7rem; color:gray;">${it.desc || ''}</p>
+                        <div style="display:flex; gap:15px; font-size:0.8rem; margin:10px 0;">
+                            <span onclick="like(${i})" style="cursor:pointer;">👍 ${it.likes || 0}</span>
+                            <span>💬 ${(it.comments || []).length}</span>
                         </div>
-                        <div style="padding:15px;">
-                            <div style="display:flex; justify-content:space-between;">
-                                <b>${it.name}</b>
-                                <b style="color:var(--primary)">${it.price} BLL</b>
-                            </div>
-                            <p style="font-size:0.8rem; color:gray;">${it.desc || ''}</p>
-                            <button class="btn-action" onclick="alert('Contact: ${tel}')">COMMANDER</button>
+                        <div id="comms-${i}">${(it.comments || []).map(c => `<div class="comm-bubble"><b>${c.user}</b>: ${c.text}</div>`).join('')}</div>
+                        <div style="display:flex; gap:5px; margin-top:10px;">
+                            <input type="text" id="in-${i}" placeholder="Commenter..." style="margin:0; padding:8px;">
+                            <button onclick="addComm(${i})" style="background:var(--primary); color:white; border:none; border-radius:10px; padding:0 10px;">📩</button>
                         </div>
-                    </div>`;
-                });
-            }
-            document.getElementById('market-list').innerHTML = html;
+                    </div>
+                </div>`;
+            });
+            document.getElementById('market-list').innerHTML = html || "<center>Boutique vide</center>";
         });
     }
 
-    function buyPlan(name, price, limit) {
-        if(currentUser.balance < price) return alert("Solde insuffisant");
-        if(confirm(`Activer le forfait ${name} pour ${price} BLL ?`)) {
-            db.ref('accounts/' + currentUser.tel).update({
-                balance: currentUser.balance - price,
-                limit: limit,
-                plan: name
-            });
-        }
+    // INTERACTIONS SOCIALES
+    function like(i) {
+        db.ref('accounts/'+viewedTel+'/catalog/'+i+'/likes').transaction(l => (l || 0) + 1);
     }
 
-    function handleFile(e) {
-        const reader = new FileReader();
-        reader.onload = () => { tempImg = reader.result; };
-        reader.readAsDataURL(e.target.files[0]);
+    function addComm(i) {
+        const txt = document.getElementById('in-'+i).value; if(!txt) return;
+        db.ref('accounts/'+viewedTel+'/catalog/'+i+'/comments').once('value', s => {
+            let c = s.val() || []; c.push({ user: currentUser.shopName, text: txt });
+            db.ref('accounts/'+viewedTel+'/catalog/'+i+'/comments').set(c);
+        });
+    }
+
+    // UTILITAIRES
+    function handleFile(e, type) {
+        const r = new FileReader(); r.onload = () => { if(type==='logo') tempLogo=r.result; else tempProd=r.result; };
+        r.readAsDataURL(e.target.files[0]);
+    }
+
+    function buyPlan(n, p, l) {
+        if(currentUser.balance < p) return alert("Solde insuffisant");
+        db.ref('accounts/'+currentUser.tel).update({ balance: currentUser.balance - p, limit: l });
+    }
+
+    function switchAuth(m) {
+        document.getElementById('view-login').classList.toggle('hidden', m==='signup');
+        document.getElementById('view-signup').classList.toggle('hidden', m==='login');
     }
 
     function showSection(id, el) {
