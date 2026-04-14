@@ -2,143 +2,306 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BOLOLO BROKER - Bourse des Boutiques</title>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>BOLOLO BROKER - Professionnal Trading Platform</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
     <style>
-        :root { --bull: #00ff88; --bear: #ff3e3e; --bg: #0a0e17; --card: #161b28; }
-        body { margin: 0; font-family: 'JetBrains Mono', monospace; background: var(--bg); color: white; }
-        
-        header { padding: 20px; border-bottom: 1px solid #2d3343; display: flex; justify-content: space-between; align-items: center; background: var(--card); }
-        .balance-box { color: var(--bull); font-weight: bold; }
+        :root { 
+            --bg-dark: #12171f; 
+            --bg-panel: #191e28;
+            --bull: #00c853; /* Vert IQ */
+            --bear: #ff3d00; /* Rouge IQ */
+            --text-main: #ced4da;
+            --text-dim: #707a8a;
+            --border: #2a2f3a;
+            --accent: #2962ff;
+        }
 
-        .market-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 20px; }
-        
-        .stock-card { background: var(--card); border-radius: 12px; padding: 20px; border: 1px solid #2d3343; transition: 0.3s; }
-        .stock-card:hover { border-color: var(--bull); }
+        * { box-sizing: border-box; font-family: 'Roboto', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--bg-dark); color: var(--text-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        .stock-header { display: flex; justify-content: space-between; margin-bottom: 15px; }
-        .stock-price { font-size: 1.5rem; font-weight: bold; }
+        /* TOP HEADER */
+        header { height: 50px; background: var(--bg-panel); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; z-index: 10; }
+        .logo-area { font-weight: 700; color: white; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; }
+        .logo-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 10px var(--accent); }
+        
+        .user-area { display: flex; align-items: center; gap: 15px; }
+        .balance-box { background: rgba(0,200,83,0.1); color: var(--bull); padding: 5px 10px; border-radius: 4px; font-weight: 500; font-size: 0.85rem; border: 1px solid rgba(0,200,83,0.3); }
+
+        /* MAIN LAYOUT */
+        .main-wrapper { flex: 1; display: flex; overflow: hidden; }
+
+        /* 1. ASSET LIST (LEFT) */
+        .asset-sidebar { width: 280px; background: var(--bg-panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+        .sidebar-header { padding: 10px 15px; border-bottom: 1px solid var(--border); color: var(--text-dim); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
+        .asset-list { flex: 1; overflow-y: auto; scrollbar-width: none; }
+        .asset-list::-webkit-scrollbar { display: none; }
+        
+        .asset-item { padding: 12px 15px; border-bottom: 1px solid var(--border); cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .asset-item:hover { background: rgba(255,255,255,0.03); }
+        .asset-item.active { background: rgba(41,98,255,0.1); border-left: 3px solid var(--accent); }
+        .asset-name { font-weight: 500; color: white; font-size: 0.85rem; }
+        .asset-id { color: var(--text-dim); font-size: 0.7rem; }
+        .asset-price { text-align: right; font-size: 0.85rem; font-weight: 500; }
         .trend-up { color: var(--bull); }
         .trend-down { color: var(--bear); }
 
-        .btn-trade { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn-buy { background: var(--bull); color: #000; }
-        .btn-sell { background: transparent; border: 1px solid var(--bear); color: var(--bear); }
+        /* 2. CHART AREA (CENTER) */
+        .chart-container { flex: 1; position: relative; background: var(--bg-dark); display: flex; flex-direction: column; padding: 20px; }
+        .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .current-asset-title { font-size: 1.2rem; font-weight: 700; color: white; }
+        
+        /* Simulation Graphique (IQ Style) */
+        .mock-chart { flex: 1; width: 100%; position: relative; overflow: hidden; border-bottom: 1px solid var(--border); }
+        .chart-line { position: absolute; bottom: 30px; left: 0; width: 100%; height: 60%; stroke: var(--accent); stroke-width: 2; fill: none; }
+        .chart-gradient { position: absolute; bottom: 30px; left: 0; width: 100%; height: 60%; fill: url(#grad); opacity: 0.2; }
+        .price-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; position: absolute; right: 0; top: 40%; box-shadow: 0 0 10px var(--accent); }
+        .time-axis { height: 25px; display: flex; justify-content: space-between; color: var(--text-dim); font-size: 0.7rem; padding-top: 5px; }
 
-        .stats-row { display: flex; justify-content: space-between; font-size: 0.8rem; color: #8b949e; margin: 5px 0; }
+        /* 3. TRADE PANEL (RIGHT) */
+        .trade-panel { width: 240px; background: var(--bg-panel); border-left: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .panel-label { color: var(--text-dim); font-size: 0.75rem; margin-bottom: 5px; }
         
-        input { width: 100%; background: #0a0e17; border: 1px solid #2d3343; color: white; padding: 10px; border-radius: 5px; margin-top: 10px; box-sizing: border-box; }
-        
-        .hidden { display: none; }
+        .input-box { background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 4px; display: flex; align-items: center; padding: 5px; }
+        .input-box input { flex: 1; background: transparent; border: none; color: white; font-size: 1.1rem; font-weight: 700; text-align: center; outline: none; padding: 5px; }
+        .input-btn { background: #2a2f3a; color: white; border: none; width: 30px; height: 30px; border-radius: 4px; cursor: pointer; font-size: 1.2rem; }
+
+        .profit-info { text-align: center; margin: 10px 0; }
+        .profit-percent { color: var(--bull); font-size: 1.8rem; font-weight: 700; }
+        .profit-amount { color: var(--text-dim); font-size: 0.8rem; }
+
+        .btn-trade { border: none; border-radius: 4px; padding: 15px; color: white; font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.2s; position: relative; overflow: hidden; }
+        .btn-buy { background: var(--bull); }
+        .btn-buy:hover { background: #00e676; }
+        .btn-sell { background: var(--bear); }
+        .btn-sell:hover { background: #ff5722; }
+        .btn-icon { position: absolute; left: 15px; font-size: 1.2rem; }
+
+        /* AUTH SCREEN */
+        #auth-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-dark); z-index: 100; display: flex; justify-content: center; align-items: center; }
+        .auth-card { background: var(--bg-panel); padding: 40px; border-radius: 8px; border: 1px solid var(--border); text-align: center; width: 320px; }
+        .auth-input { width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--border); color: white; padding: 12px; border-radius: 4px; margin-bottom: 15px; font-size: 1rem; outline: none; text-align: center; }
+
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-<header>
-    <div><span style="color:var(--bull)">●</span> BOLOLO STOCK EXCHANGE</div>
-    <div class="balance-box" id="my-bll">Wallet: 0 BLL</div>
-</header>
-
-<div id="auth-screen" style="max-width: 400px; margin: 100px auto; text-align: center;">
-    <h2>Connexion Trader</h2>
-    <input type="tel" id="user-tel" placeholder="N° Téléphone">
-    <button class="btn-trade btn-buy" onclick="login()">SE CONNECTER</button>
+<div id="auth-screen">
+    <div class="auth-card">
+        <div class="logo-area" style="justify-content:center; margin-bottom:30px; font-size:1.2rem;">
+            <div class="logo-dot"></div> BOLOLO <span style="font-weight:300">BROKER</span>
+        </div>
+        <input type="tel" id="user-tel" class="auth-input" placeholder="N° Téléphone">
+        <button class="btn-trade btn-buy" style="width:100%" onclick="login()">CONNEXION TRADER</button>
+    </div>
 </div>
 
-<div id="broker-screen" class="hidden">
-    <div style="padding: 20px 20px 0 20px;">
-        <h3>Marché en Direct</h3>
-        <p style="font-size: 0.7rem; color: #8b949e;">La valeur dépend du solde de la boutique et du nombre de produits en stock.</p>
+<header>
+    <div class="logo-area"><div class="logo-dot"></div> BOLOLO <span style="font-weight:300">BROKER</span></div>
+    <div class="user-area">
+        <div class="balance-box" id="my-bll">0.00 BLL</div>
+        <img src="https://via.placeholder.com/30" style="border-radius:50%; border:1px solid var(--border)">
     </div>
-    <div class="market-grid" id="market-grid">
+</header>
+
+<div class="main-wrapper hidden" id="broker-screen">
+    
+    <div class="asset-sidebar">
+        <div class="sidebar-header">Actifs Boutiques</div>
+        <div class="asset-list" id="asset-list">
+            </div>
+    </div>
+
+    <div class="chart-container">
+        <div class="chart-header">
+            <div id="active-asset-title" class="current-asset-title">Sélectionnez un actif</div>
+            <div class="balance-box" style="background:var(--bg-panel); color:white; border-color:var(--border)">Compte Réel</div>
         </div>
+        
+        <div class="mock-chart">
+            <svg width="100%" height="100%" viewBox="0 0 500 200" preserveAspectRatio="none">
+                <defs>
+                    <linearGradient id="grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:var(--accent);stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:var(--bg-dark);stop-opacity:0" />
+                    </linearGradient>
+                </defs>
+                <path class="chart-gradient" d="M0,150 L50,130 L100,140 L150,110 L200,120 L250,90 L300,100 L350,70 L400,80 L450,50 L500,60 L500,200 L0,200 Z" />
+                <path class="chart-line" d="M0,150 L50,130 L100,140 L150,110 L200,120 L250,90 L300,100 L350,70 L400,80 L450,50 L500,60" />
+            </svg>
+            <div class="price-dot"></div>
+        </div>
+        
+        <div class="time-axis">
+            <span>10:30</span><span>10:35</span><span>10:40</span><span>10:45</span><span>10:50</span><span>10:55</span>
+        </div>
+    </div>
+
+    <div class="trade-panel">
+        <div>
+            <div class="panel-label">Montant de l'investissement</div>
+            <div class="input-box">
+                <button class="input-btn" onclick="adjustAmount(-10)">-</button>
+                <input type="number" id="trade-amount" value="50" min="10" step="10">
+                <button class="input-btn" onclick="adjustAmount(10)">+</button>
+            </div>
+        </div>
+
+        <div class="profit-info">
+            <div class="panel-label">Revenu</div>
+            <div class="profit-percent">+87%</div>
+            <div class="profit-amount" id="profit-bll">93.50 BLL</div>
+        </div>
+
+        <button class="btn-trade btn-buy" onclick="placeOrder('UP')">
+            <span class="btn-icon">▲</span> ACHAT (HAUSSE)
+        </button>
+        
+        <button class="btn-trade btn-sell" onclick="placeOrder('DOWN')">
+            <span class="btn-icon">▼</span> VENTE (BAISSE)
+        </button>
+    </div>
 </div>
 
 <script>
+    // Configuration Firebase
     const firebaseConfig = { databaseURL: "https://bololoshop-bf59b-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
     let currentUser = null;
+    let selectedShopTel = null;
+    let currentSharePrice = 0;
 
+    // 1. CONNEXION
     function login() {
         const tel = document.getElementById('user-tel').value;
+        if(!tel) return alert("Entrez votre numéro BOLOLO");
+        
         db.ref('accounts/' + tel).once('value', s => {
             if(s.exists()) {
                 currentUser = s.val();
                 document.getElementById('auth-screen').classList.add('hidden');
                 document.getElementById('broker-screen').classList.remove('hidden');
-                initMarket();
-            } else { alert("Compte non trouvé sur BOLOLO"); }
+                initTradingPlatform();
+            } else { alert("Compte BOLOLO Pro non trouvé."); }
         });
     }
 
-    function initMarket() {
-        // Observer les changements du portefeuille
+    // 2. INITIALISATION PLATEFORME
+    function initTradingPlatform() {
+        // Solde en temps réel
         db.ref('accounts/' + currentUser.tel + '/balance').on('value', s => {
-            document.getElementById('my-bll').innerText = "Wallet: " + s.val() + " BLL";
+            const bal = s.val() || 0;
+            document.getElementById('my-bll').innerText = bal.toLocaleString('fr-FR', {minimumFractionDigits: 2}) + " BLL";
         });
 
-        // Charger toutes les boutiques pour simuler les actions
+        // Calcul Profit sur changement d'input
+        document.getElementById('trade-amount').addEventListener('input', updateProfitDisplay);
+        updateProfitDisplay();
+
+        // Charger Liste Actifs
         db.ref('accounts').on('value', snap => {
             const data = snap.val();
             let html = "";
             for(let tel in data) {
                 const shop = data[tel];
+                
+                // --- LOGIQUE PRIX ACTION (Simulée basée sur données Admin) ---
+                // Prix = (Solde / 100) + (Nombre Articles * 5)
                 const stockCount = shop.catalog ? shop.catalog.length : 0;
+                const cap = (shop.balance || 0) + (stockCount * 500);
+                const price = Math.max(5, Math.floor(cap / 50)); 
                 
-                // Calcul du prix de l'action (Exemple: Solde / 10 + Articles * 100)
-                const marketCap = (shop.balance || 0) + (stockCount * 500);
-                const sharePrice = Math.max(10, Math.floor(marketCap / 100)); // Une boutique a 100 parts
-                
-                const trend = Math.random() > 0.5 ? 'trend-up' : 'trend-down';
-                const sign = trend === 'trend-up' ? '+' : '-';
+                // Simulation Tendance aléatoire pour le design
+                const trendClass = Math.random() > 0.4 ? 'trend-up' : 'trend-down';
+                const isActive = tel === selectedShopTel ? 'active' : '';
 
                 html += `
-                    <div class="stock-card">
-                        <div class="stock-header">
-                            <div>
-                                <b>${shop.shopName || 'Boutique'}</b><br>
-                                <small style="color:#8b949e">Ticker: ${tel.slice(-4)}</small>
-                            </div>
-                            <div class="trend-tag ${trend}">${sign}${Math.floor(Math.random()*10)}%</div>
+                    <div class="asset-item ${isActive}" onclick="selectAsset('${tel}', '${shop.shopName || 'Boutique'}', ${price})">
+                        <div>
+                            <div class="asset-name">${shop.shopName || 'Boutique'}</div>
+                            <div class="asset-id">#${tel.slice(-4)}</div>
                         </div>
-                        <div class="stock-price">${sharePrice} BLL</div>
-                        <div class="stats-row"><span>Parts dispo:</span><span>${Math.floor(Math.random()*100)} / 100</span></div>
-                        <div class="stats-row"><span>Volume:</span><span>${marketCap} BLL</span></div>
-                        
-                        <input type="number" id="qty-${tel}" placeholder="Nombre de parts" min="1">
-                        <button class="btn-trade btn-buy" onclick="trade('${tel}', ${sharePrice}, 'BUY')">ACHETER PARTS</button>
-                        <button class="btn-trade btn-sell" onclick="trade('${tel}', ${sharePrice}, 'SELL')">VENDRE PARTS</button>
+                        <div class="asset-price ${trendClass}">${price.toFixed(2)}</div>
                     </div>
                 `;
             }
-            document.getElementById('market-grid').innerHTML = html;
+            document.getElementById('asset-list').innerHTML = html;
         });
     }
 
-    function trade(shopTel, price, type) {
-        const qty = parseInt(document.getElementById('qty-' + shopTel).value);
-        if(!qty || qty <= 0) return alert("Quantité invalide");
+    // 3. SÉLECTIONNER UN ACTIF
+    function selectAsset(tel, name, price) {
+        selectedShopTel = tel;
+        currentSharePrice = price;
+        document.getElementById('active-asset-title').innerText = name;
         
-        const total = price * qty;
+        // Relancer l'init pour mettre à jour la classe 'active' dans la liste
+        initTradingPlatform(); 
         
+        // Simuler mouvement graphique IQ Style
+        animateChart();
+    }
+
+    // 4. PASSER UN ORDRE (IQ STYLE - Hausse/Baisse simplifié)
+    function placeOrder(direction) {
+        if(!selectedShopTel) return alert("Sélectionnez une boutique à trader.");
+        
+        const investAmount = parseInt(document.getElementById('trade-amount').value);
+        if(investAmount < 10) return alert("Investissement minimum: 10 BLL");
+
         db.ref('accounts/' + currentUser.tel + '/balance').get().then(s => {
-            const currentBalance = s.val();
+            const currentBalance = s.val() || 0;
+            if(currentBalance < investAmount) return alert("Solde insuffisant sur votre compte réel.");
+
+            // Débiter
+            db.ref('accounts/' + currentUser.tel + '/balance').set(currentBalance - investAmount);
             
-            if(type === 'BUY') {
-                if(currentBalance < total) return alert("Fonds insuffisants sur votre compte BOLOLO");
-                db.ref('accounts/' + currentUser.tel + '/balance').set(currentBalance - total);
-                alert(`Achat de ${qty} parts de la boutique ${shopTel} réussi !`);
-            } else {
-                db.ref('accounts/' + currentUser.tel + '/balance').set(currentBalance + (total * 0.95)); // Commission de 5% à la vente
-                alert(`Vente réussie ! +${total * 0.95} BLL crédités.`);
-            }
+            // Simulation Résultat rapide (IQ Style 3 secondes)
+            alert(`Ordre ${direction} placé sur ${document.getElementById('active-asset-title').innerText} pour ${investAmount} BLL.\nRésultat dans 3 secondes...`);
+            
+            setTimeout(() => {
+                const win = Math.random() > 0.45; // 55% de chance de perdre (Probabilité Broker)
+                if(win) {
+                    const profit = Math.floor(investAmount * 1.87); // Gain +87%
+                    db.ref('accounts/' + currentUser.tel + '/balance').transaction(b => (b || 0) + profit);
+                    alert(`✅ GAGNÉ ! +${profit} BLL crédités.`);
+                } else {
+                    alert(`❌ PERDU ! L'actif a expiré hors de votre prévision.`);
+                }
+            }, 3000);
         });
+    }
+
+    // UTILITAIRES DESIGN
+    function adjustAmount(val) {
+        const inp = document.getElementById('trade-amount');
+        let newV = parseInt(inp.value) + val;
+        if(newV < 10) newV = 10;
+        inp.value = newV;
+        updateProfitDisplay();
+    }
+
+    function updateProfitDisplay() {
+        const amt = parseInt(document.getElementById('trade-amount').value) || 0;
+        const profit = (amt * 1.87).toFixed(2);
+        document.getElementById('profit-bll').innerText = profit + " BLL";
+    }
+
+    function animateChart() {
+        const dot = document.querySelector('.price-dot');
+        // Animation simpliste du point de prix
+        setInterval(() => {
+            const randomTop = 30 + Math.random() * 40; // entre 30% et 70%
+            dot.style.top = randomTop + '%';
+        }, 1000);
     }
 </script>
 </body>
