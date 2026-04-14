@@ -31,7 +31,7 @@
         .btn-deposit { background: #22c55e; color: white; }
         .btn-quota { background: var(--primary); color: white; }
         .btn-block { background: #ef4444; color: white; }
-        .btn-unblock { background: #475569; color: white; }
+        .btn-del { background: #f1f5f9; color: #64748b; }
     </style>
 </head>
 <body>
@@ -50,7 +50,7 @@
     <div class="stats-grid">
         <div class="stat-card"><h3>Inscrits</h3><p id="stat-users">0</p></div>
         <div class="stat-card"><h3>Articles</h3><p id="stat-articles">0</p></div>
-        <div class="stat-card"><h3>Total BLL</h3><p id="stat-balance">0 BLL</p></div>
+        <div class="stat-card"><h3>Masse BLL</h3><p id="stat-balance">0 BLL</p></div>
         <div class="stat-card"><h3>Bloqués</h3><p id="stat-blocked" style="color:#ef4444">0</p></div>
     </div>
 
@@ -58,9 +58,9 @@
         <table>
             <thead>
                 <tr>
-                    <th>UTILISATEUR</th>
+                    <th>BOUTIQUE</th>
                     <th>SOLDE</th>
-                    <th>INFOS</th>
+                    <th>STATUT & PLAN</th>
                     <th>ACTIONS</th>
                 </tr>
             </thead>
@@ -74,7 +74,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    function init() {
+    function refreshList() {
         db.ref('accounts').on('value', (snap) => {
             const data = snap.val() || {};
             const accounts = Object.values(data);
@@ -90,22 +90,23 @@
                         <div class="user-cell">
                             <img src="${user.shopLogo || 'https://via.placeholder.com/45'}" class="u-logo">
                             <div>
-                                <div style="font-weight:700;">${user.shopName || 'Boutique'}</div>
+                                <div style="font-weight:700;">${user.shopName || 'Sans Nom'}</div>
                                 <div style="font-size:0.75rem;">${user.tel}</div>
                             </div>
                         </div>
                     </td>
                     <td><b style="color:var(--primary); font-size:1rem;">${user.balance || 0} BLL</b></td>
                     <td>
-                        Plan: <b>${user.plan || 'Gratuit'}</b><br>
-                        Quota: ${user.catalog ? user.catalog.length : 0} / ${user.limit || 2}
+                        Plan: <b>${user.plan || 'Gratuit'}</b> (${user.catalog ? user.catalog.length : 0}/${user.limit || 2})<br>
+                        <span style="font-size:10px; color:${user.blocked ? 'red':'green'}">${user.blocked ? '❌ BLOQUÉ':'✅ ACTIF'}</span>
                     </td>
                     <td>
                         <button class="btn btn-deposit" onclick="makeDeposit('${user.tel}')">+ Dépôt</button>
                         <button class="btn btn-quota" onclick="updateQuota('${user.tel}', ${user.limit || 2})">Quota</button>
-                        <button class="btn ${user.blocked ? 'btn-unblock' : 'btn-block'}" onclick="toggleBlock('${user.tel}', ${user.blocked})">
+                        <button class="btn ${user.blocked ? 'btn-unblock' : 'btn-block'}" style="background:${user.blocked ? '#22c55e':''}" onclick="toggleBlock('${user.tel}', ${user.blocked})">
                             ${user.blocked ? 'Débloquer' : 'Bloquer'}
                         </button>
+                        <button class="btn btn-del" onclick="deleteUser('${user.tel}')">🗑️</button>
                     </td>
                 </tr>
             `).join('');
@@ -113,10 +114,10 @@
     }
 
     function makeDeposit(tel) {
-        const montant = prompt("Montant du versement physique (FCFA / BLL) :");
+        const montant = prompt("Montant du versement physique (FCFA vers BLL) :");
         if (montant && !isNaN(montant)) {
             db.ref('accounts/' + tel + '/balance').transaction(b => (b || 0) + parseInt(montant));
-            alert("Versement effectué avec succès !");
+            alert("Compte rechargé !");
         }
     }
 
@@ -125,8 +126,9 @@
         const n = prompt("Nouveau quota d'articles :", current);
         if (n) db.ref('accounts/' + tel).update({ limit: parseInt(n) });
     }
+    function deleteUser(tel) { if(confirm("Supprimer cette boutique ?")) db.ref('accounts/' + tel).remove(); }
 
-    init();
+    refreshList();
 </script>
 </body>
 </html>
