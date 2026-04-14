@@ -10,139 +10,246 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
     <style>
-        /* Vos styles originaux conservés */
         :root { --primary: #6366f1; --sidebar-bg: #0f172a; --bg-main: #f1f5f9; }
-        body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg-main); display: flex; min-height: 100vh; }
-        .sidebar { width: 260px; background: var(--sidebar-bg); color: white; position: fixed; height: 100vh; display: flex; flex-direction: column; }
+        body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg-main); display: flex; min-height: 100vh; overflow-x: hidden; }
+        
+        /* SIDEBAR */
+        .sidebar { width: 260px; background: var(--sidebar-bg); color: white; position: fixed; height: 100vh; display: flex; flex-direction: column; z-index: 100; }
         .sidebar-header { padding: 30px 20px; font-size: 1.2rem; font-weight: 800; color: var(--primary); border-bottom: 1px solid #1e293b; }
         .nav-item { padding: 15px 25px; color: #94a3b8; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 10px; }
+        .nav-item:hover { background: #1e293b; color: white; }
         .nav-item.active { background: #1e293b; color: white; border-left: 4px solid var(--primary); }
-        .main-content { margin-left: 260px; flex: 1; padding: 40px; }
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+
+        /* MAIN CONTENT */
+        .main-content { margin-left: 260px; flex: 1; padding: 40px; width: calc(100% - 260px); }
+        
+        /* SEARCH & HEADER */
+        .header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .search-container { position: relative; width: 300px; }
+        .search-input { width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #ddd; outline: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+
+        /* STATS */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
         .stat-card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         .stat-card h3 { margin: 0; font-size: 0.8rem; color: #64748b; text-transform: uppercase; }
-        .stat-card p { margin: 10px 0 0; font-size: 1.8rem; font-weight: 800; color: #0f172a; }
-        .data-card { background: white; border-radius: 16px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { text-align: left; padding: 15px; color: #64748b; border-bottom: 2px solid #f1f5f9; }
-        td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
-        .user-cell { display: flex; align-items: center; gap: 12px; }
-        .u-logo { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: #eee; }
-        .badge { padding: 5px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 700; }
+        .stat-card p { margin: 10px 0 0; font-size: 1.5rem; font-weight: 800; color: #0f172a; }
+
+        /* TABLE & CARDS */
+        .data-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th { text-align: left; padding: 15px; color: #64748b; border-bottom: 2px solid #f1f5f9; font-size: 0.8rem; }
+        td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.85rem; }
+        
+        .u-info { display: flex; align-items: center; gap: 10px; }
+        .u-logo { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #eee; }
+
+        /* BOUTONS ACTIONS */
+        .btn { border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.7rem; transition: 0.2s; margin-right: 4px; }
+        .btn-deposit { background: #22c55e; color: white; }
+        .btn-quota { background: #6366f1; color: white; }
+        .btn-block { background: #f59e0b; color: white; }
+        .btn-unblock { background: #94a3b8; color: white; }
+        .btn-del { background: #ef4444; color: white; }
+
+        .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.6rem; font-weight: 800; }
         .badge-active { background: #dcfce7; color: #15803d; }
         .badge-blocked { background: #fee2e2; color: #b91c1c; }
-        .btn { border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.8rem; }
-        .btn-quota { background: var(--primary); color: white; }
-        .btn-block { background: #ef4444; color: white; }
-        .btn-unblock { background: #22c55e; color: white; }
-        .btn-del { background: #f1f5f9; color: #64748b; }
+        
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
     <div class="sidebar-header">BOLOLO MASTER</div>
-    <div class="nav-item active">👤 Utilisateurs</div>
+    <div class="nav-item active" id="nav-shops" onclick="switchTab('shops')">👤 Gestion Boutiques</div>
+    <div class="nav-item" id="nav-trans" onclick="switchTab('trans')">💸 Transactions</div>
 </div>
 
 <div class="main-content">
-    <header>
-        <h1>Gestion des Boutiques</h1>
-        <button class="btn btn-quota" onclick="refreshList()">Actualiser</button>
-    </header>
-
-    <div class="stats-grid">
-        <div class="stat-card"><h3>Inscrits</h3><p id="stat-users">0</p></div>
-        <div class="stat-card"><h3>Articles</h3><p id="stat-articles">0</p></div>
-        <div class="stat-card"><h3>Bloqués</h3><p id="stat-blocked" style="color:#ef4444">0</p></div>
+    <div class="header-flex">
+        <h1 id="page-title">Administration Système</h1>
+        <div class="search-container" id="search-box">
+            <input type="text" class="search-input" id="shop-search" placeholder="Rechercher une boutique..." oninput="filterShops(this.value)">
+        </div>
     </div>
 
-    <div class="data-card">
-        <table>
-            <thead>
-                <tr>
-                    <th>UTILISATEUR</th>
-                    <th>STATUT</th>
-                    <th>ARTICLES</th>
-                    <th>QUOTA</th>
-                    <th>ACTIONS</th>
-                </tr>
-            </thead>
-            <tbody id="user-list"></tbody>
-        </table>
+    <div id="view-shops">
+        <div class="stats-grid">
+            <div class="stat-card"><h3>Utilisateurs</h3><p id="stat-u">0</p></div>
+            <div class="stat-card"><h3>Total BLL</h3><p id="stat-b">0</p></div>
+            <div class="stat-card"><h3>Articles</h3><p id="stat-a">0</p></div>
+            <div class="stat-card"><h3>Bloqués</h3><p id="stat-bl" style="color:red">0</p></div>
+        </div>
+
+        <div class="data-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>BOUTIQUE</th>
+                        <th>SOLDE</th>
+                        <th>PLAN / STATUT</th>
+                        <th>CATALOGUE</th>
+                        <th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody id="user-list"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="view-trans" class="hidden">
+        <div class="data-card">
+            <h3>Historique Global des Ventes</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>DATE</th>
+                        <th>CLIENT</th>
+                        <th>VENDEUR</th>
+                        <th>PRODUIT</th>
+                        <th>MONTANT</th>
+                        <th>STATUT</th>
+                    </tr>
+                </thead>
+                <tbody id="trans-list"></tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 <script>
-    // INITIALISATION FIREBASE
-    const firebaseConfig = {
-        databaseURL: "https://bololoshop-bf59b-default-rtdb.firebaseio.com/"
-    };
+    const firebaseConfig = { databaseURL: "https://bololoshop-bf59b-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    function refreshList() {
-        const tbody = document.getElementById('user-list');
-        
-        // On écoute la base de données en temps réel
-        db.ref('accounts').on('value', (snapshot) => {
-            const data = snapshot.val() || {};
-            const accounts = Object.values(data);
-            
-            // Stats
-            document.getElementById('stat-users').innerText = accounts.length;
-            document.getElementById('stat-blocked').innerText = accounts.filter(a => a.blocked).length;
-            document.getElementById('stat-articles').innerText = accounts.reduce((sum, a) => sum + (a.catalog ? a.catalog.length : 0), 0);
+    let allAccounts = [];
 
-            tbody.innerHTML = accounts.map((user) => `
-                <tr>
-                    <td>
-                        <div class="user-cell">
-                            <img src="${user.shopLogo || 'https://via.placeholder.com/45'}" class="u-logo">
-                            <div>
-                                <div style="font-weight:700;">${user.shopName || 'Boutique'}</div>
-                                <div style="font-size:0.75rem; color:#64748b;">${user.tel}</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        <span class="badge ${user.blocked ? 'badge-blocked' : 'badge-active'}">
-                            ${user.blocked ? 'BLOQUÉ' : 'ACTIF'}
-                        </span>
-                    </td>
-                    <td><b>${user.catalog ? user.catalog.length : 0}</b></td>
-                    <td><b style="color:var(--primary)">${user.limit || 2}</b></td>
-                    <td>
-                        <button class="btn btn-quota" onclick="updateQuota('${user.tel}', ${user.limit || 2})">Quota</button>
-                        <button class="btn ${user.blocked ? 'btn-unblock' : 'btn-block'}" onclick="toggleBlock('${user.tel}', ${user.blocked})">
-                            ${user.blocked ? 'Débloquer' : 'Bloquer'}
-                        </button>
-                        <button class="btn btn-del" onclick="deleteUser('${user.tel}')">🗑️</button>
-                    </td>
-                </tr>
-            `).join('');
+    function loadData() {
+        db.ref('accounts').on('value', snap => {
+            const data = snap.val() || {};
+            allAccounts = Object.values(data);
+            
+            // Mise à jour des stats
+            document.getElementById('stat-u').innerText = allAccounts.length;
+            document.getElementById('stat-b').innerText = allAccounts.reduce((s, a) => s + (a.balance || 0), 0).toLocaleString() + " BLL";
+            document.getElementById('stat-a').innerText = allAccounts.reduce((s, a) => s + (a.catalog ? a.catalog.length : 0), 0);
+            document.getElementById('stat-bl').innerText = allAccounts.filter(a => a.blocked).length;
+
+            renderShops(allAccounts);
+            renderAllTransactions(allAccounts);
         });
     }
 
-    function toggleBlock(tel, currentStatus) {
-        db.ref('accounts/' + tel).update({ blocked: !currentStatus });
+    // RENDU DES BOUTIQUES
+    function renderShops(list) {
+        document.getElementById('user-list').innerHTML = list.map(u => `
+            <tr>
+                <td>
+                    <div class="u-info">
+                        <img src="${u.shopLogo || 'bololo.png'}" class="u-logo" onerror="this.src='https://via.placeholder.com/40'">
+                        <div>
+                            <b>${u.shopName || 'Sans Nom'}</b><br>
+                            <small>${u.tel}</small>
+                        </div>
+                    </div>
+                </td>
+                <td><b style="color:var(--primary)">${(u.balance || 0).toLocaleString()} BLL</b></td>
+                <td>
+                    <b>${u.plan || 'Gratuit'}</b><br>
+                    <span class="badge ${u.blocked ? 'badge-blocked' : 'badge-active'}">
+                        ${u.blocked ? 'BLOQUÉ' : 'ACTIF'}
+                    </span>
+                </td>
+                <td><b>${u.catalog ? u.catalog.length : 0}</b> / ${u.limit || 10}</td>
+                <td>
+                    <button class="btn btn-deposit" onclick="deposit('${u.tel}')" title="Recharger">+ BLL</button>
+                    <button class="btn btn-quota" onclick="updateQuota('${u.tel}', ${u.limit || 10})">Quota</button>
+                    <button class="btn ${u.blocked ? 'btn-unblock' : 'btn-block'}" onclick="toggleBlock('${u.tel}', ${u.blocked})">
+                        ${u.blocked ? 'Débloquer' : 'Bloquer'}
+                    </button>
+                    <button class="btn btn-del" onclick="deleteUser('${u.tel}')">🗑️</button>
+                </td>
+            </tr>
+        `).join('');
     }
 
-    function updateQuota(tel, currentQuota) {
-        const n = prompt("Nouveau quota pour " + tel, currentQuota);
-        if (n !== null) {
-            db.ref('accounts/' + tel).update({ limit: parseInt(n) });
-        }
+    // RENDU DES TRANSACTIONS (HISTORIQUE GLOBAL)
+    function renderAllTransactions(accounts) {
+        let globalOrders = [];
+        accounts.forEach(acc => {
+            if(acc.orders) {
+                acc.orders.forEach(order => {
+                    globalOrders.push({
+                        ...order,
+                        buyerName: acc.shopName || acc.tel,
+                        buyerTel: acc.tel
+                    });
+                });
+            }
+        });
+
+        // Trier par date (plus récent en haut)
+        globalOrders.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        document.getElementById('trans-list').innerHTML = globalOrders.map(o => `
+            <tr>
+                <td><small>${o.date}</small></td>
+                <td><b>${o.buyerName}</b><br><small>${o.buyerTel}</small></td>
+                <td><b>${o.sellerName}</b><br><small>${o.sellerTel}</small></td>
+                <td>
+                    <div style="display:flex; align-items:center; gap:5px;">
+                        <img src="${o.img || 'bololo.png'}" style="width:30px; height:30px; border-radius:5px; object-fit:cover;">
+                        ${o.name}
+                    </div>
+                </td>
+                <td><b style="color:#22c55e">${o.price} BLL</b></td>
+                <td><span class="badge ${o.status === 'Livré' ? 'badge-active' : 'badge-blocked'}">${o.status}</span></td>
+            </tr>
+        `).join('');
+    }
+
+    // RECHERCHE AUTOCOMPLETION / FILTRE
+    function filterShops(val) {
+        const filtered = allAccounts.filter(a => 
+            (a.shopName && a.shopName.toLowerCase().includes(val.toLowerCase())) || 
+            a.tel.includes(val)
+        );
+        renderShops(filtered);
+    }
+
+    // NAVIGATION
+    function switchTab(tab) {
+        document.getElementById('view-shops').classList.toggle('hidden', tab !== 'shops');
+        document.getElementById('view-trans').classList.toggle('hidden', tab !== 'trans');
+        document.getElementById('nav-shops').classList.toggle('active', tab === 'shops');
+        document.getElementById('nav-trans').classList.toggle('active', tab === 'trans');
+        document.getElementById('search-box').classList.toggle('hidden', tab !== 'shops');
+        document.getElementById('page-title').innerText = tab === 'shops' ? "Administration Système" : "Suivi des Transactions";
+    }
+
+    // ACTIONS FONCTIONNELLES
+    function deposit(tel) {
+        const amt = prompt("Montant à créditer pour " + tel + " :");
+        if (amt && !isNaN(amt)) db.ref('accounts/' + tel + '/balance').transaction(b => (b || 0) + parseInt(amt));
+    }
+
+    function updateQuota(tel, current) {
+        const n = prompt("Nouvelle limite d'articles :", current);
+        if (n && !isNaN(n)) db.ref('accounts/' + tel).update({ limit: parseInt(n) });
+    }
+
+    function toggleBlock(tel, status) {
+        db.ref('accounts/' + tel).update({ blocked: !status });
     }
 
     function deleteUser(tel) {
-        if(confirm("Supprimer définitivement cette boutique ?")) {
-            db.ref('accounts/' + tel).remove();
+        if(confirm("⚠️ Supprimer DÉFINITIVEMENT la boutique " + tel + " ?")) {
+            db.ref('accounts/' + tel).remove().then(() => alert("Supprimé !"));
         }
     }
 
-    refreshList();
+    loadData();
 </script>
 </body>
 </html>
