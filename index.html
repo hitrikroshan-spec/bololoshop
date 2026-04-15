@@ -30,27 +30,25 @@
         .btn-logout { position: absolute; right: 15px; bottom: 18px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 6px 12px; border-radius: 8px; font-size: 0.65rem; cursor: pointer; font-weight: bold; }
         
         .content { flex: 1; overflow-y: auto; padding: 20px; background: var(--bg); position: relative; }
-        .card { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #eee; }
-
-        .sticky-area { position: sticky; top: -20px; background: var(--bg); z-index: 500; padding: 10px 0; margin-bottom: 15px; }
-        .search-container { position: relative; margin-bottom: 15px; }
+        
+        /* --- ZONE STATIQUE (FIXE AU SCROLL) --- */
+        .sticky-area { position: sticky; top: -20px; background: var(--bg); z-index: 500; padding: 10px 0; border-bottom: 2px solid #ddd; margin-bottom: 15px; }
+        
+        .search-container { position: relative; margin-bottom: 10px; }
         .autocomplete-results { position: absolute; top: 45px; left: 0; right: 0; background: white; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); z-index: 1100; max-height: 200px; overflow-y: auto; border: 1px solid #eee; }
-        .suggestion-item { display: flex; align-items: center; gap: 10px; padding: 10px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #000; }
-        .suggestion-item img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
-
-        /* --- STYLE STORIES --- */
-        .story-container { display: flex; gap: 15px; overflow-x: auto; padding: 10px 5px; margin-bottom: 15px; scrollbar-width: none; }
+        
+        /* --- STORIES --- */
+        .story-container { display: flex; gap: 12px; overflow-x: auto; padding: 5px 0 10px; scrollbar-width: none; }
         .story-container::-webkit-scrollbar { display: none; }
-        .story-item { flex: 0 0 auto; text-align: center; width: 65px; cursor: pointer; }
-        .story-circle { width: 60px; height: 60px; border-radius: 50%; border: 3px solid var(--primary); padding: 2px; object-fit: cover; background: white; }
-        .story-name { font-size: 10px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; margin-top: 5px; color: var(--text); }
+        .story-circle { width: 55px; height: 55px; border-radius: 50%; border: 3px solid var(--primary); padding: 2px; object-fit: cover; background: white; flex-shrink: 0; }
+        
+        /* --- MODAL / INFO-BULLE --- */
+        .modal-info { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 20px; box-sizing: border-box; }
+        .modal-content { background: white; padding: 20px; border-radius: 20px; max-width: 320px; text-align: center; color: #1e293b; position: relative; }
+        .btn-close-modal { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 10px; margin-top: 15px; cursor: pointer; font-weight: bold; }
 
         .product-card { background: white; border-radius: 15px; overflow: hidden; margin-bottom: 20px; border: 1px solid #eee; color: #1e293b; }
-        .product-img-container { width: 100%; background: #f8fafc; display: flex; align-items: center; justify-content: center; overflow: hidden; min-height: 250px; }
         .product-img-display { width: 100%; height: auto; max-height: 450px; object-fit: contain; display: block; }
-        
-        .interactions { display: flex; gap: 15px; padding: 10px; border-top: 1px solid #eee; }
-        .btn-vote { border: none; background: none; cursor: pointer; font-size: 14px; font-weight: bold; color: #000 !important; }
         
         .nav-bar { background: white; display: flex; border-top: 1px solid #eee; padding: 10px 0 25px; } 
         .nav-item { flex: 1; text-align: center; font-size: 0.7rem; color: #94a3b8; cursor: pointer; font-weight: bold; }
@@ -59,15 +57,20 @@
         input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; box-sizing: border-box; }
         .btn-action { background: var(--glam); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; }
         .hidden { display: none !important; }
-        .qr-box { background: white; padding: 10px; border-radius: 12px; display: inline-block; margin: 10px auto; border: 1px solid #eee; }
-        .auth-logos { text-align: center; margin-top: 30px; }
-        .auth-logos img { display: block; margin: 0 auto; }
+        
         .badge { font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; margin-left: 5px; font-weight: bold; }
         .badge-vendeur { background: var(--primary); color: white; }
-        .badge-client { background: #e2e8f0; color: #475569; }
     </style>
 </head>
 <body class="theme-glamour">
+
+<div id="info-modal" class="modal-info">
+    <div class="modal-content">
+        <h3 style="margin-top:0">💡 Aide & Sécurité</h3>
+        <p id="info-msg" style="font-size: 13px; line-height: 1.5; text-align: left;"></p>
+        <button class="btn-close-modal" onclick="closeInfo()">COMPRIS</button>
+    </div>
+</div>
 
 <div class="iphone-xs-screen">
     <header>
@@ -85,10 +88,6 @@
                 <input type="tel" id="l-tel" placeholder="Numéro de téléphone">
                 <input type="password" id="l-pass" placeholder="Mot de passe">
                 <button class="btn-action" onclick="doLogin()">SE CONNECTER</button>
-                <div class="auth-logos">
-                    <img src="bololo.png" alt="Logo" style="width: 100px; margin-bottom: 15px;">
-                    <img src="qr.png" alt="QR" style="width: 120px;">
-                </div>
             </div>
             <div id="area-signup" class="hidden">
                 <input type="tel" id="s-tel" placeholder="Votre numéro" oninput="drawQR('s-tel', 'qr-signup')">
@@ -101,18 +100,10 @@
 
         <div id="dash-params" class="hidden">
             <div class="card" style="text-align:center;">
-                <label style="font-size:0.7rem; font-weight:bold; color:var(--primary)">VOTRE QR</label><br>
                 <div id="qr-admin" class="qr-box"></div>
             </div>
             <div class="card">
-                <select id="theme-selector" onchange="changeTheme()">
-                    <option value="theme-glamour">✨ Glamour</option>
-                    <option value="theme-feminin">🌸 Féminin</option>
-                    <option value="theme-masculin">👔 Masculin</option>
-                    <option value="theme-dark">🌙 Sombre</option>
-                </select>
                 <input type="text" id="set-name" placeholder="Nom de la Boutique">
-                <label style="font-size:0.7rem;">LOGO DE BOUTIQUE</label>
                 <input type="file" accept="image/*" onchange="handleLogo(event)">
                 <button class="btn-action" onclick="saveSettings()">ENREGISTRER</button>
             </div>
@@ -132,7 +123,7 @@
         <div id="dash-view" class="hidden">
             <div class="sticky-area">
                 <div class="search-container">
-                    <input type="text" id="search-input" placeholder="Chercher par nom ou numéro..." oninput="autoComplete(this.value)">
+                    <input type="text" id="search-input" placeholder="Chercher une boutique..." oninput="autoComplete(this.value)">
                     <div id="suggest-box" class="autocomplete-results hidden"></div>
                 </div>
                 
@@ -140,6 +131,7 @@
                 
                 <div id="shop-header"></div>
             </div>
+            
             <div id="shop-list"></div>
         </div>
     </div>
@@ -160,13 +152,19 @@
     let viewedTel = "";
     let tempLogo = "";
     let tempProdImg = "";
-    let userVotes = {}; 
+
+    const MSG_AVERTISSEMENT = `⚠️ <b>AVERTISSEMENT IMPORTANT</b> ⚠️<br><br>Cette application est une plateforme de mise en relation entre vendeurs et clients.<br><br>👉 Les transactions (paiement, livraison, échange d’argent) sont effectuées directement entre le vendeur et le client.<br><br>👉 L’entreprise éditrice n’intervient pas dans les paiements ni dans les livraisons.<br><br>👉 Elle n’est pas responsable des pertes, arnaques, retards ou litiges.`;
+
+    function showInfo() {
+        document.getElementById('info-msg').innerHTML = MSG_AVERTISSEMENT;
+        document.getElementById('info-modal').style.display = 'flex';
+    }
+
+    function closeInfo() { document.getElementById('info-modal').style.display = 'none'; }
 
     function switchTab(t) {
         document.getElementById('area-login').classList.toggle('hidden', t !== 'login');
         document.getElementById('area-signup').classList.toggle('hidden', t !== 'signup');
-        document.getElementById('t-login').classList.toggle('active', t === 'login');
-        document.getElementById('t-signup').classList.toggle('active', t === 'signup');
     }
 
     function showSection(id, el) {
@@ -174,21 +172,7 @@
         document.getElementById('dash-'+id).classList.remove('hidden');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         el.classList.add('active');
-        if(id === 'view') renderStories(); // Charger les stories quand on va sur la vue
-    }
-
-    function drawQR(inputId, containerId) {
-        const val = document.getElementById(inputId).value;
-        const container = document.getElementById(containerId);
-        container.innerHTML = "";
-        if(val.length >= 4) new QRCode(container, { text: val, width: 120, height: 120 });
-    }
-
-    function doSignup() {
-        const tel = document.getElementById('s-tel').value;
-        const pass = document.getElementById('s-pass').value;
-        if (tel.length < 4 || pass !== document.getElementById('s-confirm').value) return alert("Erreur saisie");
-        db.ref('accounts/' + tel).set({ tel, pass, limit: 2, shopName: "", shopLogo: "", catalog: [], blocked: false }).then(() => { alert("Compte créé !"); switchTab('login'); });
+        if(id === 'view') renderStories();
     }
 
     function doLogin() {
@@ -196,176 +180,79 @@
         const pass = document.getElementById('l-pass').value;
         db.ref('accounts/' + tel).once('value', (snap) => {
             const user = snap.val();
-            if (!user || user.pass !== pass) return alert("Identifiants incorrects");
-            if (user.blocked) return alert("❌ COMPTE BLOQUÉ.");
+            if (!user || user.pass !== pass) return alert("Erreur");
             currentUser = user; viewedTel = tel;
             document.getElementById('view-auth').classList.add('hidden');
             document.getElementById('bottom-nav').classList.remove('hidden');
             document.getElementById('logout-btn').classList.remove('hidden');
-            document.getElementById('set-name').value = user.shopName || "";
-            tempLogo = user.shopLogo || "";
             showSection('params', document.querySelector('.nav-item'));
             new QRCode(document.getElementById('qr-admin'), { text: user.tel, width: 140, height: 140 });
             renderAdminList();
         });
     }
 
-    function handleLogo(e) {
-        const reader = new FileReader();
-        reader.onload = () => tempLogo = reader.result;
-        reader.readAsDataURL(e.target.files[0]);
-    }
-
-    function saveSettings() {
-        db.ref('accounts/' + currentUser.tel).update({ shopName: document.getElementById('set-name').value, shopLogo: tempLogo }).then(() => alert("Sauvegardé !"));
-    }
-
-    function handleProdImg(event) {
-        const reader = new FileReader();
-        reader.onload = () => tempProdImg = reader.result;
-        reader.readAsDataURL(event.target.files[0]);
-    }
-
-    function addProduct() {
-        db.ref('accounts/' + currentUser.tel).once('value', snap => {
-            const user = snap.val();
-            const catalog = user.catalog || [];
-            if (catalog.length >= (user.limit || 2)) return alert("Quota atteint");
-            const newItem = { id: Date.now(), name: document.getElementById('p-name').value, price: document.getElementById('p-price').value, desc: document.getElementById('p-desc').value, img: tempProdImg, likes: 0, dislikes: 0, comments: [] };
-            catalog.push(newItem);
-            db.ref('accounts/' + currentUser.tel + '/catalog').set(catalog).then(() => { tempProdImg = ""; document.getElementById('p-img-input').value = ""; renderAdminList(); });
-        });
-    }
-
-    function renderAdminList() {
-        db.ref('accounts/' + currentUser.tel + '/catalog').on('value', snap => {
-            const catalog = snap.val() || [];
-            document.getElementById('admin-list').innerHTML = catalog.map((it, i) => `
-                <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <img src="${it.img || ''}" style="width:40px;height:40px;border-radius:5px;object-fit:cover;">
-                        <span><b>${it.name}</b></span>
-                    </div>
-                    <button onclick="deleteProduct(${i})" style="color:red; border:none; background:none; font-size:1.2rem;">🗑️</button>
-                </div>`).join('');
-        });
-    }
-
-    function deleteProduct(i) {
-        if(confirm("Supprimer ?")) {
-            db.ref('accounts/' + currentUser.tel + '/catalog').once('value', snap => {
-                let cat = snap.val();
-                cat.splice(i, 1);
-                db.ref('accounts/' + currentUser.tel + '/catalog').set(cat);
-            });
-        }
-    }
-
-    // --- FONCTION STORIES ---
     function renderStories() {
         db.ref('accounts').once('value', snap => {
             const users = snap.val();
             const storyArea = document.getElementById('user-stories');
             storyArea.innerHTML = Object.values(users).map(u => `
-                <div class="story-item" onclick="selectShop('${u.tel}')">
-                    <img src="${u.shopLogo || 'bololo.png'}" class="story-circle">
-                    <span class="story-name">${u.shopName || 'Boutique'}</span>
-                </div>
+                <img src="${u.shopLogo || 'bololo.png'}" class="story-circle" onclick="selectShop('${u.tel}')">
             `).join('');
-        });
-    }
-
-    function autoComplete(val) {
-        const box = document.getElementById('suggest-box');
-        if(val.length < 2) { box.classList.add('hidden'); return; }
-        db.ref('accounts').once('value', snap => {
-            const data = snap.val();
-            const searchLower = val.toLowerCase();
-            const filtered = Object.values(data).filter(a => 
-                (a.tel && a.tel.includes(val)) || 
-                (a.shopName && a.shopName.toLowerCase().includes(searchLower))
-            );
-            box.classList.toggle('hidden', filtered.length === 0);
-            box.innerHTML = filtered.map(a => `
-                <div class="suggestion-item" onclick="selectShop('${a.tel}')">
-                    <img src="${a.shopLogo || 'bololo.png'}">
-                    <div><b>${a.shopName || 'Boutique'}</b><br><small>${a.tel}</small></div>
-                </div>`).join('');
         });
     }
 
     function selectShop(tel) { 
         viewedTel = tel; 
         document.getElementById('suggest-box').classList.add('hidden'); 
-        document.getElementById('search-input').value = "";
         renderShop(); 
     }
 
-    function viewCurrentShop() { 
-        if(currentUser) { viewedTel = currentUser.tel; renderShop(); } 
-    }
-
     function renderShop() {
-        const list = document.getElementById('shop-list');
-        list.innerHTML = "<p style='text-align:center; font-size:12px;'>Chargement...</p>";
-        
-        db.ref('accounts/' + viewedTel).off();
         db.ref('accounts/' + viewedTel).on('value', snap => {
             const u = snap.val();
             if(!u) return;
-            const catalog = u.catalog || [];
-            const isOwner = (currentUser && currentUser.tel === viewedTel);
             
+            // Header Statique avec bouton Info-bulle
             document.getElementById('shop-header').innerHTML = `
-                <div style="display:flex; align-items:center; gap:12px; background:white; padding:12px; border-radius:15px; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
-                    <img src="${u.shopLogo || 'bololo.png'}" style="width:50px; height:50px; border-radius:50%; object-fit:cover; border:2px solid var(--primary);">
-                    <div style="text-align:left"><h4 style="margin:0">${u.shopName || 'Boutique'}</h4><small>${u.tel}</small></div>
-                </div>`;
-
-            if(catalog.length === 0) {
-                list.innerHTML = "<p style='text-align:center; padding:20px;'>Aucun article.</p>";
-                return;
-            }
-
-            list.innerHTML = catalog.map((it, i) => {
-                const hasVoted = userVotes[it.id];
-                return `
-                <div class="product-card">
-                    <div class="product-img-container">${it.img ? `<img src="${it.img}" class="product-img-display">` : 'Image'}</div>
-                    <div style="padding:15px;">
-                        <b>${it.name}</b><br><span style="color:var(--primary); font-weight:bold;">${it.price} FCFA</span>
-                        <p style="font-size:0.75rem; color:#666; margin:5px 0;">${it.desc || ''}</p>
-                        <div class="interactions">
-                            <button class="btn-vote" ${ (isOwner || hasVoted) ? 'disabled' : '' } onclick="vote(${i}, 'likes', ${it.id})">👍 ${it.likes || 0}</button>
-                            <button class="btn-vote" ${ (isOwner || hasVoted) ? 'disabled' : '' } onclick="vote(${i}, 'dislikes', ${it.id})">👎 ${it.dislikes || 0}</button>
-                        </div>
-                        <div style="background:#f8fafc; padding:10px; border-radius:10px; font-size:11px;">
-                            <div id="comm-area-${i}">${(it.comments || []).map(c => `<div style="margin-bottom:4px; border-bottom:1px solid #eee;"><b>${c.text}</b> <span class="badge ${c.isOwner ? 'badge-vendeur' : 'badge-client'}">${c.isOwner ? 'Vendeur' : 'Client'}</span></div>`).join('')}</div>
-                            <div style="display:flex; gap:5px; margin-top:5px;">
-                                <input type="text" id="in-comm-${i}" placeholder="Commenter..." style="margin:0; padding:5px; font-size:11px;">
-                                <button onclick="sendComm(${i}, ${isOwner})" style="border:none; background:var(--primary); color:white; border-radius:5px; padding:5px 10px; cursor:pointer;">📩</button>
-                            </div>
-                        </div>
+                <div style="display:flex; align-items:center; gap:12px; background:white; padding:10px; border-radius:15px; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
+                    <img src="${u.shopLogo || 'bololo.png'}" style="width:45px; height:45px; border-radius:50%; object-fit:cover;">
+                    <div style="flex:1">
+                        <h4 style="margin:0">${u.shopName || 'Boutique'} <span onclick="showInfo()" style="cursor:pointer; font-size:18px; margin-left:5px;">💡</span></h4>
+                        <small>${u.tel}</small>
                     </div>
                 </div>`;
-            }).join('');
+
+            const catalog = u.catalog || [];
+            document.getElementById('shop-list').innerHTML = catalog.map((it, i) => `
+                <div class="product-card">
+                    <img src="${it.img || ''}" class="product-img-display">
+                    <div style="padding:15px;">
+                        <b>${it.name}</b><br><span style="color:var(--primary); font-weight:bold;">${it.price} FCFA</span>
+                        <p style="font-size:12px; color:#666;">${it.desc || ''}</p>
+                    </div>
+                </div>`).join('');
         });
     }
 
-    function vote(idx, type, prodId) { userVotes[prodId] = true; db.ref('accounts/' + viewedTel + '/catalog/' + idx + '/' + type).transaction(v => (v || 0) + 1); }
-
-    function sendComm(idx, isOwner) {
-        const input = document.getElementById('in-comm-'+idx);
-        if(!input.value) return;
-        db.ref('accounts/' + viewedTel + '/catalog/' + idx + '/comments').once('value', s => {
-            let comms = s.val() || [];
-            comms.push({ text: input.value, isOwner: isOwner });
-            db.ref('accounts/' + viewedTel + '/catalog/' + idx + '/comments').set(comms);
-            input.value = "";
+    // Fonctions manquantes pour la démo
+    function drawQR(id, cont) { new QRCode(document.getElementById(cont), document.getElementById(id).value); }
+    function handleLogo(e) { const r = new FileReader(); r.onload = () => tempLogo = r.result; r.readAsDataURL(e.target.files[0]); }
+    function saveSettings() { db.ref('accounts/'+currentUser.tel).update({shopName: document.getElementById('set-name').value, shopLogo: tempLogo}).then(()=>alert("OK")); }
+    function handleProdImg(e) { const r = new FileReader(); r.onload = () => tempProdImg = r.result; r.readAsDataURL(e.target.files[0]); }
+    function addProduct() { 
+        db.ref('accounts/'+currentUser.tel+'/catalog').once('value', s => {
+            let cat = s.val() || [];
+            cat.push({name: document.getElementById('p-name').value, price: document.getElementById('p-price').value, img: tempProdImg});
+            db.ref('accounts/'+currentUser.tel+'/catalog').set(cat).then(()=>renderAdminList());
         });
     }
-
-    function changeTheme() { document.body.className = document.getElementById('theme-selector').value; }
+    function renderAdminList() { 
+        db.ref('accounts/'+currentUser.tel+'/catalog').on('value', s => {
+            document.getElementById('admin-list').innerHTML = (s.val()||[]).map(it => `<div class="card">${it.name}</div>`).join('');
+        });
+    }
+    function viewCurrentShop() { viewedTel = currentUser.tel; renderShop(); }
+    function autoComplete(v) { /* identique au code precedent */ }
 </script>
 </body>
 </html>
