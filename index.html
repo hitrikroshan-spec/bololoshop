@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head> 
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>BOLOLO Pro</title>
@@ -15,49 +15,59 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
     <style>
-        :root { --primary: #6366f1; --glam: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); --bg: #f1f5f9; --text: #1e293b; }
-        body.theme-glamour { --primary: #a855f7; --glam: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); --bg: #f1f5f9; }
+        /* PALETTE HARMONISÉE AVEC LE LOGO BOLOLO SHOP */
+        :root { 
+            --primary: #008080; /* Bleu canard du logo */
+            --accent: #ef7d11;  /* Orange du logo */
+            --glam: linear-gradient(135deg, #008080 0%, #ef7d11 100%); 
+            --bg: #f8fafb; 
+            --text: #1e293b; 
+        }
+
+        body.theme-glamour { --primary: #008080; --glam: linear-gradient(135deg, #008080 0%, #ef7d11 100%); --bg: #f8fafb; }
         body.theme-feminin { --primary: #ec4899; --glam: linear-gradient(135deg, #f472b6 0%, #ec4899 100%); --bg: #fff1f2; }
         body.theme-masculin { --primary: #0ea5e9; --glam: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%); --bg: #f0f9ff; }
-        body.theme-dark { --primary: #64748b; --glam: linear-gradient(135deg, #334155 0%, #0f172a 100%); --bg: #1e293b; --text: #f8fafc; }
+        body.theme-dark { --primary: #008080; --glam: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); --bg: #1e293b; --text: #f8fafc; }
         
         body { margin: 0; font-family: 'Inter', sans-serif; background: #e2e8f0; min-height: 100vh; display: flex; justify-content: center; align-items: center; color: var(--text); overscroll-behavior: none; }
 
-        .iphone-xs-screen { width: 100%; max-width: 400px; height: 100vh; background: white; display: flex; flex-direction: column; overflow: hidden; position: relative; border: none; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        .iphone-xs-screen { width: 100%; max-width: 400px; height: 100vh; background: white; display: flex; flex-direction: column; overflow: hidden; position: relative; border: none; box-shadow: 0 0 30px rgba(0,0,0,0.15); }
         
-        header { background: var(--glam); color: white; padding: 60px 20px 20px; text-align: center; font-weight: bold; font-size: 1.1rem; position: relative; z-index: 1000; }
+        header { background: var(--glam); color: white; padding: 60px 20px 20px; text-align: center; font-weight: bold; font-size: 1.2rem; position: relative; z-index: 1000; letter-spacing: 1px; }
 
-        .btn-logout { position: absolute; right: 15px; bottom: 18px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 6px 12px; border-radius: 8px; font-size: 0.65rem; cursor: pointer; font-weight: bold; }
+        .btn-logout { position: absolute; right: 15px; bottom: 18px; background: rgba(255,255,255,0.25); border: none; color: white; padding: 6px 12px; border-radius: 8px; font-size: 0.65rem; cursor: pointer; font-weight: bold; backdrop-filter: blur(5px); }
         
         .content { flex: 1; overflow-y: auto; padding: 20px; background: var(--bg); position: relative; }
-        .card { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #eee; }
+        .card { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 15px; border: 1px solid rgba(0,0,0,0.05); }
 
         .sticky-area { position: sticky; top: -20px; background: var(--bg); z-index: 500; padding: 10px 0; margin-bottom: 15px; }
         .search-container { position: relative; margin-bottom: 15px; }
-        .autocomplete-results { position: absolute; top: 45px; left: 0; right: 0; background: white; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); z-index: 1100; max-height: 200px; overflow-y: auto; border: 1px solid #eee; }
-        .suggestion-item { display: flex; align-items: center; gap: 10px; padding: 10px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #000; }
-        .suggestion-item img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
+        
+        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 16px; box-sizing: border-box; transition: 0.3s; }
+        input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.1); }
+
+        .btn-action { background: var(--glam); color: white; border: none; padding: 16px; width: 100%; border-radius: 14px; font-weight: bold; cursor: pointer; font-size: 1rem; box-shadow: 0 4px 15px rgba(0, 128, 128, 0.2); }
+        
+        .nav-bar { background: white; display: flex; border-top: 1px solid #eee; padding: 10px 0 25px; } 
+        .nav-item { flex: 1; text-align: center; font-size: 0.7rem; color: #94a3b8; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .nav-item.active { color: var(--primary); }
 
         .product-card { background: white; border-radius: 15px; overflow: hidden; margin-bottom: 20px; border: 1px solid #eee; color: #1e293b; }
         .product-img-container { width: 100%; background: #f8fafc; display: flex; align-items: center; justify-content: center; overflow: hidden; min-height: 250px; }
         .product-img-display { width: 100%; height: auto; max-height: 450px; object-fit: contain; display: block; }
         
         .interactions { display: flex; gap: 15px; padding: 10px; border-top: 1px solid #eee; }
-        .btn-vote { border: none; background: none; cursor: pointer; font-size: 14px; font-weight: bold; color: #000 !important; }
+        .btn-vote { border: none; background: none; cursor: pointer; font-size: 14px; font-weight: bold; color: var(--text) !important; }
         
-        .nav-bar { background: white; display: flex; border-top: 1px solid #eee; padding: 10px 0 25px; } 
-        .nav-item { flex: 1; text-align: center; font-size: 0.7rem; color: #94a3b8; cursor: pointer; font-weight: bold; }
-        .nav-item.active { color: var(--primary); }
+        .autocomplete-results { position: absolute; top: 50px; left: 0; right: 0; background: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 1100; max-height: 250px; overflow-y: auto; border: 1px solid #eee; }
+        .suggestion-item { display: flex; align-items: center; gap: 12px; padding: 12px; cursor: pointer; border-bottom: 1px solid #f8fafb; color: #000; font-size: 13px; }
+        .suggestion-item img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
 
-        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; box-sizing: border-box; }
-        .btn-action { background: var(--glam); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; }
-        .hidden { display: none !important; }
-        .qr-box { background: white; padding: 10px; border-radius: 12px; display: inline-block; margin: 10px auto; border: 1px solid #eee; }
-        .auth-logos { text-align: center; margin-top: 30px; }
-        .auth-logos img { display: block; margin: 0 auto; }
         .badge { font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; margin-left: 5px; font-weight: bold; }
         .badge-vendeur { background: var(--primary); color: white; }
-        .badge-client { background: #e2e8f0; color: #475569; }
+        .badge-client { background: var(--accent); color: white; }
+        .hidden { display: none !important; }
+        .qr-box { background: white; padding: 10px; border-radius: 12px; display: inline-block; margin: 10px auto; border: 1px solid #eee; }
     </style>
 </head>
 <body class="theme-glamour">
@@ -78,9 +88,9 @@
                 <input type="tel" id="l-tel" placeholder="Numéro de téléphone">
                 <input type="password" id="l-pass" placeholder="Mot de passe">
                 <button class="btn-action" onclick="doLogin()">SE CONNECTER</button>
-                <div class="auth-logos">
-                    <img src="bololo.png" alt="Logo" style="width: 100px; margin-bottom: 15px;">
-                    <img src="qr.png" alt="QR" style="width: 120px;">
+                <div class="auth-logos" style="text-align:center; margin-top:30px;">
+                    <img src="bololo.png" alt="Logo" style="width: 100px; margin-bottom: 15px; display:block; margin-inline: auto;">
+                    <img src="qr.png" alt="QR" style="width: 150px; display:block; margin-inline: auto;">
                 </div>
             </div>
             <div id="area-signup" class="hidden">
@@ -99,7 +109,7 @@
             </div>
             <div class="card">
                 <select id="theme-selector" onchange="changeTheme()">
-                    <option value="theme-glamour">✨ Glamour</option>
+                    <option value="theme-glamour">✨ Bololo Style</option>
                     <option value="theme-feminin">🌸 Féminin</option>
                     <option value="theme-masculin">👔 Masculin</option>
                     <option value="theme-dark">🌙 Sombre</option>
@@ -125,7 +135,7 @@
         <div id="dash-view" class="hidden">
             <div class="sticky-area">
                 <div class="search-container">
-                    <input type="text" id="search-input" placeholder="Chercher par nom ou numéro..." oninput="autoComplete(this.value)">
+                    <input type="text" id="search-input" placeholder="Nom ou numéro de boutique..." oninput="autoComplete(this.value)">
                     <div id="suggest-box" class="autocomplete-results hidden"></div>
                 </div>
                 <div id="shop-header"></div>
@@ -173,20 +183,12 @@
         if(val.length >= 4) new QRCode(container, { text: val, width: 120, height: 120 });
     }
 
-    function doSignup() {
-        const tel = document.getElementById('s-tel').value;
-        const pass = document.getElementById('s-pass').value;
-        if (tel.length < 4 || pass !== document.getElementById('s-confirm').value) return alert("Erreur saisie");
-        db.ref('accounts/' + tel).set({ tel, pass, limit: 2, shopName: "", shopLogo: "", catalog: [], blocked: false }).then(() => { alert("Compte créé !"); switchTab('login'); });
-    }
-
     function doLogin() {
         const tel = document.getElementById('l-tel').value;
         const pass = document.getElementById('l-pass').value;
         db.ref('accounts/' + tel).once('value', (snap) => {
             const user = snap.val();
             if (!user || user.pass !== pass) return alert("Identifiants incorrects");
-            if (user.blocked) return alert("❌ COMPTE BLOQUÉ.");
             currentUser = user; viewedTel = tel;
             document.getElementById('view-auth').classList.add('hidden');
             document.getElementById('bottom-nav').classList.remove('hidden');
@@ -197,6 +199,13 @@
             new QRCode(document.getElementById('qr-admin'), { text: user.tel, width: 140, height: 140 });
             renderAdminList();
         });
+    }
+
+    function doSignup() {
+        const tel = document.getElementById('s-tel').value;
+        const pass = document.getElementById('s-pass').value;
+        if (tel.length < 4 || pass !== document.getElementById('s-confirm').value) return alert("Erreur saisie");
+        db.ref('accounts/' + tel).set({ tel, pass, limit: 2, shopName: "", shopLogo: "", catalog: [] }).then(() => { alert("Compte créé !"); switchTab('login'); });
     }
 
     function handleLogo(e) {
@@ -219,7 +228,7 @@
         db.ref('accounts/' + currentUser.tel).once('value', snap => {
             const user = snap.val();
             const catalog = user.catalog || [];
-            if (catalog.length >= (user.limit || 2)) return alert("Quota atteint");
+            if (catalog.length >= (user.limit || 5)) return alert("Quota atteint");
             const newItem = { id: Date.now(), name: document.getElementById('p-name').value, price: document.getElementById('p-price').value, desc: document.getElementById('p-desc').value, img: tempProdImg, likes: 0, dislikes: 0, comments: [] };
             catalog.push(newItem);
             db.ref('accounts/' + currentUser.tel + '/catalog').set(catalog).then(() => { tempProdImg = ""; document.getElementById('p-img-input').value = ""; renderAdminList(); });
@@ -250,7 +259,7 @@
         }
     }
 
-    // --- RECHERCHE HYBRIDE (NOM + NUMÉRO) ---
+    // --- RECHERCHE HYBRIDE ---
     function autoComplete(val) {
         const box = document.getElementById('suggest-box');
         if(val.length < 2) { box.classList.add('hidden'); return; }
@@ -258,8 +267,7 @@
             const data = snap.val();
             const searchLower = val.toLowerCase();
             const filtered = Object.values(data).filter(a => 
-                (a.tel && a.tel.includes(val)) || 
-                (a.shopName && a.shopName.toLowerCase().includes(searchLower))
+                (a.tel && a.tel.includes(val)) || (a.shopName && a.shopName.toLowerCase().includes(searchLower))
             );
             box.classList.toggle('hidden', filtered.length === 0);
             box.innerHTML = filtered.map(a => `
@@ -270,26 +278,15 @@
         });
     }
 
-    function selectShop(tel) { 
-        viewedTel = tel; 
-        document.getElementById('suggest-box').classList.add('hidden'); 
-        document.getElementById('search-input').value = "";
-        renderShop(); 
-    }
+    function selectShop(tel) { viewedTel = tel; document.getElementById('suggest-box').classList.add('hidden'); document.getElementById('search-input').value = ""; renderShop(); }
+    function viewCurrentShop() { if(currentUser) { viewedTel = currentUser.tel; renderShop(); } }
 
-    function viewCurrentShop() { 
-        if(currentUser) { viewedTel = currentUser.tel; renderShop(); } 
-    }
-
-    // --- AFFICHAGE DE LA VUE CLIENT ---
     function renderShop() {
         const list = document.getElementById('shop-list');
         list.innerHTML = "<p style='text-align:center; font-size:12px;'>Chargement...</p>";
-        
-        db.ref('accounts/' + viewedTel).off(); // Nettoyer les anciens écouteurs
+        db.ref('accounts/' + viewedTel).off();
         db.ref('accounts/' + viewedTel).on('value', snap => {
-            const u = snap.val();
-            if(!u) return;
+            const u = snap.val(); if(!u) return;
             const catalog = u.catalog || [];
             const isOwner = (currentUser && currentUser.tel === viewedTel);
             
@@ -299,12 +296,7 @@
                     <div style="text-align:left"><h4 style="margin:0">${u.shopName || 'Boutique'}</h4><small>${u.tel}</small></div>
                 </div>`;
 
-            if(catalog.length === 0) {
-                list.innerHTML = "<p style='text-align:center; padding:20px;'>Aucun article.</p>";
-                return;
-            }
-
-            list.innerHTML = catalog.map((it, i) => {
+            list.innerHTML = catalog.length === 0 ? "<p style='text-align:center; padding:20px;'>Aucun article.</p>" : catalog.map((it, i) => {
                 const hasVoted = userVotes[it.id];
                 return `
                 <div class="product-card">
@@ -332,13 +324,10 @@
     function vote(idx, type, prodId) { userVotes[prodId] = true; db.ref('accounts/' + viewedTel + '/catalog/' + idx + '/' + type).transaction(v => (v || 0) + 1); }
 
     function sendComm(idx, isOwner) {
-        const input = document.getElementById('in-comm-'+idx);
-        if(!input.value) return;
+        const input = document.getElementById('in-comm-'+idx); if(!input.value) return;
         db.ref('accounts/' + viewedTel + '/catalog/' + idx + '/comments').once('value', s => {
-            let comms = s.val() || [];
-            comms.push({ text: input.value, isOwner: isOwner });
-            db.ref('accounts/' + viewedTel + '/catalog/' + idx + '/comments').set(comms);
-            input.value = "";
+            let comms = s.val() || []; comms.push({ text: input.value, isOwner: isOwner });
+            db.ref('accounts/' + viewedTel + '/catalog/' + idx + '/comments').set(comms); input.value = "";
         });
     }
 
