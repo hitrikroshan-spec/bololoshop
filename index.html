@@ -36,21 +36,20 @@
         .iphone-xs-screen { 
             width: 100%;
             max-width: 400px; 
-            height: 100vh;    
+            height: 100vh;     
             background: white; 
             display: flex; 
             flex-direction: column; 
             overflow: hidden; 
             position: relative; 
-            border: none;     
+            border: none;      
             box-shadow: 0 0 20px rgba(0,0,0,0.1); 
         }
         
-        /* --- HEADER DESCENDU --- */
         header { 
             background: var(--glam); 
             color: white; 
-            padding: 60px 20px 20px; /* On a augmenté le 60px pour faire descendre le contenu */
+            padding: 60px 20px 20px; 
             text-align: center; 
             font-weight: bold; 
             font-size: 1.1rem; 
@@ -61,7 +60,7 @@
         .btn-logout { 
             position: absolute; 
             right: 15px; 
-            bottom: 18px; /* Ajusté pour rester bien aligné avec le titre descendu */
+            bottom: 18px; 
             background: rgba(255,255,255,0.2); 
             border: none; 
             color: white; 
@@ -115,6 +114,10 @@
         .btn-action { background: var(--glam); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; }
         .hidden { display: none !important; }
         .qr-box { background: white; padding: 10px; border-radius: 12px; display: inline-block; margin: 10px auto; border: 1px solid #eee; }
+        
+        /* Style pour l'alignement des logos */
+        .auth-logos { text-align: center; margin-top: 30px; }
+        .auth-logos img { display: block; margin: 0 auto; }
     </style>
 </head>
 <body class="theme-glamour">
@@ -131,12 +134,18 @@
                 <span id="t-login" class="tab-item active" style="flex:1; text-align:center; padding:12px; cursor:pointer; font-weight:bold; font-size:0.7rem;" onclick="switchTab('login')">LOGIN</span>
                 <span id="t-signup" class="tab-item" style="flex:1; text-align:center; padding:12px; cursor:pointer; font-weight:bold; font-size:0.7rem; color:#999;" onclick="switchTab('signup')">CREER</span>
             </div>
+            
             <div id="area-login">
                 <input type="tel" id="l-tel" placeholder="Numéro de téléphone">
                 <input type="password" id="l-pass" placeholder="Mot de passe">
                 <button class="btn-action" onclick="doLogin()">SE CONNECTER</button>
-                <center><img src="bololo.png" alt="Logo" style="width: 100px; margin-top: 30px;"></center>
+                
+                <div class="auth-logos">
+                    <img src="bololo.png" alt="Logo Bololo" style="width: 100px; margin-bottom: 15px;">
+                    <img src="qr.png" alt="QR Code" style="width: 80px;">
+                </div>
             </div>
+
             <div id="area-signup" class="hidden">
                 <input type="tel" id="s-tel" placeholder="Votre numéro" oninput="drawQR('s-tel', 'qr-signup')">
                 <center><div id="qr-signup" class="qr-box"></div></center>
