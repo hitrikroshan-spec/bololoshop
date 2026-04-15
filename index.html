@@ -5,95 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>BOLOLO Pro</title>
     
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="BololoShop">
-    <link rel="apple-touch-icon" href="bololo.png">
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
     <style>
-        :root { --primary: #008080; --glam: linear-gradient(135deg, #008080 0%, #ffffff 100%); --bg: #f8fafb; --text: #1e293b; }
-        body.theme-glamour { --primary: #008080; --glam: linear-gradient(135deg, #008080 0%, #ffffff 100%); --bg: #f8fafb; }
+        /* RETOUR À LA COULEUR BLEU CANARD & BLANC */
+        :root { 
+            --primary: #008080; 
+            --bg: #ffffff; 
+            --text: #1a1a1a; 
+            --glam: linear-gradient(135deg, #008080 0%, #ffffff 100%);
+        }
+
+        /* DÉFINITION DES THÈMES */
+        body.theme-glamour { --primary: #008080; --glam: linear-gradient(135deg, #008080 0%, #ffffff 100%); --bg: #ffffff; }
+        body.theme-feminin { --primary: #ec4899; --glam: linear-gradient(135deg, #f472b6 0%, #ec4899 100%); --bg: #fff1f2; }
+        body.theme-masculin { --primary: #0ea5e9; --glam: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%); --bg: #f0f9ff; }
         body.theme-dark { --primary: #008080; --glam: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); --bg: #1e293b; --text: #f8fafc; }
         
-        body { margin: 0; font-family: 'Inter', sans-serif; background: #e2e8f0; min-height: 100vh; display: flex; justify-content: center; align-items: center; color: var(--text); overscroll-behavior: none; }
+        body { margin: 0; font-family: 'Inter', sans-serif; background: #f0f4f4; min-height: 100vh; display: flex; justify-content: center; color: var(--text); }
 
-        .iphone-xs-screen { width: 100%; max-width: 400px; height: 100vh; background: white; display: flex; flex-direction: column; overflow: hidden; position: relative; border: none; box-shadow: 0 0 30px rgba(0,0,0,0.15); }
+        .iphone-xs-screen { width: 100%; max-width: 400px; height: 100vh; background: white; display: flex; flex-direction: column; overflow: hidden; position: relative; box-shadow: 0 0 30px rgba(0,0,0,0.1); }
         
-        header { background: var(--glam); color: white; padding: 60px 20px 20px; text-align: center; font-weight: bold; font-size: 1.2rem; position: relative; z-index: 1000; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        header { background: var(--glam); color: white; padding: 60px 20px 20px; text-align: center; font-weight: bold; position: relative; z-index: 1000; }
 
-        .btn-logout { position: absolute; right: 15px; bottom: 18px; background: rgba(255,255,255,0.25); border: none; color: white; padding: 6px 12px; border-radius: 8px; font-size: 0.65rem; cursor: pointer; font-weight: bold; backdrop-filter: blur(5px); }
+        .btn-logout { position: absolute; right: 15px; bottom: 18px; background: rgba(255,255,255,0.3); border: none; color: white; padding: 6px 12px; border-radius: 8px; font-size: 0.65rem; cursor: pointer; }
         
-        .content { flex: 1; overflow-y: auto; padding: 20px; background: var(--bg); position: relative; }
-        .card { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 15px; border: 1px solid rgba(0,0,0,0.05); }
+        .content { flex: 1; overflow-y: auto; padding: 20px; background: var(--bg); }
+        .card { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #eee; color: #1a1a1a; }
 
-        /* RECHERCHE ET STORIES */
-        .sticky-area { position: sticky; top: -20px; background: var(--bg); z-index: 500; padding: 10px 0; margin-bottom: 5px; }
-        
-        /* STYLE DES CERCLES (STORIES) */
-        .stories-container { 
-            display: flex; 
-            gap: 15px; 
-            overflow-x: auto; 
-            padding: 10px 5px; 
-            margin-bottom: 15px;
-            scrollbar-width: none; /* Firefox */
-        }
-        .stories-container::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+        /* STORIES (CERCLES) */
+        .stories-container { display: flex; gap: 15px; overflow-x: auto; padding: 10px 0; scrollbar-width: none; }
+        .stories-container::-webkit-scrollbar { display: none; }
+        .story-item { flex: 0 0 70px; text-align: center; cursor: pointer; }
+        .story-circle { width: 60px; height: 60px; border-radius: 50%; border: 3px solid var(--primary); padding: 2px; object-fit: cover; background: white; }
+        .story-name { font-size: 10px; font-weight: bold; display: block; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        .story-item { 
-            flex: 0 0 70px; 
-            text-align: center; 
-            cursor: pointer; 
-        }
-        .story-circle { 
-            width: 60px; 
-            height: 60px; 
-            border-radius: 50%; 
-            border: 3px solid var(--primary); 
-            padding: 2px;
-            background: white;
-            object-fit: cover;
-            transition: transform 0.2s;
-        }
-        .story-item:active .story-circle { transform: scale(0.9); }
-        .story-name { 
-            font-size: 10px; 
-            margin-top: 5px; 
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-            font-weight: bold;
-            display: block;
-        }
+        .product-card { background: white; border-radius: 15px; overflow: hidden; margin-bottom: 20px; border: 1px solid #eee; color: #1a1a1a; }
+        .product-img-display { width: 100%; height: auto; max-height: 400px; object-fit: contain; background: #f9f9f9; }
+        
+        .interactions { display: flex; gap: 20px; padding: 10px; border-top: 1px solid #eee; }
+        .btn-vote { border: none; background: none; cursor: pointer; font-size: 16px; font-weight: bold; color: var(--primary); transition: 0.2s; }
+        .btn-vote:disabled { opacity: 0.5; color: #ccc; cursor: default; }
 
-        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 16px; box-sizing: border-box; }
-        
-        .btn-action { background: var(--primary); color: white; border: none; padding: 16px; width: 100%; border-radius: 14px; font-weight: bold; cursor: pointer; }
-        
+        .comm-section { background: #f8fafc; padding: 12px; border-radius: 12px; margin-top: 10px; font-size: 12px; }
+        .comm-list { max-height: 100px; overflow-y: auto; margin-bottom: 8px; border-bottom: 1px solid #eee; }
+        .comm-item { margin-bottom: 5px; padding-bottom: 5px; border-bottom: 1px dashed #ddd; }
+
         .nav-bar { background: white; display: flex; border-top: 1px solid #eee; padding: 10px 0 25px; } 
         .nav-item { flex: 1; text-align: center; font-size: 0.7rem; color: #94a3b8; cursor: pointer; font-weight: bold; }
         .nav-item.active { color: var(--primary); }
 
-        .product-card { background: white; border-radius: 15px; overflow: hidden; margin-bottom: 20px; border: 1px solid #eee; }
-        .product-img-container { width: 100%; background: #f8fafc; display: flex; align-items: center; justify-content: center; min-height: 250px; }
-        .product-img-display { width: 100%; height: auto; max-height: 450px; object-fit: contain; }
-        
-        .interactions { display: flex; gap: 15px; padding: 10px; border-top: 1px solid #eee; }
-        .btn-vote { border: none; background: none; cursor: pointer; font-size: 14px; font-weight: bold; }
-        
-        .autocomplete-results { position: absolute; top: 50px; left: 0; right: 0; background: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 1100; max-height: 250px; overflow-y: auto; }
-        .suggestion-item { display: flex; align-items: center; gap: 12px; padding: 12px; cursor: pointer; border-bottom: 1px solid #f8fafb; color: #000; font-size: 13px; }
-        .suggestion-item img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
-
-        .badge { font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; margin-left: 5px; font-weight: bold; color: white; }
+        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #eee; border-radius: 10px; font-size: 14px; box-sizing: border-box; }
+        .btn-action { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        .hidden { display: none !important; }
+        .badge { font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; color: white; margin-left: 5px; }
         .badge-vendeur { background: var(--primary); }
         .badge-client { background: #94a3b8; }
-        .hidden { display: none !important; }
-        .qr-box { background: white; padding: 10px; border-radius: 12px; display: inline-block; margin: 10px auto; border: 1px solid #eee; }
     </style>
 </head>
 <body class="theme-glamour">
@@ -104,63 +73,46 @@
         <button id="logout-btn" class="btn-logout hidden" onclick="location.reload()">SORTIR</button>
     </header>
     
-    <div class="content" id="main-content">
+    <div class="content">
         <div id="view-auth">
-            <div class="tab-bar" style="display:flex; gap:5px; margin-bottom:25px; border-bottom:1px solid #eee;">
-                <span id="t-login" class="tab-item active" style="flex:1; text-align:center; padding:12px; cursor:pointer; font-weight:bold; font-size:0.7rem;" onclick="switchTab('login')">LOGIN</span>
-                <span id="t-signup" class="tab-item" style="flex:1; text-align:center; padding:12px; cursor:pointer; font-weight:bold; font-size:0.7rem; color:#999;" onclick="switchTab('signup')">CREER</span>
-            </div>
-            <div id="area-login">
-                <input type="tel" id="l-tel" placeholder="Numéro de téléphone">
-                <input type="password" id="l-pass" placeholder="Mot de passe">
-                <button class="btn-action" onclick="doLogin()">SE CONNECTER</button>
-                <div class="auth-logos" style="text-align:center; margin-top:30px;">
-                    <img src="bololo.png" alt="Logo" style="width: 100px; margin-bottom: 15px;">
-                </div>
-            </div>
-            <div id="area-signup" class="hidden">
-                <input type="tel" id="s-tel" placeholder="Votre numéro" oninput="drawQR('s-tel', 'qr-signup')">
-                <center><div id="qr-signup" class="qr-box"></div></center>
-                <input type="password" id="s-pass" placeholder="Mot de passe">
-                <input type="password" id="s-confirm" placeholder="Confirmer">
-                <button class="btn-action" onclick="doSignup()">CREER LE COMPTE</button>
-            </div>
+            <input type="tel" id="l-tel" placeholder="Numéro de téléphone">
+            <input type="password" id="l-pass" placeholder="Mot de passe">
+            <button class="btn-action" onclick="doLogin()">SE CONNECTER</button>
+            <p style="text-align:center; font-size:12px; margin-top:20px;">Pas de compte ? Contactez l'admin.</p>
         </div>
 
         <div id="dash-params" class="hidden">
-            <div class="card" style="text-align:center;">
-                <label style="font-size:0.7rem; font-weight:bold; color:var(--primary)">VOTRE QR</label><br>
-                <div id="qr-admin" class="qr-box"></div>
-            </div>
             <div class="card">
                 <input type="text" id="set-name" placeholder="Nom de la Boutique">
-                <label style="font-size:0.7rem;">LOGO DE BOUTIQUE</label>
                 <input type="file" accept="image/*" onchange="handleLogo(event)">
-                <button class="btn-action" onclick="saveSettings()">ENREGISTRER</button>
+                <button class="btn-action" onclick="saveSettings()">SAUVEGARDER</button>
             </div>
         </div>
 
         <div id="dash-articles" class="hidden">
             <div class="card">
-                <input type="text" id="p-name" placeholder="Nom Article">
-                <input type="number" id="p-price" placeholder="Prix (FCFA)">
+                <input type="text" id="p-name" placeholder="Nom de l'article">
+                <input type="number" id="p-price" placeholder="Prix">
                 <textarea id="p-desc" placeholder="Description..."></textarea>
-                <input type="file" id="p-img-input" accept="image/*" onchange="handleProdImg(event)">
+                <input type="file" accept="image/*" onchange="handleProdImg(event)">
                 <button class="btn-action" onclick="addProduct()">PUBLIER</button>
             </div>
             <div id="admin-list"></div>
         </div>
 
         <div id="dash-view" class="hidden">
-            <div class="sticky-area">
-                <div class="search-container">
-                    <input type="text" id="search-input" placeholder="Chercher une boutique..." oninput="autoComplete(this.value)">
-                    <div id="suggest-box" class="autocomplete-results hidden"></div>
-                </div>
-                <div id="stories-list" class="stories-container"></div>
-                
-                <div id="shop-header"></div>
+            <div class="card" style="padding:10px; margin-bottom:10px;">
+                <select id="view-theme-selector" onchange="changeTheme(this.value)">
+                    <option value="theme-glamour">✨ Thème Teal</option>
+                    <option value="theme-feminin">🌸 Thème Rose</option>
+                    <option value="theme-masculin">👔 Thème Bleu</option>
+                    <option value="theme-dark">🌙 Thème Sombre</option>
+                </select>
+                <input type="text" placeholder="Rechercher boutique..." oninput="autoComplete(this.value)">
             </div>
+            
+            <div id="stories-list" class="stories-container"></div>
+            <div id="shop-header"></div>
             <div id="shop-list"></div>
         </div>
     </div>
@@ -181,14 +133,7 @@
     let viewedTel = "";
     let tempLogo = "";
     let tempProdImg = "";
-    let userVotes = {}; 
-
-    function switchTab(t) {
-        document.getElementById('area-login').classList.toggle('hidden', t !== 'login');
-        document.getElementById('area-signup').classList.toggle('hidden', t !== 'signup');
-        document.getElementById('t-login').classList.toggle('active', t === 'login');
-        document.getElementById('t-signup').classList.toggle('active', t === 'signup');
-    }
+    let userVotes = {}; // Local storage pour simuler le vote unique par session
 
     function showSection(id, el) {
         ['params', 'articles', 'view'].forEach(s => document.getElementById('dash-'+s).classList.add('hidden'));
@@ -197,101 +142,48 @@
         el.classList.add('active');
     }
 
-    function drawQR(inputId, containerId) {
-        const val = document.getElementById(inputId).value;
-        const container = document.getElementById(containerId);
-        container.innerHTML = "";
-        if(val.length >= 4) new QRCode(container, { text: val, width: 120, height: 120 });
-    }
-
     function doLogin() {
         const tel = document.getElementById('l-tel').value;
         const pass = document.getElementById('l-pass').value;
         db.ref('accounts/' + tel).once('value', (snap) => {
             const user = snap.val();
-            if (!user || user.pass !== pass) return alert("Identifiants incorrects");
+            if (!user || user.pass !== pass) return alert("Erreur !");
             currentUser = user; viewedTel = tel;
             document.getElementById('view-auth').classList.add('hidden');
             document.getElementById('bottom-nav').classList.remove('hidden');
             document.getElementById('logout-btn').classList.remove('hidden');
-            document.getElementById('set-name').value = user.shopName || "";
-            tempLogo = user.shopLogo || "";
             showSection('params', document.querySelector('.nav-item'));
-            new QRCode(document.getElementById('qr-admin'), { text: user.tel, width: 140, height: 140 });
             renderAdminList();
         });
     }
 
-    function doSignup() {
-        const tel = document.getElementById('s-tel').value;
-        const pass = document.getElementById('s-pass').value;
-        if (tel.length < 4 || pass !== document.getElementById('s-confirm').value) return alert("Erreur saisie");
-        db.ref('accounts/' + tel).set({ tel, pass, limit: 2, shopName: "", shopLogo: "", catalog: [] }).then(() => { alert("Compte créé !"); switchTab('login'); });
-    }
-
-    function handleLogo(e) {
-        const reader = new FileReader();
-        reader.onload = () => tempLogo = reader.result;
-        reader.readAsDataURL(e.target.files[0]);
-    }
+    function handleLogo(e) { const r = new FileReader(); r.onload = () => tempLogo = r.result; r.readAsDataURL(e.target.files[0]); }
+    function handleProdImg(e) { const r = new FileReader(); r.onload = () => tempProdImg = r.result; r.readAsDataURL(e.target.files[0]); }
 
     function saveSettings() {
-        db.ref('accounts/' + currentUser.tel).update({ shopName: document.getElementById('set-name').value, shopLogo: tempLogo }).then(() => alert("Sauvegardé !"));
-    }
-
-    function handleProdImg(event) {
-        const reader = new FileReader();
-        reader.onload = () => tempProdImg = reader.result;
-        reader.readAsDataURL(event.target.files[0]);
+        db.ref('accounts/' + currentUser.tel).update({ shopName: document.getElementById('set-name').value, shopLogo: tempLogo }).then(() => alert("Réglages enregistrés"));
     }
 
     function addProduct() {
-        db.ref('accounts/' + currentUser.tel).once('value', snap => {
-            const user = snap.val();
-            const catalog = user.catalog || [];
-            if (catalog.length >= 2) return alert("Quota atteint");
-            const newItem = { id: Date.now(), name: document.getElementById('p-name').value, price: document.getElementById('p-price').value, desc: document.getElementById('p-desc').value, img: tempProdImg, likes: 0, dislikes: 0, comments: [] };
-            catalog.push(newItem);
-            db.ref('accounts/' + currentUser.tel + '/catalog').set(catalog).then(() => { tempProdImg = ""; renderAdminList(); });
+        const newItem = { id: Date.now(), name: document.getElementById('p-name').value, price: document.getElementById('p-price').value, desc: document.getElementById('p-desc').value, img: tempProdImg, likes: 0, dislikes: 0, comments: [] };
+        db.ref('accounts/' + currentUser.tel + '/catalog').once('value', s => {
+            let cat = s.val() || []; cat.push(newItem);
+            db.ref('accounts/' + currentUser.tel + '/catalog').set(cat).then(() => { tempProdImg = ""; alert("Article ajouté !"); });
         });
     }
 
     function renderAdminList() {
         db.ref('accounts/' + currentUser.tel + '/catalog').on('value', snap => {
-            const catalog = snap.val() || [];
-            document.getElementById('admin-list').innerHTML = catalog.map((it, i) => `
-                <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <img src="${it.img || ''}" style="width:40px;height:40px;border-radius:5px;object-fit:cover;">
-                        <span><b>${it.name}</b></span>
-                    </div>
-                    <button onclick="deleteProduct(${i})" style="color:red; border:none; background:none;">🗑️</button>
-                </div>`).join('');
+            const cat = snap.val() || [];
+            document.getElementById('admin-list').innerHTML = cat.map((it, i) => `<div class="card"><b>${it.name}</b> - ${it.price} FCFA</div>`).join('');
         });
     }
 
-    function deleteProduct(i) {
-        if(confirm("Supprimer ?")) {
-            db.ref('accounts/' + currentUser.tel + '/catalog').once('value', snap => {
-                let cat = snap.val(); cat.splice(i, 1);
-                db.ref('accounts/' + currentUser.tel + '/catalog').set(cat);
-            });
-        }
-    }
-
-    // --- LOGIQUE DES STORIES ET VUE ---
-
+    // --- VUE PUBLIQUE ---
     function initView() {
-        loadStories();
-        if(currentUser) { viewedTel = currentUser.tel; renderShop(); }
-    }
-
-    function loadStories() {
-        const container = document.getElementById('stories-list');
         db.ref('accounts').once('value', snap => {
             const users = snap.val();
-            if(!users) return;
-            container.innerHTML = Object.values(users).map(u => `
+            document.getElementById('stories-list').innerHTML = Object.values(users).map(u => `
                 <div class="story-item" onclick="selectShop('${u.tel}')">
                     <img src="${u.shopLogo || 'bololo.png'}" class="story-circle">
                     <span class="story-name">${u.shopName || u.tel}</span>
@@ -300,52 +192,62 @@
         });
     }
 
-    function autoComplete(val) {
-        const box = document.getElementById('suggest-box');
-        if(val.length < 2) { box.classList.add('hidden'); return; }
-        db.ref('accounts').once('value', snap => {
-            const data = snap.val();
-            const filtered = Object.values(data).filter(a => (a.tel && a.tel.includes(val)) || (a.shopName && a.shopName.toLowerCase().includes(val.toLowerCase())));
-            box.classList.toggle('hidden', filtered.length === 0);
-            box.innerHTML = filtered.map(a => `<div class="suggestion-item" onclick="selectShop('${a.tel}')"><img src="${a.shopLogo || 'bololo.png'}"><span>${a.shopName || a.tel}</span></div>`).join('');
-        });
-    }
-
-    function selectShop(tel) { 
-        viewedTel = tel; 
-        document.getElementById('suggest-box').classList.add('hidden'); 
-        document.getElementById('search-input').value = "";
-        renderShop(); 
-    }
+    function selectShop(tel) { viewedTel = tel; renderShop(); }
 
     function renderShop() {
         const list = document.getElementById('shop-list');
         db.ref('accounts/' + viewedTel).on('value', snap => {
-            const u = snap.val(); if(!u) return;
+            const u = snap.val();
             const catalog = u.catalog || [];
             const isOwner = (currentUser && currentUser.tel === viewedTel);
-            
-            document.getElementById('shop-header').innerHTML = `
-                <div class="card" style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
-                    <img src="${u.shopLogo || 'bololo.png'}" style="width:50px; height:50px; border-radius:50%; object-fit:cover; border:2px solid var(--primary);">
-                    <div><h4 style="margin:0">${u.shopName || 'Boutique'}</h4><small>${u.tel}</small></div>
-                </div>`;
 
-            list.innerHTML = catalog.map((it, i) => `
+            document.getElementById('shop-header').innerHTML = `<h3 style="text-align:center">${u.shopName || 'Boutique'}</h3>`;
+
+            list.innerHTML = catalog.map((it, i) => {
+                const alreadyVoted = userVotes[it.id]; // On vérifie si l'utilisateur a déjà voté pour cet ID
+                return `
                 <div class="product-card">
-                    <div class="product-img-container"><img src="${it.img || ''}" class="product-img-display"></div>
+                    <img src="${it.img || ''}" class="product-img-display">
                     <div style="padding:15px;">
-                        <b>${it.name}</b><br><span style="color:var(--primary); font-weight:bold;">${it.price} FCFA</span>
+                        <b>${it.name}</b> | <span style="color:var(--primary)">${it.price} FCFA</span>
                         <div class="interactions">
-                            <button class="btn-vote" onclick="vote(${i}, 'likes', ${it.id})">👍 ${it.likes || 0}</button>
-                            <button class="btn-vote" onclick="vote(${i}, 'dislikes', ${it.id})">👎 ${it.dislikes || 0}</button>
+                            <button class="btn-vote" ${alreadyVoted ? 'disabled' : ''} onclick="vote(${i}, 'likes', ${it.id})">👍 ${it.likes || 0}</button>
+                            <button class="btn-vote" ${alreadyVoted ? 'disabled' : ''} onclick="vote(${i}, 'dislikes', ${it.id})">👎 ${it.dislikes || 0}</button>
+                        </div>
+                        <div class="comm-section">
+                            <div class="comm-list">
+                                ${(it.comments || []).map(c => `<div class="comm-item"><b>${c.isOwner ? 'Vendeur' : 'Client'}:</b> ${c.text}</div>`).join('')}
+                            </div>
+                            <div style="display:flex; gap:5px;">
+                                <input type="text" id="in-comm-${i}" placeholder="Ajouter un commentaire..." style="margin:0; padding:8px;">
+                                <button onclick="sendComm(${i}, ${isOwner})" style="background:var(--primary); color:white; border:none; border-radius:8px; padding:0 10px;">OK</button>
+                            </div>
                         </div>
                     </div>
-                </div>`).join('');
+                </div>`;
+            }).join('');
         });
     }
 
-    function vote(idx, type, prodId) { db.ref('accounts/' + viewedTel + '/catalog/' + idx + '/' + type).transaction(v => (v || 0) + 1); }
+    // LOGIQUE DE VOTE UNIQUE
+    function vote(idx, type, prodId) {
+        if (userVotes[prodId]) return; // Sécurité supplémentaire
+        userVotes[prodId] = true; // Marquer comme voté (un seul vote : soit like, soit dislike)
+        db.ref('accounts/' + viewedTel + '/catalog/' + idx + '/' + type).transaction(v => (v || 0) + 1);
+    }
+
+    function sendComm(idx, isOwner) {
+        const input = document.getElementById('in-comm-'+idx);
+        if(!input.value) return;
+        db.ref('accounts/' + viewedTel + '/catalog/' + idx + '/comments').once('value', s => {
+            let comms = s.val() || [];
+            comms.push({ text: input.value, isOwner: isOwner });
+            db.ref('accounts/' + viewedTel + '/catalog/' + idx + '/comments').set(comms);
+            input.value = "";
+        });
+    }
+
+    function changeTheme(v) { document.body.className = v; }
 </script>
 </body>
 </html>
