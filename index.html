@@ -21,55 +21,13 @@
         body.theme-masculin { --primary: #0ea5e9; --glam: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%); --bg: #f0f9ff; }
         body.theme-dark { --primary: #64748b; --glam: linear-gradient(135deg, #334155 0%, #0f172a 100%); --bg: #1e293b; --text: #f8fafc; }
         
-        body { 
-            margin: 0; 
-            font-family: 'Inter', sans-serif; 
-            background: #e2e8f0; 
-            min-height: 100vh; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            color: var(--text); 
-            overscroll-behavior: none; 
-        }
+        body { margin: 0; font-family: 'Inter', sans-serif; background: #e2e8f0; min-height: 100vh; display: flex; justify-content: center; align-items: center; color: var(--text); overscroll-behavior: none; }
 
-        .iphone-xs-screen { 
-            width: 100%;
-            max-width: 400px; 
-            height: 100vh;     
-            background: white; 
-            display: flex; 
-            flex-direction: column; 
-            overflow: hidden; 
-            position: relative; 
-            border: none;      
-            box-shadow: 0 0 20px rgba(0,0,0,0.1); 
-        }
+        .iphone-xs-screen { width: 100%; max-width: 400px; height: 100vh; background: white; display: flex; flex-direction: column; overflow: hidden; position: relative; border: none; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
         
-        header { 
-            background: var(--glam); 
-            color: white; 
-            padding: 60px 20px 20px; 
-            text-align: center; 
-            font-weight: bold; 
-            font-size: 1.1rem; 
-            position: relative; 
-            z-index: 1000; 
-        }
+        header { background: var(--glam); color: white; padding: 60px 20px 20px; text-align: center; font-weight: bold; font-size: 1.1rem; position: relative; z-index: 1000; }
 
-        .btn-logout { 
-            position: absolute; 
-            right: 15px; 
-            bottom: 18px; 
-            background: rgba(255,255,255,0.2); 
-            border: none; 
-            color: white; 
-            padding: 6px 12px; 
-            border-radius: 8px; 
-            font-size: 0.65rem; 
-            cursor: pointer; 
-            font-weight: bold;
-        }
+        .btn-logout { position: absolute; right: 15px; bottom: 18px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 6px 12px; border-radius: 8px; font-size: 0.65rem; cursor: pointer; font-weight: bold; }
         
         .content { flex: 1; overflow-y: auto; padding: 20px; background: var(--bg); position: relative; }
         .card { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #eee; }
@@ -81,31 +39,12 @@
         .suggestion-item img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
 
         .product-card { background: white; border-radius: 15px; overflow: hidden; margin-bottom: 20px; border: 1px solid #eee; color: #1e293b; }
-        .product-img-container { 
-            width: 100%; 
-            background: #f8fafc; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            overflow: hidden;
-            min-height: 250px;
-        }
-        .product-img-display { 
-            width: 100%; 
-            height: auto; 
-            max-height: 450px;
-            object-fit: contain; 
-            display: block;
-        }
+        .product-img-container { width: 100%; background: #f8fafc; display: flex; align-items: center; justify-content: center; overflow: hidden; min-height: 250px; }
+        .product-img-display { width: 100%; height: auto; max-height: 450px; object-fit: contain; display: block; }
         
         .interactions { display: flex; gap: 15px; padding: 10px; border-top: 1px solid #eee; }
         .btn-vote { border: none; background: none; cursor: pointer; font-size: 14px; font-weight: bold; color: #000 !important; }
-        .btn-vote:disabled { opacity: 0.4; cursor: default; }
         
-        .badge { font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; margin-left: 5px; font-weight: bold; }
-        .badge-vendeur { background: var(--primary); color: white; }
-        .badge-client { background: #e2e8f0; color: #475569; }
-
         .nav-bar { background: white; display: flex; border-top: 1px solid #eee; padding: 10px 0 25px; } 
         .nav-item { flex: 1; text-align: center; font-size: 0.7rem; color: #94a3b8; cursor: pointer; font-weight: bold; }
         .nav-item.active { color: var(--primary); }
@@ -114,10 +53,11 @@
         .btn-action { background: var(--glam); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; }
         .hidden { display: none !important; }
         .qr-box { background: white; padding: 10px; border-radius: 12px; display: inline-block; margin: 10px auto; border: 1px solid #eee; }
-        
-        /* Style pour l'alignement des logos */
         .auth-logos { text-align: center; margin-top: 30px; }
         .auth-logos img { display: block; margin: 0 auto; }
+        .badge { font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; margin-left: 5px; font-weight: bold; }
+        .badge-vendeur { background: var(--primary); color: white; }
+        .badge-client { background: #e2e8f0; color: #475569; }
     </style>
 </head>
 <body class="theme-glamour">
@@ -134,18 +74,15 @@
                 <span id="t-login" class="tab-item active" style="flex:1; text-align:center; padding:12px; cursor:pointer; font-weight:bold; font-size:0.7rem;" onclick="switchTab('login')">LOGIN</span>
                 <span id="t-signup" class="tab-item" style="flex:1; text-align:center; padding:12px; cursor:pointer; font-weight:bold; font-size:0.7rem; color:#999;" onclick="switchTab('signup')">CREER</span>
             </div>
-            
             <div id="area-login">
                 <input type="tel" id="l-tel" placeholder="Numéro de téléphone">
                 <input type="password" id="l-pass" placeholder="Mot de passe">
                 <button class="btn-action" onclick="doLogin()">SE CONNECTER</button>
-                
                 <div class="auth-logos">
-                    <img src="bololo.png" alt="Logo Bololo" style="width: 100px; margin-bottom: 15px;">
-                    <img src="qr.png" alt="QR Code" style="width: 80px;">
+                    <img src="bololo.png" alt="Logo" style="width: 100px; margin-bottom: 15px;">
+                    <img src="qr.png" alt="QR" style="width: 80px;">
                 </div>
             </div>
-
             <div id="area-signup" class="hidden">
                 <input type="tel" id="s-tel" placeholder="Votre numéro" oninput="drawQR('s-tel', 'qr-signup')">
                 <center><div id="qr-signup" class="qr-box"></div></center>
@@ -188,7 +125,7 @@
         <div id="dash-view" class="hidden">
             <div class="sticky-area">
                 <div class="search-container">
-                    <input type="tel" id="search-tel" placeholder="Chercher une boutique..." oninput="autoComplete(this.value)">
+                    <input type="text" id="search-input" placeholder="Chercher par nom ou numéro..." oninput="autoComplete(this.value)">
                     <div id="suggest-box" class="autocomplete-results hidden"></div>
                 </div>
                 <div id="shop-header"></div>
@@ -313,12 +250,17 @@
         }
     }
 
+    // --- RECHERCHE HYBRIDE (NOM + NUMÉRO) ---
     function autoComplete(val) {
         const box = document.getElementById('suggest-box');
         if(val.length < 2) { box.classList.add('hidden'); return; }
         db.ref('accounts').once('value', snap => {
             const data = snap.val();
-            const filtered = Object.values(data).filter(a => a.tel.includes(val) || (a.shopName && a.shopName.toLowerCase().includes(val.toLowerCase())));
+            const searchLower = val.toLowerCase();
+            const filtered = Object.values(data).filter(a => 
+                (a.tel && a.tel.includes(val)) || 
+                (a.shopName && a.shopName.toLowerCase().includes(searchLower))
+            );
             box.classList.toggle('hidden', filtered.length === 0);
             box.innerHTML = filtered.map(a => `
                 <div class="suggestion-item" onclick="selectShop('${a.tel}')">
@@ -328,21 +270,41 @@
         });
     }
 
-    function selectShop(tel) { viewedTel = tel; document.getElementById('suggest-box').classList.add('hidden'); renderShop(); }
-    function viewCurrentShop() { viewedTel = currentUser.tel; renderShop(); }
+    function selectShop(tel) { 
+        viewedTel = tel; 
+        document.getElementById('suggest-box').classList.add('hidden'); 
+        document.getElementById('search-input').value = "";
+        renderShop(); 
+    }
 
+    function viewCurrentShop() { 
+        if(currentUser) { viewedTel = currentUser.tel; renderShop(); } 
+    }
+
+    // --- AFFICHAGE DE LA VUE CLIENT ---
     function renderShop() {
+        const list = document.getElementById('shop-list');
+        list.innerHTML = "<p style='text-align:center; font-size:12px;'>Chargement...</p>";
+        
+        db.ref('accounts/' + viewedTel).off(); // Nettoyer les anciens écouteurs
         db.ref('accounts/' + viewedTel).on('value', snap => {
             const u = snap.val();
             if(!u) return;
             const catalog = u.catalog || [];
             const isOwner = (currentUser && currentUser.tel === viewedTel);
+            
             document.getElementById('shop-header').innerHTML = `
                 <div style="display:flex; align-items:center; gap:12px; background:white; padding:12px; border-radius:15px; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
                     <img src="${u.shopLogo || 'bololo.png'}" style="width:50px; height:50px; border-radius:50%; object-fit:cover; border:2px solid var(--primary);">
                     <div style="text-align:left"><h4 style="margin:0">${u.shopName || 'Boutique'}</h4><small>${u.tel}</small></div>
                 </div>`;
-            document.getElementById('shop-list').innerHTML = catalog.map((it, i) => {
+
+            if(catalog.length === 0) {
+                list.innerHTML = "<p style='text-align:center; padding:20px;'>Aucun article.</p>";
+                return;
+            }
+
+            list.innerHTML = catalog.map((it, i) => {
                 const hasVoted = userVotes[it.id];
                 return `
                 <div class="product-card">
