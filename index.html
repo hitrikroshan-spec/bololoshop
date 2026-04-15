@@ -40,28 +40,39 @@
             z-index: 1000; 
             margin: -20px -20px 15px -20px; 
             padding: 20px 20px 10px 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
+
+        /* AUTOCOMPLETE RESULTS */
+        .search-container { position: relative; }
+        .autocomplete-results { 
+            position: absolute; top: 45px; left: 0; right: 0; 
+            background: white; border-radius: 12px; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1); 
+            z-index: 1100; max-height: 200px; overflow-y: auto; 
+            border: 1px solid #eee; 
+        }
+        .suggestion-item { 
+            display: flex; align-items: center; gap: 10px; padding: 10px; 
+            cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #000;
+        }
+        .suggestion-item img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
 
         .stories-container { display: flex; gap: 15px; overflow-x: auto; padding: 10px 0; scrollbar-width: none; }
         .stories-container::-webkit-scrollbar { display: none; }
         .story-item { flex: 0 0 70px; text-align: center; cursor: pointer; }
-        .story-circle { width: 60px; height: 60px; border-radius: 50%; border: 3px solid var(--primary); padding: 2px; object-fit: cover; background: white; transition: 0.2s; }
-        .story-item:active .story-circle { transform: scale(0.9); }
-        .story-name { font-size: 10px; font-weight: bold; display: block; margin-top: 5px; color: var(--text); }
-
-        .card { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid rgba(0,0,0,0.05); }
+        .story-circle { width: 60px; height: 60px; border-radius: 50%; border: 3px solid var(--primary); padding: 2px; object-fit: cover; background: white; }
+        .story-name { font-size: 10px; font-weight: bold; display: block; margin-top: 5px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
         .product-card { background: white; border-radius: 15px; overflow: hidden; margin-bottom: 25px; border: 1px solid #eee; }
         .product-img-display { width: 100%; height: auto; max-height: 400px; object-fit: contain; background: #fafafa; }
         
         .interactions { display: flex; gap: 20px; padding: 12px; border-top: 1px solid #eee; }
         .btn-vote { border: none; background: none; cursor: pointer; font-size: 16px; font-weight: bold; color: var(--primary); }
-        .btn-vote:disabled { color: #ccc; cursor: default; }
-
-        .comm-section { background: #f1f5f9; padding: 10px; border-radius: 12px; margin-top: 10px; font-size: 12px; }
-        .comm-list { max-height: 80px; overflow-y: auto; margin-bottom: 8px; color: #334155; }
         
+        .comm-section { background: #f1f5f9; padding: 10px; border-radius: 12px; margin-top: 10px; font-size: 12px; }
+        .comm-list { max-height: 80px; overflow-y: auto; margin-bottom: 8px; }
+
         .nav-bar { background: white; display: flex; border-top: 1px solid #eee; padding: 10px 0 25px; } 
         .nav-item { flex: 1; text-align: center; font-size: 0.7rem; color: #94a3b8; cursor: pointer; font-weight: bold; }
         .nav-item.active { color: var(--primary); }
@@ -69,12 +80,7 @@
         input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 14px; box-sizing: border-box; }
         .btn-action { background: var(--primary); color: white; border: none; padding: 16px; width: 100%; border-radius: 14px; font-weight: bold; cursor: pointer; }
         
-        .auth-logos { text-align: center; margin-top: 30px; }
-        .auth-logos img { display: block; margin: 0 auto; }
         .hidden { display: none !important; }
-        .badge { font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; color: white; margin-left: 5px; }
-        .badge-vendeur { background: var(--primary); }
-        .badge-client { background: #94a3b8; }
     </style>
 </head>
 <body class="theme-glamour">
@@ -90,46 +96,47 @@
             <input type="tel" id="l-tel" placeholder="Numéro de téléphone">
             <input type="password" id="l-pass" placeholder="Mot de passe">
             <button class="btn-action" onclick="doLogin()">SE CONNECTER</button>
-            
-            <div class="auth-logos">
+            <div style="text-align:center; margin-top:30px;">
                 <img src="bololo.png" alt="Logo" style="width: 120px; margin-bottom: 20px;">
                 <img src="qr.png" alt="QR" style="width: 140px; opacity: 0.8;">
             </div>
         </div>
 
         <div id="dash-params" class="hidden">
-            <div class="card">
+            <div style="background: white; padding: 15px; border-radius: 20px;">
                 <input type="text" id="set-name" placeholder="Nom de la Boutique">
-                <label style="font-size: 11px;">MODIFIER LOGO</label>
                 <input type="file" accept="image/*" onchange="handleLogo(event)">
                 <button class="btn-action" onclick="saveSettings()">ENREGISTRER</button>
             </div>
         </div>
 
         <div id="dash-articles" class="hidden">
-            <div class="card">
-                <input type="text" id="p-name" placeholder="Nom de l'article">
+            <div style="background: white; padding: 15px; border-radius: 20px;">
+                <input type="text" id="p-name" placeholder="Nom Article">
                 <input type="number" id="p-price" placeholder="Prix (FCFA)">
                 <textarea id="p-desc" placeholder="Description..."></textarea>
                 <input type="file" accept="image/*" onchange="handleProdImg(event)">
-                <button class="btn-action" onclick="addProduct()">PUBLIER L'ARTICLE</button>
+                <button class="btn-action" onclick="addProduct()">PUBLIER</button>
             </div>
-            <div id="admin-list"></div>
+            <div id="admin-list" style="margin-top:15px;"></div>
         </div>
 
         <div id="dash-view" class="hidden">
             <div class="sticky-header">
-                <input type="text" placeholder="Rechercher une boutique..." oninput="autoComplete(this.value)" style="margin-bottom: 5px;">
-                <select id="view-theme-selector" onchange="changeTheme(this.value)" style="padding: 8px; font-size: 12px;">
+                <div class="search-container">
+                    <input type="text" id="search-input" placeholder="Nom ou Numéro de boutique..." oninput="autoComplete(this.value)">
+                    <div id="suggest-box" class="autocomplete-results hidden"></div>
+                </div>
+                <select onchange="changeTheme(this.value)" style="padding: 8px; font-size: 11px; height:35px;">
                     <option value="theme-glamour">✨ Glamour (Teal)</option>
-                    <option value="theme-feminin">🌸 Féminin (Rose)</option>
-                    <option value="theme-masculin">👔 Masculin (Bleu)</option>
+                    <option value="theme-feminin">🌸 Féminin</option>
+                    <option value="theme-masculin">👔 Masculin</option>
                     <option value="theme-dark">🌙 Sombre</option>
                 </select>
                 <div id="stories-list" class="stories-container"></div>
             </div>
             
-            <div id="shop-header"></div>
+            <div id="shop-header" style="padding-bottom:10px;"></div>
             <div id="shop-list"></div>
         </div>
     </div>
@@ -164,7 +171,7 @@
         const pass = document.getElementById('l-pass').value;
         db.ref('accounts/' + tel).once('value', (snap) => {
             const user = snap.val();
-            if (!user || user.pass !== pass) return alert("Erreur d'authentification");
+            if (!user || user.pass !== pass) return alert("Erreur identifiants");
             currentUser = user; viewedTel = tel;
             document.getElementById('view-auth').classList.add('hidden');
             document.getElementById('bottom-nav').classList.remove('hidden');
@@ -178,39 +185,62 @@
     function handleProdImg(e) { const r = new FileReader(); r.onload = () => tempProdImg = r.result; r.readAsDataURL(e.target.files[0]); }
 
     function saveSettings() {
-        db.ref('accounts/' + currentUser.tel).update({ shopName: document.getElementById('set-name').value, shopLogo: tempLogo }).then(() => alert("Boutique mise à jour !"));
+        db.ref('accounts/' + currentUser.tel).update({ shopName: document.getElementById('set-name').value, shopLogo: tempLogo }).then(() => alert("Réussi !"));
     }
 
     function addProduct() {
         const newItem = { id: Date.now(), name: document.getElementById('p-name').value, price: document.getElementById('p-price').value, desc: document.getElementById('p-desc').value, img: tempProdImg, likes: 0, dislikes: 0, comments: [] };
         db.ref('accounts/' + currentUser.tel + '/catalog').once('value', s => {
             let cat = s.val() || []; cat.push(newItem);
-            db.ref('accounts/' + currentUser.tel + '/catalog').set(cat).then(() => { alert("Article en ligne !"); });
+            db.ref('accounts/' + currentUser.tel + '/catalog').set(cat).then(() => { tempProdImg = ""; alert("Publié !"); });
         });
     }
 
     function renderAdminList() {
         db.ref('accounts/' + currentUser.tel + '/catalog').on('value', snap => {
             const cat = snap.val() || [];
-            document.getElementById('admin-list').innerHTML = cat.map((it) => `<div class="card"><b>${it.name}</b> - ${it.price} FCFA</div>`).join('');
+            document.getElementById('admin-list').innerHTML = cat.map(it => `<div style="background:white; padding:10px; margin-bottom:5px; border-radius:10px;"><b>${it.name}</b> - ${it.price} FCFA</div>`).join('');
         });
     }
 
-    // --- VUE ---
+    // --- RECHERCHE ET VUE ---
+    function autoComplete(val) {
+        const box = document.getElementById('suggest-box');
+        if(val.length < 2) { box.classList.add('hidden'); return; }
+        db.ref('accounts').once('value', snap => {
+            const allUsers = snap.val();
+            const filtered = Object.values(allUsers).filter(u => 
+                (u.tel && u.tel.includes(val)) || 
+                (u.shopName && u.shopName.toLowerCase().includes(val.toLowerCase()))
+            );
+            box.classList.toggle('hidden', filtered.length === 0);
+            box.innerHTML = filtered.map(u => `
+                <div class="suggestion-item" onclick="selectShop('${u.tel}')">
+                    <img src="${u.shopLogo || 'bololo.png'}">
+                    <div><b>${u.shopName || 'Boutique'}</b><br><small>${u.tel}</small></div>
+                </div>`).join('');
+        });
+    }
+
     function initView() {
         db.ref('accounts').once('value', snap => {
             const users = snap.val();
             document.getElementById('stories-list').innerHTML = Object.values(users).map(u => `
                 <div class="story-item" onclick="selectShop('${u.tel}')">
                     <img src="${u.shopLogo || 'bololo.png'}" class="story-circle">
-                    <span class="story-name">${u.shopName || 'Boutique'}</span>
+                    <span class="story-name">${u.shopName || u.tel}</span>
                 </div>
             `).join('');
         });
         if(currentUser) selectShop(currentUser.tel);
     }
 
-    function selectShop(tel) { viewedTel = tel; renderShop(); }
+    function selectShop(tel) { 
+        viewedTel = tel; 
+        document.getElementById('suggest-box').classList.add('hidden');
+        document.getElementById('search-input').value = "";
+        renderShop(); 
+    }
 
     function renderShop() {
         const list = document.getElementById('shop-list');
@@ -218,8 +248,7 @@
             const u = snap.val();
             const catalog = u.catalog || [];
             const isOwner = (currentUser && currentUser.tel === viewedTel);
-
-            document.getElementById('shop-header').innerHTML = `<div style="text-align:center; padding: 10px;"><b>${u.shopName || 'Boutique'}</b> (${u.tel})</div>`;
+            document.getElementById('shop-header').innerHTML = `<div style="text-align:center; padding:5px;"><b>${u.shopName || 'Boutique'}</b></div>`;
 
             list.innerHTML = catalog.map((it, i) => {
                 const voted = userVotes[it.id];
@@ -238,7 +267,7 @@
                             </div>
                             <div style="display:flex; gap:5px; margin-top:5px;">
                                 <input type="text" id="in-comm-${i}" placeholder="Commenter..." style="margin:0; padding:8px; height:35px;">
-                                <button onclick="sendComm(${i}, ${isOwner})" style="background:var(--primary); color:white; border:none; border-radius:8px; padding:0 12px;">ENVOYER</button>
+                                <button onclick="sendComm(${i}, ${isOwner})" style="background:var(--primary); color:white; border:none; border-radius:8px; padding:0 10px;">ENVOYER</button>
                             </div>
                         </div>
                     </div>
@@ -248,7 +277,7 @@
     }
 
     function vote(idx, type, prodId) {
-        if (userVotes[prodId]) return;
+        if(userVotes[prodId]) return;
         userVotes[prodId] = true;
         db.ref('accounts/' + viewedTel + '/catalog/' + idx + '/' + type).transaction(v => (v || 0) + 1);
     }
