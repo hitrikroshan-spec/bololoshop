@@ -15,132 +15,85 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
     <style>
-        /* NOUVELLE PALETTE : BLEU CANARD (TEAL) & BLANC UNIQUEMENT */
-        :root { 
-            --primary: #008080; /* Bleu canard pur */
-            --bg: #ffffff; 
-            --text: #1a1a1a; 
-            /* Dégradé Bleu Canard vers Blanc */
-            --glam: linear-gradient(135deg, #008080 0%, #ffffff 100%);
-            /* Dégradé subtil pour les cartes et éléments */
-            --card-grad: linear-gradient(180deg, #ffffff 0%, #f0f8f8 100%);
-        }
-
-        /* Ajustement des thèmes pour respecter la contrainte */
-        body.theme-glamour { --primary: #008080; --glam: linear-gradient(135deg, #008080 0%, #ffffff 100%); --bg: #ffffff; }
+        :root { --primary: #008080; --glam: linear-gradient(135deg, #008080 0%, #ffffff 100%); --bg: #f8fafb; --text: #1e293b; }
+        body.theme-glamour { --primary: #008080; --glam: linear-gradient(135deg, #008080 0%, #ffffff 100%); --bg: #f8fafb; }
+        body.theme-dark { --primary: #008080; --glam: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); --bg: #1e293b; --text: #f8fafc; }
         
-        /* Les autres thèmes sont désactivés visuellement pour rester en Teal/Blanc */
-        body.theme-feminin, body.theme-masculin, body.theme-dark { 
-            --primary: #008080; 
-            --glam: linear-gradient(135deg, #008080 0%, #ffffff 100%); 
-            --bg: #ffffff; --text: #1a1a1a; 
-        }
-        
-        body { margin: 0; font-family: 'Inter', sans-serif; background: #f4f7f7; min-height: 100vh; display: flex; justify-content: center; align-items: center; color: var(--text); overscroll-behavior: none; }
+        body { margin: 0; font-family: 'Inter', sans-serif; background: #e2e8f0; min-height: 100vh; display: flex; justify-content: center; align-items: center; color: var(--text); overscroll-behavior: none; }
 
-        .iphone-xs-screen { width: 100%; max-width: 400px; height: 100vh; background: white; display: flex; flex-direction: column; overflow: hidden; position: relative; border: none; box-shadow: 0 0 30px rgba(0,0,0,0.1); }
+        .iphone-xs-screen { width: 100%; max-width: 400px; height: 100vh; background: white; display: flex; flex-direction: column; overflow: hidden; position: relative; border: none; box-shadow: 0 0 30px rgba(0,0,0,0.15); }
         
-        /* Header avec dégradé Bleu Canard -> Blanc */
-        header { 
-            background: var(--glam); 
-            color: #ffffff; /* Texte blanc sur le fond bleu */
-            padding: 60px 20px 20px; 
-            text-align: center; 
-            font-weight: bold; 
-            font-size: 1.2rem; 
-            position: relative; 
-            z-index: 1000; 
-            letter-spacing: 1px;
-            /* Ajout d'une ombre portée douce pour le contraste */
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
+        header { background: var(--glam); color: white; padding: 60px 20px 20px; text-align: center; font-weight: bold; font-size: 1.2rem; position: relative; z-index: 1000; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 
-        /* Bouton SORTIR adapté */
-        .btn-logout { 
-            position: absolute; 
-            right: 15px; 
-            bottom: 18px; 
-            background: rgba(255,255,255,0.3); 
-            border: 1px solid rgba(255,255,255,0.5);
-            color: white; 
-            padding: 6px 12px; 
-            border-radius: 8px; 
-            font-size: 0.65rem; 
-            cursor: pointer; 
-            font-weight: bold; 
-            backdrop-filter: blur(5px); 
-        }
+        .btn-logout { position: absolute; right: 15px; bottom: 18px; background: rgba(255,255,255,0.25); border: none; color: white; padding: 6px 12px; border-radius: 8px; font-size: 0.65rem; cursor: pointer; font-weight: bold; backdrop-filter: blur(5px); }
         
         .content { flex: 1; overflow-y: auto; padding: 20px; background: var(--bg); position: relative; }
-        
-        /* Cartes avec dégradé subtil vers le blanc */
-        .card { 
-            background: var(--card-grad); 
-            padding: 15px; 
-            border-radius: 20px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
-            margin-bottom: 15px; 
-            border: 1px solid rgba(0, 128, 128, 0.08); 
-        }
+        .card { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 15px; border: 1px solid rgba(0,0,0,0.05); }
 
-        .sticky-area { position: sticky; top: -20px; background: var(--bg); z-index: 500; padding: 10px 0; margin-bottom: 15px; }
-        .search-container { position: relative; margin-bottom: 15px; }
+        /* RECHERCHE ET STORIES */
+        .sticky-area { position: sticky; top: -20px; background: var(--bg); z-index: 500; padding: 10px 0; margin-bottom: 5px; }
         
-        /* Inputs stylisés Teal/Blanc */
-        input, select, textarea { 
-            width: 100%; 
-            padding: 12px; 
-            margin-bottom: 10px; 
-            border: 1.5px solid #e0eded; 
-            border-radius: 12px; 
-            font-size: 16px; 
-            box-sizing: border-box; 
-            transition: 0.3s; 
-            background: white;
+        /* STYLE DES CERCLES (STORIES) */
+        .stories-container { 
+            display: flex; 
+            gap: 15px; 
+            overflow-x: auto; 
+            padding: 10px 5px; 
+            margin-bottom: 15px;
+            scrollbar-width: none; /* Firefox */
         }
-        input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.1); }
+        .stories-container::-webkit-scrollbar { display: none; } /* Chrome/Safari */
 
-        /* Boutons d'action principaux Bleu Canard -> Blanc */
-        .btn-action { 
-            background: linear-gradient(135deg, #008080 0%, #40a0a0 100%); /* Dégradé Teal interne */
-            color: white; 
-            border: none; 
-            padding: 16px; 
-            width: 100%; 
-            border-radius: 14px; 
-            font-weight: bold; 
+        .story-item { 
+            flex: 0 0 70px; 
+            text-align: center; 
             cursor: pointer; 
-            font-size: 1rem; 
-            box-shadow: 0 4px 15px rgba(0, 128, 128, 0.2); 
-            transition: 0.3s;
         }
-        .btn-action:active { transform: translateY(1px); box-shadow: 0 2px 8px rgba(0, 128, 128, 0.2); }
+        .story-circle { 
+            width: 60px; 
+            height: 60px; 
+            border-radius: 50%; 
+            border: 3px solid var(--primary); 
+            padding: 2px;
+            background: white;
+            object-fit: cover;
+            transition: transform 0.2s;
+        }
+        .story-item:active .story-circle { transform: scale(0.9); }
+        .story-name { 
+            font-size: 10px; 
+            margin-top: 5px; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            font-weight: bold;
+            display: block;
+        }
+
+        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 16px; box-sizing: border-box; }
+        
+        .btn-action { background: var(--primary); color: white; border: none; padding: 16px; width: 100%; border-radius: 14px; font-weight: bold; cursor: pointer; }
         
         .nav-bar { background: white; display: flex; border-top: 1px solid #eee; padding: 10px 0 25px; } 
-        .nav-item { flex: 1; text-align: center; font-size: 0.7rem; color: #94a3b8; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .nav-item { flex: 1; text-align: center; font-size: 0.7rem; color: #94a3b8; cursor: pointer; font-weight: bold; }
         .nav-item.active { color: var(--primary); }
 
-        .product-card { background: white; border-radius: 15px; overflow: hidden; margin-bottom: 20px; border: 1px solid #eee; color: var(--text); }
-        .product-img-container { width: 100%; background: #f8fafc; display: flex; align-items: center; justify-content: center; overflow: hidden; min-height: 250px; }
-        .product-img-display { width: 100%; height: auto; max-height: 450px; object-fit: contain; display: block; }
+        .product-card { background: white; border-radius: 15px; overflow: hidden; margin-bottom: 20px; border: 1px solid #eee; }
+        .product-img-container { width: 100%; background: #f8fafc; display: flex; align-items: center; justify-content: center; min-height: 250px; }
+        .product-img-display { width: 100%; height: auto; max-height: 450px; object-fit: contain; }
         
         .interactions { display: flex; gap: 15px; padding: 10px; border-top: 1px solid #eee; }
-        /* Les boutons 👍 👎 restent discrets */
-        .btn-vote { border: none; background: none; cursor: pointer; font-size: 14px; font-weight: bold; color: var(--primary) !important; }
+        .btn-vote { border: none; background: none; cursor: pointer; font-size: 14px; font-weight: bold; }
         
-        .autocomplete-results { position: absolute; top: 50px; left: 0; right: 0; background: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 1100; max-height: 250px; overflow-y: auto; border: 1px solid #eee; }
+        .autocomplete-results { position: absolute; top: 50px; left: 0; right: 0; background: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 1100; max-height: 250px; overflow-y: auto; }
         .suggestion-item { display: flex; align-items: center; gap: 12px; padding: 12px; cursor: pointer; border-bottom: 1px solid #f8fafb; color: #000; font-size: 13px; }
         .suggestion-item img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
 
-        .badge { font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; margin-left: 5px; font-weight: bold; color: white;}
+        .badge { font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; margin-left: 5px; font-weight: bold; color: white; }
         .badge-vendeur { background: var(--primary); }
-        /* Badge client Teal clair au lieu d'orange */
-        .badge-client { background: #40a0a0; }
-        
+        .badge-client { background: #94a3b8; }
         .hidden { display: none !important; }
         .qr-box { background: white; padding: 10px; border-radius: 12px; display: inline-block; margin: 10px auto; border: 1px solid #eee; }
-        .auth-logos { text-align: center; margin-top: 30px; }
-        .auth-logos img { display: block; margin: 0 auto; }
     </style>
 </head>
 <body class="theme-glamour">
@@ -161,9 +114,8 @@
                 <input type="tel" id="l-tel" placeholder="Numéro de téléphone">
                 <input type="password" id="l-pass" placeholder="Mot de passe">
                 <button class="btn-action" onclick="doLogin()">SE CONNECTER</button>
-                <div class="auth-logos">
-                    <img src="bololo.png" alt="Logo" style="width: 100px; margin-bottom: 15px; display:block; margin-inline: auto;">
-                    <img src="qr.png" alt="QR" style="width: 150px; display:block; margin-inline: auto;">
+                <div class="auth-logos" style="text-align:center; margin-top:30px;">
+                    <img src="bololo.png" alt="Logo" style="width: 100px; margin-bottom: 15px;">
                 </div>
             </div>
             <div id="area-signup" class="hidden">
@@ -181,10 +133,6 @@
                 <div id="qr-admin" class="qr-box"></div>
             </div>
             <div class="card">
-                <select id="theme-selector" onchange="changeTheme()">
-                    <option value="theme-glamour">✨ Bololo Teal</option>
-                    <option value="theme-dark">🌙 Sombre</option>
-                </select>
                 <input type="text" id="set-name" placeholder="Nom de la Boutique">
                 <label style="font-size:0.7rem;">LOGO DE BOUTIQUE</label>
                 <input type="file" accept="image/*" onchange="handleLogo(event)">
@@ -206,9 +154,11 @@
         <div id="dash-view" class="hidden">
             <div class="sticky-area">
                 <div class="search-container">
-                    <input type="text" id="search-input" placeholder="Nom ou numéro de boutique..." oninput="autoComplete(this.value)">
+                    <input type="text" id="search-input" placeholder="Chercher une boutique..." oninput="autoComplete(this.value)">
                     <div id="suggest-box" class="autocomplete-results hidden"></div>
                 </div>
+                <div id="stories-list" class="stories-container"></div>
+                
                 <div id="shop-header"></div>
             </div>
             <div id="shop-list"></div>
@@ -218,7 +168,7 @@
     <nav id="bottom-nav" class="nav-bar hidden">
         <div class="nav-item active" onclick="showSection('params', this)">⚙️<br>CONFIG</div>
         <div class="nav-item" onclick="showSection('articles', this)">📦<br>ARTICLES</div>
-        <div class="nav-item" onclick="showSection('view', this); viewCurrentShop();">🛒<br>VUE</div>
+        <div class="nav-item" onclick="showSection('view', this); initView();">🛒<br>VUE</div>
     </nav>
 </div>
 
@@ -299,10 +249,10 @@
         db.ref('accounts/' + currentUser.tel).once('value', snap => {
             const user = snap.val();
             const catalog = user.catalog || [];
-            if (catalog.length >= (user.limit || 5)) return alert("Quota atteint");
+            if (catalog.length >= 2) return alert("Quota atteint");
             const newItem = { id: Date.now(), name: document.getElementById('p-name').value, price: document.getElementById('p-price').value, desc: document.getElementById('p-desc').value, img: tempProdImg, likes: 0, dislikes: 0, comments: [] };
             catalog.push(newItem);
-            db.ref('accounts/' + currentUser.tel + '/catalog').set(catalog).then(() => { tempProdImg = ""; document.getElementById('p-img-input').value = ""; renderAdminList(); });
+            db.ref('accounts/' + currentUser.tel + '/catalog').set(catalog).then(() => { tempProdImg = ""; renderAdminList(); });
         });
     }
 
@@ -315,7 +265,7 @@
                         <img src="${it.img || ''}" style="width:40px;height:40px;border-radius:5px;object-fit:cover;">
                         <span><b>${it.name}</b></span>
                     </div>
-                    <button onclick="deleteProduct(${i})" style="color:red; border:none; background:none; font-size:1.2rem;">🗑️</button>
+                    <button onclick="deleteProduct(${i})" style="color:red; border:none; background:none;">🗑️</button>
                 </div>`).join('');
         });
     }
@@ -323,11 +273,31 @@
     function deleteProduct(i) {
         if(confirm("Supprimer ?")) {
             db.ref('accounts/' + currentUser.tel + '/catalog').once('value', snap => {
-                let cat = snap.val();
-                cat.splice(i, 1);
+                let cat = snap.val(); cat.splice(i, 1);
                 db.ref('accounts/' + currentUser.tel + '/catalog').set(cat);
             });
         }
+    }
+
+    // --- LOGIQUE DES STORIES ET VUE ---
+
+    function initView() {
+        loadStories();
+        if(currentUser) { viewedTel = currentUser.tel; renderShop(); }
+    }
+
+    function loadStories() {
+        const container = document.getElementById('stories-list');
+        db.ref('accounts').once('value', snap => {
+            const users = snap.val();
+            if(!users) return;
+            container.innerHTML = Object.values(users).map(u => `
+                <div class="story-item" onclick="selectShop('${u.tel}')">
+                    <img src="${u.shopLogo || 'bololo.png'}" class="story-circle">
+                    <span class="story-name">${u.shopName || u.tel}</span>
+                </div>
+            `).join('');
+        });
     }
 
     function autoComplete(val) {
@@ -335,73 +305,47 @@
         if(val.length < 2) { box.classList.add('hidden'); return; }
         db.ref('accounts').once('value', snap => {
             const data = snap.val();
-            const searchLower = val.toLowerCase();
-            const filtered = Object.values(data).filter(a => 
-                (a.tel && a.tel.includes(val)) || (a.shopName && a.shopName.toLowerCase().includes(searchLower))
-            );
+            const filtered = Object.values(data).filter(a => (a.tel && a.tel.includes(val)) || (a.shopName && a.shopName.toLowerCase().includes(val.toLowerCase())));
             box.classList.toggle('hidden', filtered.length === 0);
-            box.innerHTML = filtered.map(a => `
-                <div class="suggestion-item" onclick="selectShop('${a.tel}')">
-                    <img src="${a.shopLogo || 'bololo.png'}">
-                    <div><b>${a.shopName || 'Boutique'}</b><br><small>${a.tel}</small></div>
-                </div>`).join('');
+            box.innerHTML = filtered.map(a => `<div class="suggestion-item" onclick="selectShop('${a.tel}')"><img src="${a.shopLogo || 'bololo.png'}"><span>${a.shopName || a.tel}</span></div>`).join('');
         });
     }
 
-    function selectShop(tel) { viewedTel = tel; document.getElementById('suggest-box').classList.add('hidden'); document.getElementById('search-input').value = ""; renderShop(); }
-    function viewCurrentShop() { if(currentUser) { viewedTel = currentUser.tel; renderShop(); } }
+    function selectShop(tel) { 
+        viewedTel = tel; 
+        document.getElementById('suggest-box').classList.add('hidden'); 
+        document.getElementById('search-input').value = "";
+        renderShop(); 
+    }
 
     function renderShop() {
         const list = document.getElementById('shop-list');
-        list.innerHTML = "<p style='text-align:center; font-size:12px;'>Chargement...</p>";
-        db.ref('accounts/' + viewedTel).off();
         db.ref('accounts/' + viewedTel).on('value', snap => {
             const u = snap.val(); if(!u) return;
             const catalog = u.catalog || [];
             const isOwner = (currentUser && currentUser.tel === viewedTel);
             
             document.getElementById('shop-header').innerHTML = `
-                <div style="display:flex; align-items:center; gap:12px; background:white; padding:12px; border-radius:15px; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
+                <div class="card" style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
                     <img src="${u.shopLogo || 'bololo.png'}" style="width:50px; height:50px; border-radius:50%; object-fit:cover; border:2px solid var(--primary);">
-                    <div style="text-align:left"><h4 style="margin:0">${u.shopName || 'Boutique'}</h4><small>${u.tel}</small></div>
+                    <div><h4 style="margin:0">${u.shopName || 'Boutique'}</h4><small>${u.tel}</small></div>
                 </div>`;
 
-            list.innerHTML = catalog.length === 0 ? "<p style='text-align:center; padding:20px;'>Aucun article.</p>" : catalog.map((it, i) => {
-                const hasVoted = userVotes[it.id];
-                return `
+            list.innerHTML = catalog.map((it, i) => `
                 <div class="product-card">
-                    <div class="product-img-container">${it.img ? `<img src="${it.img}" class="product-img-display">` : 'Image'}</div>
+                    <div class="product-img-container"><img src="${it.img || ''}" class="product-img-display"></div>
                     <div style="padding:15px;">
                         <b>${it.name}</b><br><span style="color:var(--primary); font-weight:bold;">${it.price} FCFA</span>
-                        <p style="font-size:0.75rem; color:#666; margin:5px 0;">${it.desc || ''}</p>
                         <div class="interactions">
-                            <button class="btn-vote" ${ (isOwner || hasVoted) ? 'disabled' : '' } onclick="vote(${i}, 'likes', ${it.id})">👍 ${it.likes || 0}</button>
-                            <button class="btn-vote" ${ (isOwner || hasVoted) ? 'disabled' : '' } onclick="vote(${i}, 'dislikes', ${it.id})">👎 ${it.dislikes || 0}</button>
-                        </div>
-                        <div style="background:#f8fafc; padding:10px; border-radius:10px; font-size:11px;">
-                            <div id="comm-area-${i}">${(it.comments || []).map(c => `<div style="margin-bottom:4px; border-bottom:1px solid #eee;"><b>${c.text}</b> <span class="badge ${c.isOwner ? 'badge-vendeur' : 'badge-client'}">${c.isOwner ? 'Vendeur' : 'Client'}</span></div>`).join('')}</div>
-                            <div style="display:flex; gap:5px; margin-top:5px;">
-                                <input type="text" id="in-comm-${i}" placeholder="Commenter..." style="margin:0; padding:5px; font-size:11px;">
-                                <button onclick="sendComm(${i}, ${isOwner})" style="border:none; background:var(--primary); color:white; border-radius:5px; padding:5px 10px; cursor:pointer;">📩</button>
-                            </div>
+                            <button class="btn-vote" onclick="vote(${i}, 'likes', ${it.id})">👍 ${it.likes || 0}</button>
+                            <button class="btn-vote" onclick="vote(${i}, 'dislikes', ${it.id})">👎 ${it.dislikes || 0}</button>
                         </div>
                     </div>
-                </div>`;
-            }).join('');
+                </div>`).join('');
         });
     }
 
-    function vote(idx, type, prodId) { userVotes[prodId] = true; db.ref('accounts/' + viewedTel + '/catalog/' + idx + '/' + type).transaction(v => (v || 0) + 1); }
-
-    function sendComm(idx, isOwner) {
-        const input = document.getElementById('in-comm-'+idx); if(!input.value) return;
-        db.ref('accounts/' + viewedTel + '/catalog/' + idx + '/comments').once('value', s => {
-            let comms = s.val() || []; comms.push({ text: input.value, isOwner: isOwner });
-            db.ref('accounts/' + viewedTel + '/catalog/' + idx + '/comments').set(comms); input.value = "";
-        });
-    }
-
-    function changeTheme() { document.body.className = document.getElementById('theme-selector').value; }
+    function vote(idx, type, prodId) { db.ref('accounts/' + viewedTel + '/catalog/' + idx + '/' + type).transaction(v => (v || 0) + 1); }
 </script>
 </body>
 </html>
