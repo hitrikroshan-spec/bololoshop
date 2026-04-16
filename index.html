@@ -60,8 +60,6 @@
         .btn-action { background: var(--glam); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; }
         .hidden { display: none !important; }
         .qr-box { background: white; padding: 10px; border-radius: 12px; display: inline-block; margin: 10px auto; border: 1px solid #eee; }
-        
-        /* Styles spécifiques pour les liens personnalisés */
         .link-text { color: var(--primary); font-weight: bold; cursor: pointer; font-size: 0.8rem; text-decoration: underline; margin-top: 15px; display: inline-block; }
     </style>
 </head>
@@ -95,13 +93,14 @@
                 
                 <div class="link-text" onclick="switchTab('signup')">Pas de compte ? CRÉER UN COMPTE</div>
 
-                <div style="margin-top:30px; opacity: 0.5;">
-                    <img src="bololo.png" alt="Logo" style="width: 60px; display: block; margin: 0 auto;">
+                <div style="margin-top:25px;">
+                    <img src="bololo.png" alt="Logo" style="width: 70px; display: block; margin: 0 auto 5px;">
+                    <img src="qr.png" alt="QR Link" style="width: 110px; display: block; margin: 0 auto;">
                 </div>
             </div>
 
             <div id="area-signup" class="hidden" style="text-align: center;">
-                <div style="text-align:left; font-size: 0.7rem; font-weight: bold; margin-bottom: 10px; color: #666;" onclick="switchTab('login')">← RETOUR LOGIN</div>
+                <div style="text-align:left; font-size: 0.7rem; font-weight: bold; margin-bottom: 10px; color: #666; cursor:pointer;" onclick="switchTab('login')">← RETOUR LOGIN</div>
                 <input type="tel" id="s-tel" placeholder="Votre numéro" oninput="drawQR('s-tel', 'qr-signup')">
                 <center><div id="qr-signup" class="qr-box"></div></center>
                 <input type="password" id="s-pass" placeholder="Mot de passe">
@@ -165,7 +164,7 @@
 
     let currentUser = null, viewedTel = "", tempLogo = "", tempProdImg = "", userVotes = {};
 
-    const AVERTISSEMENT_TEXT = `⚠️ <b>AVERTISSEMENT</b> ⚠️<br><br>Cette application est une vitrine de mise en relation.<br><br>👉 Les transactions se font entre vendeur et client.<br><br>👉 Bololo Pro n'est pas responsable des livraisons ou paiements.`;
+    const AVERTISSEMENT_TEXT = `⚠️ <b>AVERTISSEMENT</b> ⚠️<br><br>Cette plateforme est une vitrine de mise en relation.<br><br>👉 Les transactions sont directes entre vendeur et client.<br><br>👉 Bololo Pro n'est pas responsable des livraisons ou paiements.`;
 
     function showInfo() {
         document.getElementById('info-msg').innerHTML = AVERTISSEMENT_TEXT;
@@ -173,7 +172,6 @@
     }
     function closeInfo() { document.getElementById('info-modal').style.display = 'none'; }
 
-    // Modification 2 : Fonction Vitrine sans connexion
     function openVitrineDirect() {
         document.getElementById('view-auth').classList.add('hidden');
         document.getElementById('dash-view').classList.remove('hidden');
@@ -272,7 +270,7 @@
     function doSignup() {
         const tel = document.getElementById('s-tel').value, pass = document.getElementById('s-pass').value;
         if(tel.length < 4 || pass !== document.getElementById('s-confirm').value) return alert("Erreur de saisie");
-        db.ref('accounts/'+tel).set({tel, pass, shopName:"Boutique", shopLogo:"", catalog:[]}).then(()=>{alert("Compte créé ! Connectez-vous."); switchTab('login');});
+        db.ref('accounts/'+tel).set({tel, pass, shopName:"Boutique", shopLogo:"", catalog:[]}).then(()=>{alert("Compte créé !"); switchTab('login');});
     }
 
     function selectShop(t) { viewedTel = t; document.getElementById('suggest-box').classList.add('hidden'); renderShop(); }
@@ -283,33 +281,24 @@
     function changeTheme() { document.body.className = document.getElementById('theme-selector').value; }
     
     function addProduct() {
-        const name = document.getElementById('p-name').value;
-        if(!name) return alert("Nom requis");
         db.ref('accounts/'+currentUser.tel+'/catalog').once('value', s => {
             let cat = s.val() || [];
-            cat.push({id: Date.now(), name: name, price: document.getElementById('p-price').value, img: tempProdImg, likes:0, dislikes:0, comments:[]});
-            db.ref('accounts/'+currentUser.tel+'/catalog').set(cat).then(() => {
-                document.getElementById('p-name').value = "";
-                document.getElementById('p-price').value = "";
-                document.getElementById('p-desc').value = "";
-                alert("Article ajouté !");
-            });
+            cat.push({id: Date.now(), name: document.getElementById('p-name').value, price: document.getElementById('p-price').value, img: tempProdImg, likes:0, dislikes:0, comments:[]});
+            db.ref('accounts/'+currentUser.tel+'/catalog').set(cat).then(() => alert("Article ajouté !"));
         });
     }
 
     function renderAdminList() {
         db.ref('accounts/'+currentUser.tel+'/catalog').on('value', s => {
-            document.getElementById('admin-list').innerHTML = (s.val()||[]).map((it, i) => `<div class="card" style="display:flex; justify-content:space-between; align-items:center;"><span>${it.name}</span><button onclick="deleteProduct(${i})" style="color:red; border:none; background:none; font-size:1.2rem;">🗑️</button></div>`).join('');
+            document.getElementById('admin-list').innerHTML = (s.val()||[]).map((it, i) => `<div class="card" style="display:flex; justify-content:space-between; align-items:center;"><span>${it.name}</span><button onclick="deleteProduct(${i})" style="color:red; border:none; background:none;">🗑️</button></div>`).join('');
         });
     }
 
     function deleteProduct(i) {
-        if(confirm("Supprimer cet article ?")) {
-            db.ref('accounts/'+currentUser.tel+'/catalog').once('value', s => {
-                let cat = s.val(); cat.splice(i,1);
-                db.ref('accounts/'+currentUser.tel+'/catalog').set(cat);
-            });
-        }
+        db.ref('accounts/'+currentUser.tel+'/catalog').once('value', s => {
+            let cat = s.val(); cat.splice(i,1);
+            db.ref('accounts/'+currentUser.tel+'/catalog').set(cat);
+        });
     }
 
     function drawQR(id, cont) {
