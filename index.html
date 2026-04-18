@@ -1,1 +1,309 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>BOLOLO Pro</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        :root { --primary: #6366f1; --glam: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); --bg: #f1f5f9; --text: #1e293b; }
+        body.theme-glamour { --primary: #a855f7; --glam: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); --bg: #f1f5f9; }
+        body.theme-feminin { --primary: #ec4899; --glam: linear-gradient(135deg, #f472b6 0%, #ec4899 100%); --bg: #fff1f2; }
+        body.theme-masculin { --primary: #0ea5e9; --glam: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%); --bg: #f0f9ff; }
+        body.theme-dark { --primary: #64748b; --glam: linear-gradient(135deg, #334155 0%, #0f172a 100%); --bg: #1e293b; --text: #f8fafc; }
+        
+        body { margin: 0; font-family: 'Inter', sans-serif; background: #000; min-height: 100vh; display: flex; justify-content: center; align-items: center; color: var(--text); }
+        .iphone-xs-screen { width: 375px; height: 812px; background: white; border-radius: 40px; display: flex; flex-direction: column; overflow: hidden; position: relative; box-shadow: 0 0 30px rgba(255,255,255,0.1); }
+        
+        header { background: var(--glam); color: white; padding: 55px 20px 15px; text-align: center; font-weight: bold; font-size: 0.9rem; position: relative; z-index: 100; }
+        .btn-logout { position: absolute; right: 15px; bottom: 12px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 5px 10px; border-radius: 8px; font-size: 0.6rem; cursor: pointer; }
+        
+        .content { flex: 1; overflow-y: auto; padding: 20px; background: var(--bg); position: relative; }
+        .card { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #eee; }
 
+        .search-container { position: relative; margin-bottom: 15px; }
+        .autocomplete-results { position: absolute; top: 45px; left: 0; right: 0; background: white; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); z-index: 200; max-height: 200px; overflow-y: auto; border: 1px solid #eee; }
+        .suggestion-item { display: flex; align-items: center; gap: 10px; padding: 10px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #000; }
+        .suggestion-item img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
+
+        .sticky-shop-header { position: sticky; top: -20px; background: var(--bg); z-index: 50; padding: 10px 0; margin-bottom: 15px; }
+
+        .product-card { background: white; border-radius: 15px; overflow: hidden; margin-bottom: 20px; border: 1px solid #eee; color: #1e293b; }
+        .product-img-container { width: 100%; height: 180px; background: #f8fafc; display: flex; align-items: center; justify-content: center; }
+        .product-img-display { max-width: 100%; max-height: 100%; object-fit: contain; }
+        
+        /* VOTES EN NOIR */
+        .interactions { display: flex; gap: 15px; padding: 10px; border-top: 1px solid #eee; }
+        .btn-vote { border: none; background: none; cursor: pointer; font-size: 14px; font-weight: bold; color: #000 !important; }
+        .btn-vote:disabled { opacity: 0.4; cursor: default; }
+        
+        .badge { font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; margin-left: 5px; font-weight: bold; }
+        .badge-vendeur { background: var(--primary); color: white; }
+        .badge-client { background: #e2e8f0; color: #475569; }
+
+        .qr-box { background: white; padding: 10px; border-radius: 12px; display: inline-block; margin: 10px auto; border: 1px solid #eee; }
+        .tab-bar { display: flex; gap: 5px; margin-bottom: 25px; border-bottom: 1px solid #eee; }
+        .tab-item { flex: 1; text-align: center; padding: 12px; cursor: pointer; font-weight: bold; font-size: 0.7rem; color: #999; }
+        .tab-item.active { color: var(--primary); border-bottom: 3px solid var(--primary); }
+        
+        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; box-sizing: border-box; }
+        .btn-action { background: var(--glam); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        
+        .nav-bar { background: white; display: flex; border-top: 1px solid #eee; padding: 10px 0 34px; } 
+        .nav-item { flex: 1; text-align: center; font-size: 0.65rem; color: #94a3b8; cursor: pointer; font-weight: bold; }
+        .nav-item.active { color: var(--primary); }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body class="theme-glamour">
+
+<div class="iphone-xs-screen">
+    <header>
+        <span id="title-text">BOLOLO Pro</span>
+        <button id="logout-btn" class="btn-logout hidden" onclick="location.reload()">SORTIR</button>
+    </header>
+    
+    <div class="content" id="main-content">
+        <div id="view-auth">
+            <div class="tab-bar">
+                <span id="t-login" class="tab-item active" onclick="switchTab('login')">LOGIN</span>
+                <span id="t-signup" class="tab-item" onclick="switchTab('signup')">CREER</span>
+            </div>
+            <div id="area-login">
+                <input type="tel" id="l-tel" placeholder="Numéro de téléphone">
+                <input type="password" id="l-pass" placeholder="Mot de passe">
+                <button class="btn-action" onclick="doLogin()">SE CONNECTER</button>
+                <center><img src="bololo.png" alt="Logo" style="width: 130px; margin-top: 30px;"></center>
+            </div>
+            <div id="area-signup" class="hidden">
+                <input type="tel" id="s-tel" placeholder="Votre numéro" oninput="drawQR('s-tel', 'qr-signup')">
+                <center><div id="qr-signup" class="qr-box"></div></center>
+                <input type="password" id="s-pass" placeholder="Mot de passe">
+                <input type="password" id="s-confirm" placeholder="Confirmer">
+                <button class="btn-action" onclick="doSignup()">CREER LE COMPTE</button>
+            </div>
+        </div>
+
+        <div id="dash-params" class="hidden">
+            <div class="card" style="text-align:center;">
+                <label style="font-size:0.7rem; font-weight:bold; color:var(--primary)">VOTRE QR</label><br>
+                <div id="qr-admin" class="qr-box"></div>
+            </div>
+            <div class="card">
+                <select id="theme-selector" onchange="changeTheme()">
+                    <option value="theme-glamour">✨ Glamour</option>
+                    <option value="theme-feminin">🌸 Féminin</option>
+                    <option value="theme-masculin">👔 Masculin</option>
+                    <option value="theme-dark">🌙 Sombre</option>
+                </select>
+                <input type="text" id="set-name" placeholder="Nom de la Boutique">
+                <label style="font-size:0.7rem;">LOGO DE BOUTIQUE</label>
+                <input type="file" accept="image/*" onchange="handleLogo(event)">
+                <button class="btn-action" onclick="saveSettings()">ENREGISTRER</button>
+            </div>
+        </div>
+
+        <div id="dash-articles" class="hidden">
+            <div class="card">
+                <input type="text" id="p-name" placeholder="Nom Article">
+                <input type="number" id="p-price" placeholder="Prix (FCFA)">
+                <textarea id="p-desc" placeholder="Description..."></textarea>
+                <input type="file" id="p-img-input" accept="image/*" onchange="handleProdImg(event)">
+                <button class="btn-action" onclick="addProduct()">PUBLIER</button>
+            </div>
+            <div id="admin-list"></div>
+        </div>
+
+        <div id="dash-view" class="hidden">
+            <div class="search-container">
+                <input type="tel" id="search-tel" placeholder="Chercher une boutique..." oninput="autoComplete(this.value)">
+                <div id="suggest-box" class="autocomplete-results hidden"></div>
+            </div>
+            <div id="shop-header" class="sticky-shop-header"></div>
+            <div id="shop-list"></div>
+        </div>
+    </div>
+
+    <nav id="bottom-nav" class="nav-bar hidden">
+        <div class="nav-item active" onclick="showSection('params', this)">⚙️<br>CONFIG</div>
+        <div class="nav-item" onclick="showSection('articles', this)">📦<br>ARTICLES</div>
+        <div class="nav-item" onclick="showSection('view', this); viewCurrentShop();">🛒<br>VUE</div>
+    </nav>
+</div>
+
+<script>
+    let currentUser = null;
+    let viewedTel = "";
+    let tempLogo = "";
+    let tempProdImg = "";
+    let userVotes = {}; 
+
+    function switchTab(t) {
+        document.getElementById('area-login').classList.toggle('hidden', t !== 'login');
+        document.getElementById('area-signup').classList.toggle('hidden', t !== 'signup');
+        document.getElementById('t-login').classList.toggle('active', t === 'login');
+        document.getElementById('t-signup').classList.toggle('active', t === 'signup');
+    }
+
+    function drawQR(inputId, containerId) {
+        const val = document.getElementById(inputId).value;
+        const container = document.getElementById(containerId);
+        container.innerHTML = "";
+        if(val.length >= 4) new QRCode(container, { text: val, width: 120, height: 120 });
+    }
+
+    function doSignup() {
+        const tel = document.getElementById('s-tel').value;
+        const pass = document.getElementById('s-pass').value;
+        if (tel.length < 4 || pass !== document.getElementById('s-confirm').value) return alert("Erreur saisie");
+        let accounts = JSON.parse(localStorage.getItem('bololo_accounts')) || [];
+        accounts.push({ tel, pass, limit: 2, shopName: "", shopLogo: "", catalog: [], blocked: false });
+        localStorage.setItem('bololo_accounts', JSON.stringify(accounts));
+        alert("Compte créé !"); switchTab('login');
+    }
+
+    function doLogin() {
+        const tel = document.getElementById('l-tel').value;
+        const pass = document.getElementById('l-pass').value;
+        let accounts = JSON.parse(localStorage.getItem('bololo_accounts')) || [];
+        const user = accounts.find(a => a.tel === tel && a.pass === pass);
+        
+        if (!user) return alert("Identifiants incorrects");
+        
+        // SECURITE : Verification du blocage
+        if (user.blocked) return alert("❌ COMPTE BLOQUÉ PAR L'ADMINISTRATEUR.");
+
+        currentUser = user; viewedTel = tel;
+        document.getElementById('view-auth').classList.add('hidden');
+        document.getElementById('bottom-nav').classList.remove('hidden');
+        document.getElementById('logout-btn').classList.remove('hidden');
+        document.getElementById('set-name').value = user.shopName || "";
+        tempLogo = user.shopLogo || "";
+        
+        showSection('params', document.querySelector('.nav-item'));
+        new QRCode(document.getElementById('qr-admin'), { text: user.tel, width: 140, height: 140 });
+        renderAdminList();
+    }
+
+    function handleLogo(e) {
+        const reader = new FileReader();
+        reader.onload = () => tempLogo = reader.result;
+        reader.readAsDataURL(e.target.files[0]);
+    }
+
+    function saveSettings() {
+        updateDB(currentUser.tel, u => { u.shopName = document.getElementById('set-name').value; u.shopLogo = tempLogo; });
+        alert("Config sauvegardée");
+    }
+
+    function handleProdImg(e) {
+        const reader = new FileReader();
+        reader.onload = () => tempProdImg = reader.result;
+        reader.readAsDataURL(e.target.files[0]);
+    }
+
+    function addProduct() {
+        let accounts = JSON.parse(localStorage.getItem('bololo_accounts'));
+        let user = accounts.find(a => a.tel === currentUser.tel);
+        if (user.catalog.length >= (user.limit || 2)) return alert("Quota atteint");
+
+        const newItem = { id: Date.now(), name: document.getElementById('p-name').value, price: document.getElementById('p-price').value, desc: document.getElementById('p-desc').value, img: tempProdImg, likes: 0, dislikes: 0, comments: [] };
+        updateDB(currentUser.tel, u => u.catalog.push(newItem));
+        tempProdImg = ""; document.getElementById('p-img-input').value = "";
+        renderAdminList();
+    }
+
+    function renderAdminList() {
+        let u = (JSON.parse(localStorage.getItem('bololo_accounts'))).find(a => a.tel === currentUser.tel);
+        document.getElementById('admin-list').innerHTML = u.catalog.map((it, i) => `
+            <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <img src="${it.img || ''}" style="width:40px;height:40px;border-radius:5px;object-fit:cover;">
+                    <span><b>${it.name}</b></span>
+                </div>
+                <button onclick="deleteProduct(${i})" style="color:red; border:none; background:none;">🗑️</button>
+            </div>`).join('');
+    }
+
+    function deleteProduct(i) { updateDB(currentUser.tel, u => u.catalog.splice(i, 1)); renderAdminList(); }
+
+    function viewCurrentShop() { viewedTel = currentUser.tel; renderShop(); }
+
+    function autoComplete(val) {
+        const box = document.getElementById('suggest-box');
+        if(val.length < 2) { box.classList.add('hidden'); return; }
+        let accs = JSON.parse(localStorage.getItem('bololo_accounts')) || [];
+        let filtered = accs.filter(a => a.tel.includes(val) || (a.shopName && a.shopName.toLowerCase().includes(val.toLowerCase())));
+        box.classList.toggle('hidden', filtered.length === 0);
+        box.innerHTML = filtered.map(a => `
+            <div class="suggestion-item" onclick="selectShop('${a.tel}')">
+                <img src="${a.shopLogo || 'https://via.placeholder.com/30'}">
+                <div><b>${a.shopName || 'Boutique'}</b><br><small>${a.tel}</small></div>
+            </div>`).join('');
+    }
+
+    function selectShop(tel) { viewedTel = tel; document.getElementById('suggest-box').classList.add('hidden'); renderShop(); }
+
+    function renderShop() {
+        let accounts = JSON.parse(localStorage.getItem('bololo_accounts'));
+        let u = accounts.find(a => a.tel === viewedTel);
+        const isOwner = (currentUser.tel === viewedTel);
+
+        document.getElementById('shop-header').innerHTML = `
+            <div style="display:flex; align-items:center; gap:12px; background:white; padding:12px; border-radius:15px; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
+                <img src="${u.shopLogo || ''}" style="width:50px; height:50px; border-radius:50%; object-fit:cover; border:2px solid var(--primary);">
+                <div style="text-align:left"><h4 style="margin:0">${u.shopName || 'Boutique'}</h4><small>${u.tel}</small></div>
+            </div>`;
+
+        document.getElementById('shop-list').innerHTML = u.catalog.map((it, i) => {
+            const hasVoted = userVotes[it.id];
+            return `
+            <div class="product-card">
+                <div class="product-img-container">${it.img ? `<img src="${it.img}" class="product-img-display">` : 'Image'}</div>
+                <div style="padding:15px;">
+                    <b>${it.name}</b><br><span style="color:var(--primary); font-weight:bold;">${it.price} FCFA</span>
+                    <p style="font-size:0.75rem; color:#666; margin:5px 0;">${it.desc || ''}</p>
+                    
+                    <div class="interactions">
+                        <button class="btn-vote" ${ (isOwner || hasVoted) ? 'disabled' : '' } onclick="vote(${i}, 'likes', ${it.id})">👍 ${it.likes}</button>
+                        <button class="btn-vote" ${ (isOwner || hasVoted) ? 'disabled' : '' } onclick="vote(${i}, 'dislikes', ${it.id})">👎 ${it.dislikes}</button>
+                    </div>
+
+                    <div style="background:#f8fafc; padding:10px; border-radius:10px; font-size:11px;">
+                        <div id="comm-area-${i}">${it.comments.map(c => `<div style="margin-bottom:4px; border-bottom:1px solid #eee;"><b>${c.text}</b> <span class="badge ${c.isOwner ? 'badge-vendeur' : 'badge-client'}">${c.isOwner ? 'Vendeur' : 'Client'}</span></div>`).join('')}</div>
+                        <div style="display:flex; gap:5px; margin-top:5px;">
+                            <input type="text" id="in-comm-${i}" placeholder="Commenter..." style="margin:0; padding:5px; font-size:11px;">
+                            <button onclick="sendComm(${i}, ${isOwner})" style="border:none; background:var(--primary); color:white; border-radius:5px; padding:5px 10px; cursor:pointer;">📩</button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function vote(idx, type, prodId) { userVotes[prodId] = true; updateDB(viewedTel, u => u.catalog[idx][type]++); renderShop(); }
+
+    function sendComm(idx, isOwner) {
+        const input = document.getElementById('in-comm-'+idx);
+        if(!input.value) return;
+        updateDB(viewedTel, u => u.catalog[idx].comments.push({ text: input.value, isOwner: isOwner }));
+        input.value = ""; renderShop();
+    }
+
+    function updateDB(tel, fn) {
+        let accs = JSON.parse(localStorage.getItem('bololo_accounts'));
+        let idx = accs.findIndex(a => a.tel === tel);
+        fn(accs[idx]); localStorage.setItem('bololo_accounts', JSON.stringify(accs));
+    }
+
+    function showSection(id, el) {
+        ['params', 'articles', 'view'].forEach(s => document.getElementById('dash-'+s).classList.add('hidden'));
+        document.getElementById('dash-'+id).classList.remove('hidden');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    function changeTheme() { document.body.className = document.getElementById('theme-selector').value; }
+</script>
+</body>
+</html>
