@@ -21,36 +21,32 @@
         .content { flex: 1; overflow-y: auto; padding: 20px; background: var(--bg); position: relative; }
         .card { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #eee; }
 
-        /* AUTOCOMPLETION */
         .search-container { position: relative; margin-bottom: 15px; }
         .autocomplete-results { position: absolute; top: 45px; left: 0; right: 0; background: white; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); z-index: 200; max-height: 200px; overflow-y: auto; border: 1px solid #eee; }
         .suggestion-item { display: flex; align-items: center; gap: 10px; padding: 10px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #000; }
         .suggestion-item img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
 
-        /* HEADER BOUTIQUE STICKY */
         .sticky-shop-header { position: sticky; top: -20px; background: var(--bg); z-index: 50; padding: 10px 0; margin-bottom: 15px; }
 
-        /* PRODUITS */
         .product-card { background: white; border-radius: 15px; overflow: hidden; margin-bottom: 20px; border: 1px solid #eee; color: #1e293b; }
         .product-img-container { width: 100%; height: 180px; background: #f8fafc; display: flex; align-items: center; justify-content: center; }
         .product-img-display { max-width: 100%; max-height: 100%; object-fit: contain; }
         
-        /* INTERACTIONS - COMPTEURS EN NOIR */
+        /* VOTES EN NOIR */
         .interactions { display: flex; gap: 15px; padding: 10px; border-top: 1px solid #eee; }
         .btn-vote { border: none; background: none; cursor: pointer; font-size: 14px; font-weight: bold; color: #000 !important; }
-        .btn-vote:disabled { opacity: 0.3; cursor: default; }
+        .btn-vote:disabled { opacity: 0.4; cursor: default; }
         
-        .badge { font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; margin-left: 5px; font-weight: bold; text-transform: uppercase; }
+        .badge { font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; margin-left: 5px; font-weight: bold; }
         .badge-vendeur { background: var(--primary); color: white; }
         .badge-client { background: #e2e8f0; color: #475569; }
 
-        .qr-box { background: white; padding: 10px; border-radius: 12px; display: inline-block; margin: 10px auto; min-width: 120px; border: 1px solid #eee; }
+        .qr-box { background: white; padding: 10px; border-radius: 12px; display: inline-block; margin: 10px auto; border: 1px solid #eee; }
         .tab-bar { display: flex; gap: 5px; margin-bottom: 25px; border-bottom: 1px solid #eee; }
         .tab-item { flex: 1; text-align: center; padding: 12px; cursor: pointer; font-weight: bold; font-size: 0.7rem; color: #999; }
         .tab-item.active { color: var(--primary); border-bottom: 3px solid var(--primary); }
         
-        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; background: #fff; box-sizing: border-box; }
-        label { font-size: 0.65rem; font-weight: bold; color: var(--primary); display: block; margin-bottom: 4px; padding-left: 5px; }
+        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; box-sizing: border-box; }
         .btn-action { background: var(--glam); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; }
         
         .nav-bar { background: white; display: flex; border-top: 1px solid #eee; padding: 10px 0 34px; } 
@@ -63,7 +59,7 @@
 
 <div class="iphone-xs-screen">
     <header>
-        <span id="title-text">BOLOLO SHOP</span>
+        <span id="title-text">BOLOLO Pro</span>
         <button id="logout-btn" class="btn-logout hidden" onclick="location.reload()">SORTIR</button>
     </header>
     
@@ -77,7 +73,7 @@
                 <input type="tel" id="l-tel" placeholder="Numéro de téléphone">
                 <input type="password" id="l-pass" placeholder="Mot de passe">
                 <button class="btn-action" onclick="doLogin()">SE CONNECTER</button>
-                <center><img src="bololo.png" alt="Bololo Logo" style="width: 120px; margin-top: 25px; opacity: 0.8;"></center>
+                <center><img src="bololo.png" alt="Logo" style="width: 130px; margin-top: 30px;"></center>
             </div>
             <div id="area-signup" class="hidden">
                 <input type="tel" id="s-tel" placeholder="Votre numéro" oninput="drawQR('s-tel', 'qr-signup')">
@@ -90,32 +86,30 @@
 
         <div id="dash-params" class="hidden">
             <div class="card" style="text-align:center;">
-                <label>VOTRE QR (QUOTA: <span id="quota-display">2</span>)</label>
+                <label style="font-size:0.7rem; font-weight:bold; color:var(--primary)">VOTRE QR</label><br>
                 <div id="qr-admin" class="qr-box"></div>
             </div>
             <div class="card">
-                <label>THEME</label>
                 <select id="theme-selector" onchange="changeTheme()">
                     <option value="theme-glamour">✨ Glamour</option>
                     <option value="theme-feminin">🌸 Féminin</option>
                     <option value="theme-masculin">👔 Masculin</option>
                     <option value="theme-dark">🌙 Sombre</option>
                 </select>
-                <label>LOGO DE LA BOUTIQUE</label>
-                <input type="file" accept="image/*" onchange="handleLogo(event)">
                 <input type="text" id="set-name" placeholder="Nom de la Boutique">
-                <button class="btn-action" onclick="saveSettings()">ENREGISTRER CONFIG</button>
+                <label style="font-size:0.7rem;">LOGO DE BOUTIQUE</label>
+                <input type="file" accept="image/*" onchange="handleLogo(event)">
+                <button class="btn-action" onclick="saveSettings()">ENREGISTRER</button>
             </div>
         </div>
 
         <div id="dash-articles" class="hidden">
             <div class="card">
-                <label>NOUVEL ARTICLE</label>
                 <input type="text" id="p-name" placeholder="Nom Article">
                 <input type="number" id="p-price" placeholder="Prix (FCFA)">
-                <textarea id="p-desc" placeholder="Description..." style="height:60px;"></textarea>
+                <textarea id="p-desc" placeholder="Description..."></textarea>
                 <input type="file" id="p-img-input" accept="image/*" onchange="handleProdImg(event)">
-                <button class="btn-action" onclick="addProduct()">PUBLIER SUR LA BOUTIQUE</button>
+                <button class="btn-action" onclick="addProduct()">PUBLIER</button>
             </div>
             <div id="admin-list"></div>
         </div>
@@ -161,11 +155,11 @@
     function doSignup() {
         const tel = document.getElementById('s-tel').value;
         const pass = document.getElementById('s-pass').value;
-        if (tel.length < 4 || pass !== document.getElementById('s-confirm').value) return alert("Erreur");
+        if (tel.length < 4 || pass !== document.getElementById('s-confirm').value) return alert("Erreur saisie");
         let accounts = JSON.parse(localStorage.getItem('bololo_accounts')) || [];
-        accounts.push({ tel, pass, limit: 2, shopName: "", shopLogo: "", catalog: [] });
+        accounts.push({ tel, pass, limit: 2, shopName: "", shopLogo: "", catalog: [], blocked: false });
         localStorage.setItem('bololo_accounts', JSON.stringify(accounts));
-        switchTab('login');
+        alert("Compte créé !"); switchTab('login');
     }
 
     function doLogin() {
@@ -173,13 +167,16 @@
         const pass = document.getElementById('l-pass').value;
         let accounts = JSON.parse(localStorage.getItem('bololo_accounts')) || [];
         const user = accounts.find(a => a.tel === tel && a.pass === pass);
-        if (!user) return alert("Erreur");
+        
+        if (!user) return alert("Identifiants incorrects");
+        
+        // SECURITE : Verification du blocage
+        if (user.blocked) return alert("❌ COMPTE BLOQUÉ PAR L'ADMINISTRATEUR.");
 
         currentUser = user; viewedTel = tel;
         document.getElementById('view-auth').classList.add('hidden');
         document.getElementById('bottom-nav').classList.remove('hidden');
         document.getElementById('logout-btn').classList.remove('hidden');
-        document.getElementById('quota-display').innerText = user.limit || 2;
         document.getElementById('set-name').value = user.shopName || "";
         tempLogo = user.shopLogo || "";
         
@@ -196,7 +193,7 @@
 
     function saveSettings() {
         updateDB(currentUser.tel, u => { u.shopName = document.getElementById('set-name').value; u.shopLogo = tempLogo; });
-        alert("Enregistré");
+        alert("Config sauvegardée");
     }
 
     function handleProdImg(e) {
@@ -208,7 +205,7 @@
     function addProduct() {
         let accounts = JSON.parse(localStorage.getItem('bololo_accounts'));
         let user = accounts.find(a => a.tel === currentUser.tel);
-        if (user.catalog.length >= (user.limit || 2)) return alert("Quota plein !");
+        if (user.catalog.length >= (user.limit || 2)) return alert("Quota atteint");
 
         const newItem = { id: Date.now(), name: document.getElementById('p-name').value, price: document.getElementById('p-price').value, desc: document.getElementById('p-desc').value, img: tempProdImg, likes: 0, dislikes: 0, comments: [] };
         updateDB(currentUser.tel, u => u.catalog.push(newItem));
@@ -221,10 +218,10 @@
         document.getElementById('admin-list').innerHTML = u.catalog.map((it, i) => `
             <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
                 <div style="display:flex; align-items:center; gap:10px;">
-                    ${it.img ? `<img src="${it.img}" style="width:40px;height:40px;border-radius:5px;object-fit:cover;">` : ''}
-                    <span><b>${it.name}</b><br><small>${it.price} F</small></span>
+                    <img src="${it.img || ''}" style="width:40px;height:40px;border-radius:5px;object-fit:cover;">
+                    <span><b>${it.name}</b></span>
                 </div>
-                <button onclick="deleteProduct(${i})" style="color:red; border:none; background:none;">X</button>
+                <button onclick="deleteProduct(${i})" style="color:red; border:none; background:none;">🗑️</button>
             </div>`).join('');
     }
 
@@ -245,7 +242,7 @@
             </div>`).join('');
     }
 
-    function selectShop(tel) { viewedTel = tel; document.getElementById('suggest-box').classList.add('hidden'); document.getElementById('search-tel').value = tel; renderShop(); }
+    function selectShop(tel) { viewedTel = tel; document.getElementById('suggest-box').classList.add('hidden'); renderShop(); }
 
     function renderShop() {
         let accounts = JSON.parse(localStorage.getItem('bololo_accounts'));
@@ -264,7 +261,7 @@
             <div class="product-card">
                 <div class="product-img-container">${it.img ? `<img src="${it.img}" class="product-img-display">` : 'Image'}</div>
                 <div style="padding:15px;">
-                    <b>${it.name}</b><br><span style="color:var(--primary); font-weight:800;">${it.price} FCFA</span>
+                    <b>${it.name}</b><br><span style="color:var(--primary); font-weight:bold;">${it.price} FCFA</span>
                     <p style="font-size:0.75rem; color:#666; margin:5px 0;">${it.desc || ''}</p>
                     
                     <div class="interactions">
@@ -272,7 +269,7 @@
                         <button class="btn-vote" ${ (isOwner || hasVoted) ? 'disabled' : '' } onclick="vote(${i}, 'dislikes', ${it.id})">👎 ${it.dislikes}</button>
                     </div>
 
-                    <div style="background:#f8fafc; padding:10px; border-radius:10px; font-size:11px; margin-top:5px;">
+                    <div style="background:#f8fafc; padding:10px; border-radius:10px; font-size:11px;">
                         <div id="comm-area-${i}">${it.comments.map(c => `<div style="margin-bottom:4px; border-bottom:1px solid #eee;"><b>${c.text}</b> <span class="badge ${c.isOwner ? 'badge-vendeur' : 'badge-client'}">${c.isOwner ? 'Vendeur' : 'Client'}</span></div>`).join('')}</div>
                         <div style="display:flex; gap:5px; margin-top:5px;">
                             <input type="text" id="in-comm-${i}" placeholder="Commenter..." style="margin:0; padding:5px; font-size:11px;">
