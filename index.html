@@ -1,5 +1,4 @@
-
-i<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -8,7 +7,7 @@ i<!DOCTYPE html>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="BololoShop">  
+    <meta name="apple-mobile-web-app-title" content="BololoShop">
     <link rel="apple-touch-icon" href="bololo.png">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -29,6 +28,7 @@ i<!DOCTYPE html>
         header { background: var(--glam); color: white; padding: 60px 20px 20px; text-align: center; font-weight: bold; font-size: 1.1rem; position: relative; z-index: 1000; }
         .btn-logout { position: absolute; right: 15px; bottom: 18px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 6px 12px; border-radius: 8px; font-size: 0.65rem; cursor: pointer; font-weight: bold; }
         
+        /* Sélecteur de langue dans le header */
         .lang-select { position: absolute; left: 15px; bottom: 18px; background: rgba(255,255,255,0.2); border: none; color: white; border-radius: 8px; font-size: 0.65rem; cursor: pointer; padding: 5px; outline: none; }
         .lang-select option { color: black; }
 
@@ -53,6 +53,9 @@ i<!DOCTYPE html>
         .btn-vote { border: none; background: none; cursor: pointer; font-size: 14px; font-weight: bold; color: #000; }
         
         .badge { font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; margin-left: 5px; font-weight: bold; }
+        .badge-vendeur { background: var(--primary); color: white; }
+        .badge-client { background: #e2e8f0; color: #475569; }
+
         .nav-bar { background: white; display: flex; border-top: 1px solid #eee; padding: 10px 0 25px; } 
         .nav-item { flex: 1; text-align: center; font-size: 0.7rem; color: #94a3b8; cursor: pointer; font-weight: bold; }
         .nav-item.active { color: var(--primary); }
@@ -63,11 +66,10 @@ i<!DOCTYPE html>
         .qr-box { background: white; padding: 10px; border-radius: 12px; display: inline-block; margin: 10px auto; border: 1px solid #eee; }
         .link-text { color: var(--primary); font-weight: bold; cursor: pointer; font-size: 0.8rem; text-decoration: underline; margin-top: 15px; display: inline-block; }
         
-        .phone-group { display: flex; gap: 5px; }
-        .phone-group select { width: 100px; font-size: 14px; }
-
+        /* Ajustements RTL pour l'Arabe */
         body[dir="rtl"] .btn-logout { right: auto; left: 15px; }
         body[dir="rtl"] .lang-select { left: auto; right: 15px; }
+        body[dir="rtl"] header { text-align: center; }
     </style>
 </head>
 <body class="theme-glamour">
@@ -100,39 +102,21 @@ i<!DOCTYPE html>
             </div>
 
             <div id="area-login" style="text-align: center;">
-                <div class="phone-group">
-                    <select id="l-prefix">
-                        <option value="+226">🇧🇫 +226</option>
-                        <option value="+225">🇨🇮 +225</option>
-                        <option value="+221">🇸🇳 +221</option>
-                        <option value="+223">🇲🇱 +223</option>
-                        <option value="+229">🇧🇯 +229</option>
-                        <option value="+228">🇹🇬 +228</option>
-                        <option value="+227">🇳🇪 +227</option>
-                        <option value="+245">🇬🇼 +245</option>
-                    </select>
-                    <input type="tel" id="l-tel" placeholder="Téléphone">
-                </div>
+                <input type="tel" id="l-tel" placeholder="Numéro de téléphone">
                 <input type="password" id="l-pass" placeholder="Mot de passe">
                 <button class="btn-action" id="btn-login" onclick="doLogin()">SE CONNECTER</button>
+                
                 <div class="link-text" id="link-signup" onclick="switchTab('signup')">Pas de compte ? CRÉER UN COMPTE</div>
+
+                <div style="margin-top:30px;">
+                    <img src="bololo.png" alt="Logo" style="width: 60px; display: block; margin: 0 auto 5px; opacity: 0.8;">
+                    <img src="qr.png" alt="Scan Me" style="width: 100px; display: block; margin: 0 auto;">
+                </div>
             </div>
 
             <div id="area-signup" class="hidden" style="text-align: center;">
                 <div id="btn-back-login" style="text-align:left; font-size: 0.7rem; font-weight: bold; margin-bottom: 10px; color: #666; cursor:pointer;" onclick="switchTab('login')">← RETOUR LOGIN</div>
-                <div class="phone-group">
-                    <select id="s-prefix" onchange="updateFullTel()">
-                        <option value="+226">🇧🇫 +226</option>
-                        <option value="+225">🇨🇮 +225</option>
-                        <option value="+221">🇸🇳 +221</option>
-                        <option value="+223">🇲🇱 +223</option>
-                        <option value="+229">🇧🇯 +229</option>
-                        <option value="+228">🇹🇬 +228</option>
-                        <option value="+227">🇳🇪 +227</option>
-                        <option value="+245">🇬🇼 +245</option>
-                    </select>
-                    <input type="tel" id="s-tel" placeholder="Votre numéro" oninput="updateFullTel()">
-                </div>
+                <input type="tel" id="s-tel" placeholder="Votre numéro" oninput="drawQR('s-tel', 'qr-signup')">
                 <center><div id="qr-signup" class="qr-box"></div></center>
                 <input type="password" id="s-pass" placeholder="Mot de passe">
                 <input type="password" id="s-confirm" placeholder="Confirmer">
@@ -195,7 +179,7 @@ i<!DOCTYPE html>
 
     const translations = {
         fr: {
-            login: "LOGIN", vitrine: "🛍️ VITRINE", tel: "Téléphone", pass: "Mot de passe",
+            login: "LOGIN", vitrine: "🛍️ VITRINE", tel: "Numéro de téléphone", pass: "Mot de passe",
             connect: "SE CONNECTER", noAccount: "Pas de compte ? CRÉER UN COMPTE",
             back: "← RETOUR LOGIN", confirm: "Confirmer", create: "CRÉER MON COMPTE",
             warning: `⚠️ <b>AVERTISSEMENT</b> ⚠️<br><br>Cette application est une vitrine de mise en relation.<br><br>👉 Les transactions se font entre vendeur et client.<br><br>👉 Bololo Pro n'est pas responsable des livraisons ou paiements.`,
@@ -205,7 +189,7 @@ i<!DOCTYPE html>
             successUpdate: "Profil mis à jour", successAdd: "Article ajouté !", errLogin: "Identifiants incorrects"
         },
         en: {
-            login: "LOGIN", vitrine: "🛍️ SHOWCASE", tel: "Phone", pass: "Password",
+            login: "LOGIN", vitrine: "🛍️ SHOWCASE", tel: "Phone number", pass: "Password",
             connect: "LOG IN", noAccount: "No account? CREATE AN ACCOUNT",
             back: "← BACK TO LOGIN", confirm: "Confirm", create: "CREATE MY ACCOUNT",
             warning: `⚠️ <b>WARNING</b> ⚠️<br><br>This app is a marketplace platform.<br><br>👉 Transactions occur between seller and client.<br><br>👉 Bololo Pro is not responsible for deliveries or payments.`,
@@ -213,49 +197,37 @@ i<!DOCTYPE html>
             logout: "LOGOUT", save: "SAVE", publish: "PUBLISH", search: "Search a shop...",
             shopName: "Shop Name", artName: "Item Name", artPrice: "Price (FCFA)", desc: "Description...",
             successUpdate: "Profile updated", successAdd: "Item added!", errLogin: "Incorrect credentials"
+        },
+        es: {
+            login: "ACCESO", vitrine: "🛍️ VITRINA", tel: "Número de teléfono", pass: "Contraseña",
+            connect: "CONECTARSE", noAccount: "¿Sin cuenta? CREAR CUENTA",
+            back: "← VOLVER", confirm: "Confirmar", create: "CREAR MI CUENTA",
+            warning: `⚠️ <b>ADVERTENCIA</b> ⚠️<br><br>Esta aplicación es una vitrina de conexión.<br><br>👉 Las transacciones son entre vendedor y cliente.<br><br>👉 Bololo Pro no es responsable de envíos o pagos.`,
+            understood: "ENTENDIDO", config: "⚙️<br>CONFIG", articles: "📦<br>ARTÍCULOS", vue: "🛒<br>VISTA",
+            logout: "SALIR", save: "GUARDAR", publish: "PUBLICAR", search: "Buscar una tienda...",
+            shopName: "Nombre de la tienda", artName: "Nombre del artículo", artPrice: "Precio (FCFA)", desc: "Descripción...",
+            successUpdate: "Perfil actualizado", successAdd: "¡Artículo añadido!", errLogin: "Credenciales incorrectas"
+        },
+        ar: {
+            login: "دخول", vitrine: "🛍️ المتجر", tel: "رقم الهاتف", pass: "كلمة المرور",
+            connect: "تسجيل الدخول", noAccount: "ليس لديك حساب؟ أنشئ حساباً",
+            back: "← العودة", confirm: "تأكيد", create: "إنشاء حسابي",
+            warning: `⚠️ <b>تحذير</b> ⚠️<br><br>هذا التطبيق هو منصة ربط فقط.<br><br>👉 المعاملات تتم بين البائع والمشتري مباشرة.<br><br>👉 Bololo Pro ليس مسؤولاً عن الشحن أو الدفع.`,
+            understood: "فهمت", config: "⚙️<br>إعدادات", articles: "📦<br>منتجات", vue: "🛒<br>عرض",
+            logout: "خروج", save: "حفظ", publish: "نشر", search: "ابحث عن متجر...",
+            shopName: "اسم المتجر", artName: "اسم المنتج", artPrice: "السعر (FCFA)", desc: "الوصف...",
+            successUpdate: "تم تحديث الملف", successAdd: "تمت إضافة المنتج!", errLogin: "بيانات الدخول خاطئة"
         }
     };
 
     let currentUser = null, viewedTel = "", tempLogo = "", tempProdImg = "", userVotes = {}, curL = 'fr';
 
-    function updateFullTel() {
-        const full = document.getElementById('s-prefix').value + document.getElementById('s-tel').value;
-        drawQRDirect(full, 'qr-signup');
-    }
-
-    function drawQRDirect(val, cont) {
-        const c = document.getElementById(cont); c.innerHTML = "";
-        if(val.length > 7) new QRCode(c, { text: val, width: 120, height: 120 });
-    }
-
-    function doLogin() {
-        const fullTel = document.getElementById('l-prefix').value + document.getElementById('l-tel').value;
-        const pass = document.getElementById('l-pass').value;
-        db.ref('accounts/' + fullTel).once('value', snap => {
-            const user = snap.val();
-            if (!user || user.pass !== pass) return alert(translations[curL].errLogin);
-            currentUser = user; viewedTel = fullTel;
-            document.getElementById('view-auth').classList.add('hidden');
-            document.getElementById('bottom-nav').classList.remove('hidden');
-            document.getElementById('logout-btn').classList.remove('hidden');
-            showSection('params', document.getElementById('nav-params'));
-            new QRCode(document.getElementById('qr-admin'), { text: fullTel, width: 140, height: 140 });
-            renderAdminList();
-        });
-    }
-
-    function doSignup() {
-        const prefix = document.getElementById('s-prefix').value;
-        const tel = document.getElementById('s-tel').value;
-        const fullTel = prefix + tel;
-        const pass = document.getElementById('s-pass').value;
-        if(tel.length < 5 || pass !== document.getElementById('s-confirm').value) return alert("Erreur saisie");
-        db.ref('accounts/'+fullTel).set({tel: fullTel, pass, shopName:"Shop", shopLogo:"", catalog:[]}).then(()=>{alert("Compte Créé !"); switchTab('login');});
-    }
-
     function changeLang(lang) {
-        curL = lang; const t = translations[lang] || translations['fr'];
+        curL = lang;
+        const t = translations[lang];
         document.body.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+        
+        // Update DOM
         document.getElementById('t-login').innerText = t.login;
         document.getElementById('t-vitrine').innerText = t.vitrine;
         document.getElementById('l-tel').placeholder = t.tel;
@@ -281,15 +253,51 @@ i<!DOCTYPE html>
         document.getElementById('btn-publish').innerText = t.publish;
     }
 
-    function showInfo() { document.getElementById('info-msg').innerHTML = translations[curL].warning; document.getElementById('info-modal').style.display = 'flex'; }
+    function showInfo() {
+        document.getElementById('info-msg').innerHTML = translations[curL].warning;
+        document.getElementById('info-modal').style.display = 'flex';
+    }
     function closeInfo() { document.getElementById('info-modal').style.display = 'none'; }
-    function openVitrineDirect() { document.getElementById('view-auth').classList.add('hidden'); document.getElementById('dash-view').classList.remove('hidden'); document.getElementById('logout-btn').classList.remove('hidden'); renderStories(); }
-    function switchTab(t) { document.getElementById('area-login').classList.toggle('hidden', t !== 'login'); document.getElementById('area-signup').classList.toggle('hidden', t !== 'signup'); }
-    function showSection(id, el) { ['params', 'articles', 'view'].forEach(s => document.getElementById('dash-'+s).classList.add('hidden')); document.getElementById('dash-'+id).classList.remove('hidden'); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); el.classList.add('active'); if(id === 'view') renderStories(); }
-    
+
+    function openVitrineDirect() {
+        document.getElementById('view-auth').classList.add('hidden');
+        document.getElementById('dash-view').classList.remove('hidden');
+        document.getElementById('logout-btn').classList.remove('hidden');
+        renderStories();
+    }
+
+    function switchTab(t) {
+        document.getElementById('area-login').classList.toggle('hidden', t !== 'login');
+        document.getElementById('area-signup').classList.toggle('hidden', t !== 'signup');
+    }
+
+    function showSection(id, el) {
+        ['params', 'articles', 'view'].forEach(s => document.getElementById('dash-'+s).classList.add('hidden'));
+        document.getElementById('dash-'+id).classList.remove('hidden');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
+        if(id === 'view') renderStories();
+    }
+
+    function doLogin() {
+        const tel = document.getElementById('l-tel').value, pass = document.getElementById('l-pass').value;
+        db.ref('accounts/' + tel).once('value', snap => {
+            const user = snap.val();
+            if (!user || user.pass !== pass) return alert(translations[curL].errLogin);
+            currentUser = user; viewedTel = tel;
+            document.getElementById('view-auth').classList.add('hidden');
+            document.getElementById('bottom-nav').classList.remove('hidden');
+            document.getElementById('logout-btn').classList.remove('hidden');
+            showSection('params', document.getElementById('nav-params'));
+            new QRCode(document.getElementById('qr-admin'), { text: user.tel, width: 140, height: 140 });
+            renderAdminList();
+        });
+    }
+
     function renderStories() {
         db.ref('accounts').once('value', snap => {
-            const users = snap.val(); if(!users) return;
+            const users = snap.val();
+            if(!users) return;
             document.getElementById('user-stories').innerHTML = Object.values(users).map(u => `
                 <div class="story-item" onclick="selectShop('${u.tel}')">
                     <img src="${u.shopLogo || 'bololo.png'}" class="story-circle">
@@ -301,6 +309,7 @@ i<!DOCTYPE html>
     function renderShop() {
         db.ref('accounts/' + viewedTel).on('value', snap => {
             const u = snap.val(); if(!u) return;
+            const isOwner = (currentUser && currentUser.tel === viewedTel);
             document.getElementById('shop-header').innerHTML = `
                 <div style="display:flex; align-items:center; gap:12px; background:white; padding:12px; border-radius:15px; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
                     <img src="${u.shopLogo || 'bololo.png'}" style="width:50px; height:50px; border-radius:50%; object-fit:cover; border:2px solid var(--primary);">
@@ -324,6 +333,13 @@ i<!DOCTYPE html>
     }
 
     function vote(idx, type, id) { userVotes[id] = true; db.ref('accounts/'+viewedTel+'/catalog/'+idx+'/'+type).transaction(v => (v||0)+1); }
+
+    function doSignup() {
+        const tel = document.getElementById('s-tel').value, pass = document.getElementById('s-pass').value;
+        if(tel.length < 4 || pass !== document.getElementById('s-confirm').value) return alert("Error");
+        db.ref('accounts/'+tel).set({tel, pass, shopName:"Shop", shopLogo:"", catalog:[]}).then(()=>{alert("OK!"); switchTab('login');});
+    }
+
     function selectShop(t) { viewedTel = t; document.getElementById('suggest-box').classList.add('hidden'); renderShop(); }
     function viewCurrentShop() { if(currentUser) { viewedTel = currentUser.tel; renderShop(); } }
     function handleLogo(e) { const r = new FileReader(); r.onload = () => tempLogo = r.result; r.readAsDataURL(e.target.files[0]); }
@@ -334,7 +350,7 @@ i<!DOCTYPE html>
     function addProduct() {
         db.ref('accounts/'+currentUser.tel+'/catalog').once('value', s => {
             let cat = s.val() || [];
-            cat.push({id: Date.now(), name: document.getElementById('p-name').value, price: document.getElementById('p-price').value, img: tempProdImg, likes:0, dislikes:0});
+            cat.push({id: Date.now(), name: document.getElementById('p-name').value, price: document.getElementById('p-price').value, img: tempProdImg, likes:0, dislikes:0, comments:[]});
             db.ref('accounts/'+currentUser.tel+'/catalog').set(cat).then(() => {
                 document.getElementById('p-name').value = ""; document.getElementById('p-price').value = ""; alert(translations[curL].successAdd);
             });
@@ -348,12 +364,18 @@ i<!DOCTYPE html>
     }
 
     function deleteProduct(i) {
-        if(confirm("Supprimer ?")) {
+        if(confirm("?")) {
             db.ref('accounts/'+currentUser.tel+'/catalog').once('value', s => {
                 let cat = s.val(); cat.splice(i,1);
                 db.ref('accounts/'+currentUser.tel+'/catalog').set(cat);
             });
         }
+    }
+
+    function drawQR(id, cont) {
+        const val = document.getElementById(id).value;
+        const c = document.getElementById(cont); c.innerHTML = "";
+        if(val.length > 3) new QRCode(c, { text: val, width: 120, height: 120 });
     }
 
     function autoComplete(val) {
