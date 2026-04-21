@@ -2,9 +2,18 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>BOLOLO Pro</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="BololoShop">
+    <link rel="apple-touch-icon" href="bololo.png">
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+
     <style>
         :root { --primary: #6366f1; --glam: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); --bg: #f1f5f9; --text: #1e293b; }
         body.theme-glamour { --primary: #a855f7; --glam: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); --bg: #f1f5f9; }
@@ -12,291 +21,254 @@
         body.theme-masculin { --primary: #0ea5e9; --glam: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%); --bg: #f0f9ff; }
         body.theme-dark { --primary: #64748b; --glam: linear-gradient(135deg, #334155 0%, #0f172a 100%); --bg: #1e293b; --text: #f8fafc; }
         
-        body { margin: 0; font-family: 'Inter', sans-serif; background: #000; min-height: 100vh; display: flex; justify-content: center; align-items: center; color: var(--text); }
-        .iphone-xs-screen { width: 375px; height: 812px; background: white; border-radius: 40px; display: flex; flex-direction: column; overflow: hidden; position: relative; box-shadow: 0 0 30px rgba(255,255,255,0.1); }
+        body { margin: 0; font-family: 'Inter', sans-serif; background: #e2e8f0; min-height: 100vh; display: flex; justify-content: center; align-items: center; color: var(--text); overscroll-behavior: none; transition: all 0.3s; }
+
+        .iphone-xs-screen { width: 100%; max-width: 400px; height: 100vh; background: white; display: flex; flex-direction: column; overflow: hidden; position: relative; border: none; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
         
-        header { background: var(--glam); color: white; padding: 55px 20px 15px; text-align: center; font-weight: bold; font-size: 0.9rem; position: relative; z-index: 100; }
-        .btn-logout { position: absolute; right: 15px; bottom: 12px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 5px 10px; border-radius: 8px; font-size: 0.6rem; cursor: pointer; }
+        header { background: var(--glam); color: white; padding: 60px 20px 20px; text-align: center; font-weight: bold; font-size: 1.1rem; position: relative; z-index: 1000; }
+        .btn-logout { position: absolute; right: 15px; bottom: 18px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 6px 12px; border-radius: 8px; font-size: 0.65rem; cursor: pointer; font-weight: bold; }
         
+        /* Sélecteur de langue dans le header */
+        .lang-select { position: absolute; left: 15px; bottom: 18px; background: rgba(255,255,255,0.2); border: none; color: white; border-radius: 8px; font-size: 0.65rem; cursor: pointer; padding: 5px; outline: none; }
+        .lang-select option { color: black; }
+
         .content { flex: 1; overflow-y: auto; padding: 20px; background: var(--bg); position: relative; }
         .card { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #eee; }
 
-        /* AUTOCOMPLETION */
-        .search-container { position: relative; margin-bottom: 15px; }
-        .autocomplete-results { position: absolute; top: 45px; left: 0; right: 0; background: white; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); z-index: 200; max-height: 200px; overflow-y: auto; border: 1px solid #eee; }
-        .suggestion-item { display: flex; align-items: center; gap: 10px; padding: 10px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #000; }
-        .suggestion-item img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
-
-        /* HEADER BOUTIQUE STICKY */
-        .sticky-shop-header { position: sticky; top: -20px; background: var(--bg); z-index: 50; padding: 10px 0; margin-bottom: 15px; }
-
-        /* PRODUITS */
-        .product-card { background: white; border-radius: 15px; overflow: hidden; margin-bottom: 20px; border: 1px solid #eee; color: #1e293b; }
-        .product-img-container { width: 100%; height: 180px; background: #f8fafc; display: flex; align-items: center; justify-content: center; }
-        .product-img-display { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .sticky-area { position: sticky; top: -20px; background: var(--bg); z-index: 500; padding: 10px 0; border-bottom: 2px solid #ddd; margin-bottom: 15px; }
         
-        /* INTERACTIONS - COMPTEURS EN NOIR */
+        .story-container { display: flex; gap: 12px; overflow-x: auto; padding: 5px 0 10px; scrollbar-width: none; }
+        .story-container::-webkit-scrollbar { display: none; }
+        .story-item { flex: 0 0 auto; text-align: center; width: 60px; cursor: pointer; }
+        .story-circle { width: 55px; height: 55px; border-radius: 50%; border: 3px solid var(--primary); padding: 2px; object-fit: cover; background: white; }
+        .story-name { font-size: 9px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; margin-top: 3px; }
+
+        .modal-info { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 2500; padding: 20px; }
+        .modal-content { background: white; padding: 20px; border-radius: 25px; max-width: 340px; text-align: center; color: #1e293b; border: 3px solid var(--primary); }
+        .btn-close-modal { background: var(--glam); color: white; border: none; padding: 12px 25px; border-radius: 12px; margin-top: 20px; cursor: pointer; font-weight: bold; width: 100%; }
+
+        .product-card { background: white; border-radius: 15px; overflow: hidden; margin-bottom: 20px; border: 1px solid #eee; }
+        .product-img-display { width: 100%; height: auto; max-height: 450px; object-fit: contain; display: block; }
         .interactions { display: flex; gap: 15px; padding: 10px; border-top: 1px solid #eee; }
-        .btn-vote { border: none; background: none; cursor: pointer; font-size: 14px; font-weight: bold; color: #000 !important; }
-        .btn-vote:disabled { opacity: 0.3; cursor: default; }
+        .btn-vote { border: none; background: none; cursor: pointer; font-size: 14px; font-weight: bold; color: #000; }
         
-        .badge { font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; margin-left: 5px; font-weight: bold; text-transform: uppercase; }
+        .badge { font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; margin-left: 5px; font-weight: bold; }
         .badge-vendeur { background: var(--primary); color: white; }
         .badge-client { background: #e2e8f0; color: #475569; }
 
-        .qr-box { background: white; padding: 10px; border-radius: 12px; display: inline-block; margin: 10px auto; min-width: 120px; border: 1px solid #eee; }
-        .tab-bar { display: flex; gap: 5px; margin-bottom: 25px; border-bottom: 1px solid #eee; }
-        .tab-item { flex: 1; text-align: center; padding: 12px; cursor: pointer; font-weight: bold; font-size: 0.7rem; color: #999; }
-        .tab-item.active { color: var(--primary); border-bottom: 3px solid var(--primary); }
-        
-        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; background: #fff; box-sizing: border-box; }
-        label { font-size: 0.65rem; font-weight: bold; color: var(--primary); display: block; margin-bottom: 4px; padding-left: 5px; }
-        .btn-action { background: var(--glam); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; }
-        
-        .nav-bar { background: white; display: flex; border-top: 1px solid #eee; padding: 10px 0 34px; } 
-        .nav-item { flex: 1; text-align: center; font-size: 0.65rem; color: #94a3b8; cursor: pointer; font-weight: bold; }
+        .nav-bar { background: white; display: flex; border-top: 1px solid #eee; padding: 10px 0 25px; } 
+        .nav-item { flex: 1; text-align: center; font-size: 0.7rem; color: #94a3b8; cursor: pointer; font-weight: bold; }
         .nav-item.active { color: var(--primary); }
+
+        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; box-sizing: border-box; }
+        .btn-action { background: var(--glam); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; }
         .hidden { display: none !important; }
+        .qr-box { background: white; padding: 10px; border-radius: 12px; display: inline-block; margin: 10px auto; border: 1px solid #eee; }
+        .link-text { color: var(--primary); font-weight: bold; cursor: pointer; font-size: 0.8rem; text-decoration: underline; margin-top: 15px; display: inline-block; }
+        
+        /* Ajustements RTL pour l'Arabe */
+        body[dir="rtl"] .btn-logout { right: auto; left: 15px; }
+        body[dir="rtl"] .lang-select { left: auto; right: 15px; }
+        body[dir="rtl"] header { text-align: center; }
     </style>
 </head>
 <body class="theme-glamour">
 
+<div id="info-modal" class="modal-info">
+    <div class="modal-content">
+        <div style="font-size: 40px; margin-bottom: 10px;">💡</div>
+        <div id="info-msg" style="font-size: 13px; line-height: 1.6; text-align: left;"></div>
+        <button class="btn-close-modal" id="btn-modal-close" onclick="closeInfo()">J'AI COMPRIS</button>
+    </div>
+</div>
+
 <div class="iphone-xs-screen">
     <header>
-        <span id="title-text">BOLOLO SHOP</span>
+        <select class="lang-select" onchange="changeLang(this.value)">
+            <option value="fr">🇫🇷 FR</option>
+            <option value="en">🇺🇸 EN</option>
+            <option value="es">🇪🇸 ES</option>
+            <option value="ar">🇸🇦 AR</option>
+        </select>
+        <span id="title-text">BOLOLO Pro</span>
         <button id="logout-btn" class="btn-logout hidden" onclick="location.reload()">SORTIR</button>
     </header>
     
     <div class="content" id="main-content">
         <div id="view-auth">
-            <div class="tab-bar">
-                <span id="t-login" class="tab-item active" onclick="switchTab('login')">LOGIN</span>
-                <span id="t-signup" class="tab-item" onclick="switchTab('signup')">CREER</span>
+            <div class="tab-bar" style="display:flex; justify-content: space-between; align-items:center; margin-bottom:25px; border-bottom:1px solid #eee; padding: 0 10px;">
+                <span id="t-login" class="tab-item active" style="padding:12px; cursor:pointer; font-weight:bold; font-size:0.7rem;" onclick="switchTab('login')">LOGIN</span>
+                <span id="t-vitrine" style="padding:12px; cursor:pointer; font-weight:bold; font-size:0.7rem; color:var(--primary);" onclick="openVitrineDirect()">🛍️ VITRINE</span>
             </div>
-            <div id="area-login">
+
+            <div id="area-login" style="text-align: center;">
                 <input type="tel" id="l-tel" placeholder="Numéro de téléphone">
                 <input type="password" id="l-pass" placeholder="Mot de passe">
-                <button class="btn-action" onclick="doLogin()">SE CONNECTER</button>
-                <center><img src="bololo.png" alt="Bololo Logo" style="width: 120px; margin-top: 25px; opacity: 0.8;"></center>
+                <button class="btn-action" id="btn-login" onclick="doLogin()">SE CONNECTER</button>
+                
+                <div class="link-text" id="link-signup" onclick="switchTab('signup')">Pas de compte ? CRÉER UN COMPTE</div>
+
+                <div style="margin-top:30px;">
+                    <img src="bololo.png" alt="Logo" style="width: 60px; display: block; margin: 0 auto 5px; opacity: 0.8;">
+                    <img src="qr.png" alt="Scan Me" style="width: 100px; display: block; margin: 0 auto;">
+                </div>
             </div>
-            <div id="area-signup" class="hidden">
+
+            <div id="area-signup" class="hidden" style="text-align: center;">
+                <div id="btn-back-login" style="text-align:left; font-size: 0.7rem; font-weight: bold; margin-bottom: 10px; color: #666; cursor:pointer;" onclick="switchTab('login')">← RETOUR LOGIN</div>
                 <input type="tel" id="s-tel" placeholder="Votre numéro" oninput="drawQR('s-tel', 'qr-signup')">
                 <center><div id="qr-signup" class="qr-box"></div></center>
                 <input type="password" id="s-pass" placeholder="Mot de passe">
                 <input type="password" id="s-confirm" placeholder="Confirmer">
-                <button class="btn-action" onclick="doSignup()">CREER LE COMPTE</button>
+                <button class="btn-action" id="btn-signup-submit" onclick="doSignup()">CRÉER MON COMPTE</button>
             </div>
         </div>
 
         <div id="dash-params" class="hidden">
             <div class="card" style="text-align:center;">
-                <label>VOTRE QR (QUOTA: <span id="quota-display">2</span>)</label>
                 <div id="qr-admin" class="qr-box"></div>
             </div>
             <div class="card">
-                <label>THEME</label>
                 <select id="theme-selector" onchange="changeTheme()">
                     <option value="theme-glamour">✨ Glamour</option>
                     <option value="theme-feminin">🌸 Féminin</option>
                     <option value="theme-masculin">👔 Masculin</option>
                     <option value="theme-dark">🌙 Sombre</option>
                 </select>
-                <label>LOGO DE LA BOUTIQUE</label>
-                <input type="file" accept="image/*" onchange="handleLogo(event)">
                 <input type="text" id="set-name" placeholder="Nom de la Boutique">
-                <button class="btn-action" onclick="saveSettings()">ENREGISTRER CONFIG</button>
+                <input type="file" accept="image/*" onchange="handleLogo(event)">
+                <button class="btn-action" id="btn-save-settings" onclick="saveSettings()">ENREGISTRER</button>
             </div>
         </div>
 
         <div id="dash-articles" class="hidden">
             <div class="card">
-                <label>NOUVEL ARTICLE</label>
                 <input type="text" id="p-name" placeholder="Nom Article">
                 <input type="number" id="p-price" placeholder="Prix (FCFA)">
-                <textarea id="p-desc" placeholder="Description..." style="height:60px;"></textarea>
+                <textarea id="p-desc" placeholder="Description..."></textarea>
                 <input type="file" id="p-img-input" accept="image/*" onchange="handleProdImg(event)">
-                <button class="btn-action" onclick="addProduct()">PUBLIER SUR LA BOUTIQUE</button>
+                <button class="btn-action" id="btn-publish" onclick="addProduct()">PUBLIER</button>
             </div>
             <div id="admin-list"></div>
         </div>
 
         <div id="dash-view" class="hidden">
-            <div class="search-container">
-                <input type="tel" id="search-tel" placeholder="Chercher une boutique..." oninput="autoComplete(this.value)">
-                <div id="suggest-box" class="autocomplete-results hidden"></div>
+            <div class="sticky-area">
+                <div class="search-container">
+                    <input type="text" id="search-input" placeholder="Chercher une boutique..." oninput="autoComplete(this.value)">
+                    <div id="suggest-box" class="autocomplete-results hidden" style="position:absolute; width:100%; background:white; z-index:2000; border: 1px solid #ddd; border-radius: 10px;"></div>
+                </div>
+                <div id="user-stories" class="story-container"></div>
+                <div id="shop-header"></div>
             </div>
-            <div id="shop-header" class="sticky-shop-header"></div>
             <div id="shop-list"></div>
         </div>
     </div>
 
     <nav id="bottom-nav" class="nav-bar hidden">
-        <div class="nav-item active" onclick="showSection('params', this)">⚙️<br>CONFIG</div>
-        <div class="nav-item" onclick="showSection('articles', this)">📦<br>ARTICLES</div>
-        <div class="nav-item" onclick="showSection('view', this); viewCurrentShop();">🛒<br>VUE</div>
+        <div class="nav-item active" id="nav-params" onclick="showSection('params', this)">⚙️<br>CONFIG</div>
+        <div class="nav-item" id="nav-articles" onclick="showSection('articles', this)">📦<br>ARTICLES</div>
+        <div class="nav-item" id="nav-view" onclick="showSection('view', this); viewCurrentShop();">🛒<br>VUE</div>
     </nav>
 </div>
 
 <script>
-    let currentUser = null;
-    let viewedTel = "";
-    let tempLogo = "";
-    let tempProdImg = "";
-    let userVotes = {}; 
+    const firebaseConfig = { databaseURL: "https://bololoshop-bf59b-default-rtdb.firebaseio.com/" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const translations = {
+        fr: {
+            login: "LOGIN", vitrine: "🛍️ VITRINE", tel: "Numéro de téléphone", pass: "Mot de passe",
+            connect: "SE CONNECTER", noAccount: "Pas de compte ? CRÉER UN COMPTE",
+            back: "← RETOUR LOGIN", confirm: "Confirmer", create: "CRÉER MON COMPTE",
+            warning: `⚠️ <b>AVERTISSEMENT</b> ⚠️<br><br>Cette application est une vitrine de mise en relation.<br><br>👉 Les transactions se font entre vendeur et client.<br><br>👉 Bololo Pro n'est pas responsable des livraisons ou paiements.`,
+            understood: "J'AI COMPRIS", config: "⚙️<br>CONFIG", articles: "📦<br>ARTICLES", vue: "🛒<br>VUE",
+            logout: "SORTIR", save: "ENREGISTRER", publish: "PUBLIER", search: "Chercher une boutique...",
+            shopName: "Nom de la Boutique", artName: "Nom Article", artPrice: "Prix (FCFA)", desc: "Description...",
+            successUpdate: "Profil mis à jour", successAdd: "Article ajouté !", errLogin: "Identifiants incorrects"
+        },
+        en: {
+            login: "LOGIN", vitrine: "🛍️ SHOWCASE", tel: "Phone number", pass: "Password",
+            connect: "LOG IN", noAccount: "No account? CREATE AN ACCOUNT",
+            back: "← BACK TO LOGIN", confirm: "Confirm", create: "CREATE MY ACCOUNT",
+            warning: `⚠️ <b>WARNING</b> ⚠️<br><br>This app is a marketplace platform.<br><br>👉 Transactions occur between seller and client.<br><br>👉 Bololo Pro is not responsible for deliveries or payments.`,
+            understood: "I UNDERSTAND", config: "⚙️<br>CONFIG", articles: "📦<br>ITEMS", vue: "🛒<br>VIEW",
+            logout: "LOGOUT", save: "SAVE", publish: "PUBLISH", search: "Search a shop...",
+            shopName: "Shop Name", artName: "Item Name", artPrice: "Price (FCFA)", desc: "Description...",
+            successUpdate: "Profile updated", successAdd: "Item added!", errLogin: "Incorrect credentials"
+        },
+        es: {
+            login: "ACCESO", vitrine: "🛍️ VITRINA", tel: "Número de teléfono", pass: "Contraseña",
+            connect: "CONECTARSE", noAccount: "¿Sin cuenta? CREAR CUENTA",
+            back: "← VOLVER", confirm: "Confirmar", create: "CREAR MI CUENTA",
+            warning: `⚠️ <b>ADVERTENCIA</b> ⚠️<br><br>Esta aplicación es una vitrina de conexión.<br><br>👉 Las transacciones son entre vendedor y cliente.<br><br>👉 Bololo Pro no es responsable de envíos o pagos.`,
+            understood: "ENTENDIDO", config: "⚙️<br>CONFIG", articles: "📦<br>ARTÍCULOS", vue: "🛒<br>VISTA",
+            logout: "SALIR", save: "GUARDAR", publish: "PUBLICAR", search: "Buscar una tienda...",
+            shopName: "Nombre de la tienda", artName: "Nombre del artículo", artPrice: "Precio (FCFA)", desc: "Descripción...",
+            successUpdate: "Perfil actualizado", successAdd: "¡Artículo añadido!", errLogin: "Credenciales incorrectas"
+        },
+        ar: {
+            login: "دخول", vitrine: "🛍️ المتجر", tel: "رقم الهاتف", pass: "كلمة المرور",
+            connect: "تسجيل الدخول", noAccount: "ليس لديك حساب؟ أنشئ حساباً",
+            back: "← العودة", confirm: "تأكيد", create: "إنشاء حسابي",
+            warning: `⚠️ <b>تحذير</b> ⚠️<br><br>هذا التطبيق هو منصة ربط فقط.<br><br>👉 المعاملات تتم بين البائع والمشتري مباشرة.<br><br>👉 Bololo Pro ليس مسؤولاً عن الشحن أو الدفع.`,
+            understood: "فهمت", config: "⚙️<br>إعدادات", articles: "📦<br>منتجات", vue: "🛒<br>عرض",
+            logout: "خروج", save: "حفظ", publish: "نشر", search: "ابحث عن متجر...",
+            shopName: "اسم المتجر", artName: "اسم المنتج", artPrice: "السعر (FCFA)", desc: "الوصف...",
+            successUpdate: "تم تحديث الملف", successAdd: "تمت إضافة المنتج!", errLogin: "بيانات الدخول خاطئة"
+        }
+    };
+
+    let currentUser = null, viewedTel = "", tempLogo = "", tempProdImg = "", userVotes = {}, curL = 'fr';
+
+    function changeLang(lang) {
+        curL = lang;
+        const t = translations[lang];
+        document.body.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+        
+        // Update DOM
+        document.getElementById('t-login').innerText = t.login;
+        document.getElementById('t-vitrine').innerText = t.vitrine;
+        document.getElementById('l-tel').placeholder = t.tel;
+        document.getElementById('l-pass').placeholder = t.pass;
+        document.getElementById('btn-login').innerText = t.connect;
+        document.getElementById('link-signup').innerText = t.noAccount;
+        document.getElementById('btn-back-login').innerText = t.back;
+        document.getElementById('s-tel').placeholder = t.tel;
+        document.getElementById('s-pass').placeholder = t.pass;
+        document.getElementById('s-confirm').placeholder = t.confirm;
+        document.getElementById('btn-signup-submit').innerText = t.create;
+        document.getElementById('btn-modal-close').innerText = t.understood;
+        document.getElementById('logout-btn').innerText = t.logout;
+        document.getElementById('nav-params').innerHTML = t.config;
+        document.getElementById('nav-articles').innerHTML = t.articles;
+        document.getElementById('nav-view').innerHTML = t.vue;
+        document.getElementById('search-input').placeholder = t.search;
+        document.getElementById('set-name').placeholder = t.shopName;
+        document.getElementById('btn-save-settings').innerText = t.save;
+        document.getElementById('p-name').placeholder = t.artName;
+        document.getElementById('p-price').placeholder = t.artPrice;
+        document.getElementById('p-desc').placeholder = t.desc;
+        document.getElementById('btn-publish').innerText = t.publish;
+    }
+
+    function showInfo() {
+        document.getElementById('info-msg').innerHTML = translations[curL].warning;
+        document.getElementById('info-modal').style.display = 'flex';
+    }
+    function closeInfo() { document.getElementById('info-modal').style.display = 'none'; }
+
+    function openVitrineDirect() {
+        document.getElementById('view-auth').classList.add('hidden');
+        document.getElementById('dash-view').classList.remove('hidden');
+        document.getElementById('logout-btn').classList.remove('hidden');
+        renderStories();
+    }
 
     function switchTab(t) {
         document.getElementById('area-login').classList.toggle('hidden', t !== 'login');
         document.getElementById('area-signup').classList.toggle('hidden', t !== 'signup');
-        document.getElementById('t-login').classList.toggle('active', t === 'login');
-        document.getElementById('t-signup').classList.toggle('active', t === 'signup');
-    }
-
-    function drawQR(inputId, containerId) {
-        const val = document.getElementById(inputId).value;
-        const container = document.getElementById(containerId);
-        container.innerHTML = "";
-        if(val.length >= 4) new QRCode(container, { text: val, width: 120, height: 120 });
-    }
-
-    function doSignup() {
-        const tel = document.getElementById('s-tel').value;
-        const pass = document.getElementById('s-pass').value;
-        if (tel.length < 4 || pass !== document.getElementById('s-confirm').value) return alert("Erreur");
-        let accounts = JSON.parse(localStorage.getItem('bololo_accounts')) || [];
-        accounts.push({ tel, pass, limit: 2, shopName: "", shopLogo: "", catalog: [] });
-        localStorage.setItem('bololo_accounts', JSON.stringify(accounts));
-        switchTab('login');
-    }
-
-    function doLogin() {
-        const tel = document.getElementById('l-tel').value;
-        const pass = document.getElementById('l-pass').value;
-        let accounts = JSON.parse(localStorage.getItem('bololo_accounts')) || [];
-        const user = accounts.find(a => a.tel === tel && a.pass === pass);
-        if (!user) return alert("Erreur");
-
-        currentUser = user; viewedTel = tel;
-        document.getElementById('view-auth').classList.add('hidden');
-        document.getElementById('bottom-nav').classList.remove('hidden');
-        document.getElementById('logout-btn').classList.remove('hidden');
-        document.getElementById('quota-display').innerText = user.limit || 2;
-        document.getElementById('set-name').value = user.shopName || "";
-        tempLogo = user.shopLogo || "";
-        
-        showSection('params', document.querySelector('.nav-item'));
-        new QRCode(document.getElementById('qr-admin'), { text: user.tel, width: 140, height: 140 });
-        renderAdminList();
-    }
-
-    function handleLogo(e) {
-        const reader = new FileReader();
-        reader.onload = () => tempLogo = reader.result;
-        reader.readAsDataURL(e.target.files[0]);
-    }
-
-    function saveSettings() {
-        updateDB(currentUser.tel, u => { u.shopName = document.getElementById('set-name').value; u.shopLogo = tempLogo; });
-        alert("Enregistré");
-    }
-
-    function handleProdImg(e) {
-        const reader = new FileReader();
-        reader.onload = () => tempProdImg = reader.result;
-        reader.readAsDataURL(e.target.files[0]);
-    }
-
-    function addProduct() {
-        let accounts = JSON.parse(localStorage.getItem('bololo_accounts'));
-        let user = accounts.find(a => a.tel === currentUser.tel);
-        if (user.catalog.length >= (user.limit || 2)) return alert("Quota plein !");
-
-        const newItem = { id: Date.now(), name: document.getElementById('p-name').value, price: document.getElementById('p-price').value, desc: document.getElementById('p-desc').value, img: tempProdImg, likes: 0, dislikes: 0, comments: [] };
-        updateDB(currentUser.tel, u => u.catalog.push(newItem));
-        tempProdImg = ""; document.getElementById('p-img-input').value = "";
-        renderAdminList();
-    }
-
-    function renderAdminList() {
-        let u = (JSON.parse(localStorage.getItem('bololo_accounts'))).find(a => a.tel === currentUser.tel);
-        document.getElementById('admin-list').innerHTML = u.catalog.map((it, i) => `
-            <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
-                <div style="display:flex; align-items:center; gap:10px;">
-                    ${it.img ? `<img src="${it.img}" style="width:40px;height:40px;border-radius:5px;object-fit:cover;">` : ''}
-                    <span><b>${it.name}</b><br><small>${it.price} F</small></span>
-                </div>
-                <button onclick="deleteProduct(${i})" style="color:red; border:none; background:none;">X</button>
-            </div>`).join('');
-    }
-
-    function deleteProduct(i) { updateDB(currentUser.tel, u => u.catalog.splice(i, 1)); renderAdminList(); }
-
-    function viewCurrentShop() { viewedTel = currentUser.tel; renderShop(); }
-
-    function autoComplete(val) {
-        const box = document.getElementById('suggest-box');
-        if(val.length < 2) { box.classList.add('hidden'); return; }
-        let accs = JSON.parse(localStorage.getItem('bololo_accounts')) || [];
-        let filtered = accs.filter(a => a.tel.includes(val) || (a.shopName && a.shopName.toLowerCase().includes(val.toLowerCase())));
-        box.classList.toggle('hidden', filtered.length === 0);
-        box.innerHTML = filtered.map(a => `
-            <div class="suggestion-item" onclick="selectShop('${a.tel}')">
-                <img src="${a.shopLogo || 'https://via.placeholder.com/30'}">
-                <div><b>${a.shopName || 'Boutique'}</b><br><small>${a.tel}</small></div>
-            </div>`).join('');
-    }
-
-    function selectShop(tel) { viewedTel = tel; document.getElementById('suggest-box').classList.add('hidden'); document.getElementById('search-tel').value = tel; renderShop(); }
-
-    function renderShop() {
-        let accounts = JSON.parse(localStorage.getItem('bololo_accounts'));
-        let u = accounts.find(a => a.tel === viewedTel);
-        const isOwner = (currentUser.tel === viewedTel);
-
-        document.getElementById('shop-header').innerHTML = `
-            <div style="display:flex; align-items:center; gap:12px; background:white; padding:12px; border-radius:15px; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
-                <img src="${u.shopLogo || ''}" style="width:50px; height:50px; border-radius:50%; object-fit:cover; border:2px solid var(--primary);">
-                <div style="text-align:left"><h4 style="margin:0">${u.shopName || 'Boutique'}</h4><small>${u.tel}</small></div>
-            </div>`;
-
-        document.getElementById('shop-list').innerHTML = u.catalog.map((it, i) => {
-            const hasVoted = userVotes[it.id];
-            return `
-            <div class="product-card">
-                <div class="product-img-container">${it.img ? `<img src="${it.img}" class="product-img-display">` : 'Image'}</div>
-                <div style="padding:15px;">
-                    <b>${it.name}</b><br><span style="color:var(--primary); font-weight:800;">${it.price} FCFA</span>
-                    <p style="font-size:0.75rem; color:#666; margin:5px 0;">${it.desc || ''}</p>
-                    
-                    <div class="interactions">
-                        <button class="btn-vote" ${ (isOwner || hasVoted) ? 'disabled' : '' } onclick="vote(${i}, 'likes', ${it.id})">👍 ${it.likes}</button>
-                        <button class="btn-vote" ${ (isOwner || hasVoted) ? 'disabled' : '' } onclick="vote(${i}, 'dislikes', ${it.id})">👎 ${it.dislikes}</button>
-                    </div>
-
-                    <div style="background:#f8fafc; padding:10px; border-radius:10px; font-size:11px; margin-top:5px;">
-                        <div id="comm-area-${i}">${it.comments.map(c => `<div style="margin-bottom:4px; border-bottom:1px solid #eee;"><b>${c.text}</b> <span class="badge ${c.isOwner ? 'badge-vendeur' : 'badge-client'}">${c.isOwner ? 'Vendeur' : 'Client'}</span></div>`).join('')}</div>
-                        <div style="display:flex; gap:5px; margin-top:5px;">
-                            <input type="text" id="in-comm-${i}" placeholder="Commenter..." style="margin:0; padding:5px; font-size:11px;">
-                            <button onclick="sendComm(${i}, ${isOwner})" style="border:none; background:var(--primary); color:white; border-radius:5px; padding:5px 10px; cursor:pointer;">📩</button>
-                        </div>
-                    </div>
-                </div>
-            </div>`;
-        }).join('');
-    }
-
-    function vote(idx, type, prodId) { userVotes[prodId] = true; updateDB(viewedTel, u => u.catalog[idx][type]++); renderShop(); }
-
-    function sendComm(idx, isOwner) {
-        const input = document.getElementById('in-comm-'+idx);
-        if(!input.value) return;
-        updateDB(viewedTel, u => u.catalog[idx].comments.push({ text: input.value, isOwner: isOwner }));
-        input.value = ""; renderShop();
-    }
-
-    function updateDB(tel, fn) {
-        let accs = JSON.parse(localStorage.getItem('bololo_accounts'));
-        let idx = accs.findIndex(a => a.tel === tel);
-        fn(accs[idx]); localStorage.setItem('bololo_accounts', JSON.stringify(accs));
     }
 
     function showSection(id, el) {
@@ -304,9 +276,118 @@
         document.getElementById('dash-'+id).classList.remove('hidden');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         el.classList.add('active');
+        if(id === 'view') renderStories();
     }
 
+    function doLogin() {
+        const tel = document.getElementById('l-tel').value, pass = document.getElementById('l-pass').value;
+        db.ref('accounts/' + tel).once('value', snap => {
+            const user = snap.val();
+            if (!user || user.pass !== pass) return alert(translations[curL].errLogin);
+            currentUser = user; viewedTel = tel;
+            document.getElementById('view-auth').classList.add('hidden');
+            document.getElementById('bottom-nav').classList.remove('hidden');
+            document.getElementById('logout-btn').classList.remove('hidden');
+            showSection('params', document.getElementById('nav-params'));
+            new QRCode(document.getElementById('qr-admin'), { text: user.tel, width: 140, height: 140 });
+            renderAdminList();
+        });
+    }
+
+    function renderStories() {
+        db.ref('accounts').once('value', snap => {
+            const users = snap.val();
+            if(!users) return;
+            document.getElementById('user-stories').innerHTML = Object.values(users).map(u => `
+                <div class="story-item" onclick="selectShop('${u.tel}')">
+                    <img src="${u.shopLogo || 'bololo.png'}" class="story-circle">
+                    <span class="story-name">${u.shopName || 'Shop'}</span>
+                </div>`).join('');
+        });
+    }
+
+    function renderShop() {
+        db.ref('accounts/' + viewedTel).on('value', snap => {
+            const u = snap.val(); if(!u) return;
+            const isOwner = (currentUser && currentUser.tel === viewedTel);
+            document.getElementById('shop-header').innerHTML = `
+                <div style="display:flex; align-items:center; gap:12px; background:white; padding:12px; border-radius:15px; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
+                    <img src="${u.shopLogo || 'bololo.png'}" style="width:50px; height:50px; border-radius:50%; object-fit:cover; border:2px solid var(--primary);">
+                    <div style="flex:1"><h4 style="margin:0">${u.shopName} <span onclick="showInfo()" style="cursor:pointer;">💡</span></h4><small>${u.tel}</small></div>
+                </div>`;
+            document.getElementById('shop-list').innerHTML = (u.catalog || []).map((it, i) => {
+                const hasVoted = userVotes[it.id];
+                return `
+                <div class="product-card">
+                    <img src="${it.img || ''}" class="product-img-display">
+                    <div style="padding:15px;">
+                        <b>${it.name}</b><br><span style="color:var(--primary); font-weight:bold;">${it.price} FCFA</span>
+                        <div class="interactions">
+                            <button class="btn-vote" ${hasVoted?'disabled':''} onclick="vote(${i}, 'likes', ${it.id})">👍 ${it.likes||0}</button>
+                            <button class="btn-vote" ${hasVoted?'disabled':''} onclick="vote(${i}, 'dislikes', ${it.id})">👎 ${it.dislikes||0}</button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        });
+    }
+
+    function vote(idx, type, id) { userVotes[id] = true; db.ref('accounts/'+viewedTel+'/catalog/'+idx+'/'+type).transaction(v => (v||0)+1); }
+
+    function doSignup() {
+        const tel = document.getElementById('s-tel').value, pass = document.getElementById('s-pass').value;
+        if(tel.length < 4 || pass !== document.getElementById('s-confirm').value) return alert("Error");
+        db.ref('accounts/'+tel).set({tel, pass, shopName:"Shop", shopLogo:"", catalog:[]}).then(()=>{alert("OK!"); switchTab('login');});
+    }
+
+    function selectShop(t) { viewedTel = t; document.getElementById('suggest-box').classList.add('hidden'); renderShop(); }
+    function viewCurrentShop() { if(currentUser) { viewedTel = currentUser.tel; renderShop(); } }
+    function handleLogo(e) { const r = new FileReader(); r.onload = () => tempLogo = r.result; r.readAsDataURL(e.target.files[0]); }
+    function handleProdImg(e) { const r = new FileReader(); r.onload = () => tempProdImg = r.result; r.readAsDataURL(e.target.files[0]); }
+    function saveSettings() { db.ref('accounts/'+currentUser.tel).update({shopName: document.getElementById('set-name').value, shopLogo: tempLogo}).then(()=>alert(translations[curL].successUpdate)); }
     function changeTheme() { document.body.className = document.getElementById('theme-selector').value; }
+    
+    function addProduct() {
+        db.ref('accounts/'+currentUser.tel+'/catalog').once('value', s => {
+            let cat = s.val() || [];
+            cat.push({id: Date.now(), name: document.getElementById('p-name').value, price: document.getElementById('p-price').value, img: tempProdImg, likes:0, dislikes:0, comments:[]});
+            db.ref('accounts/'+currentUser.tel+'/catalog').set(cat).then(() => {
+                document.getElementById('p-name').value = ""; document.getElementById('p-price').value = ""; alert(translations[curL].successAdd);
+            });
+        });
+    }
+
+    function renderAdminList() {
+        db.ref('accounts/'+currentUser.tel+'/catalog').on('value', s => {
+            document.getElementById('admin-list').innerHTML = (s.val()||[]).map((it, i) => `<div class="card" style="display:flex; justify-content:space-between; align-items:center;"><span>${it.name}</span><button onclick="deleteProduct(${i})" style="color:red; border:none; background:none; font-size:1.2rem;">🗑️</button></div>`).join('');
+        });
+    }
+
+    function deleteProduct(i) {
+        if(confirm("?")) {
+            db.ref('accounts/'+currentUser.tel+'/catalog').once('value', s => {
+                let cat = s.val(); cat.splice(i,1);
+                db.ref('accounts/'+currentUser.tel+'/catalog').set(cat);
+            });
+        }
+    }
+
+    function drawQR(id, cont) {
+        const val = document.getElementById(id).value;
+        const c = document.getElementById(cont); c.innerHTML = "";
+        if(val.length > 3) new QRCode(c, { text: val, width: 120, height: 120 });
+    }
+
+    function autoComplete(val) {
+        const box = document.getElementById('suggest-box');
+        if(val.length < 2) { box.classList.add('hidden'); return; }
+        db.ref('accounts').once('value', snap => {
+            const data = Object.values(snap.val() || {});
+            const filtered = data.filter(u => u.shopName?.toLowerCase().includes(val.toLowerCase()) || u.tel.includes(val));
+            box.classList.toggle('hidden', filtered.length === 0);
+            box.innerHTML = filtered.map(u => `<div style="padding:10px; border-bottom:1px solid #eee; display:flex; align-items:center; gap:10px;" onclick="selectShop('${u.tel}')"><img src="${u.shopLogo||'bololo.png'}" style="width:30px;height:30px;border-radius:50%;"><span>${u.shopName}</span></div>`).join('');
+        });
+    }
 </script>
 </body>
 </html>
