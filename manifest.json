@@ -1,0 +1,23 @@
+{
+  "name": "BOLOLO Pro - Vitrine",
+  "short_name": "BOLOLO Pro",
+  "description": "Plateforme de mise en relation vitrine pour vendeurs et clients.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f1f5f9",
+  "theme_color": "#6366f1",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "bololo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "bololo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
