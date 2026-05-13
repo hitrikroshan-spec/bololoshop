@@ -53,9 +53,11 @@
         .interactions { display: flex; gap: 15px; padding: 10px; border-top: 1px solid #eee; }
         .btn-vote { border: none; background: none; cursor: pointer; font-size: 14px; font-weight: bold; color: #000; }
         .product-desc { font-size: 0.85rem; color: #64748b; margin-top: 5px; line-height: 1.4; }
-        
-        .comment-section { padding: 10px; border-top: 1px solid #f0f0f0; background: #fafafa; }
-        .comment-input { font-size: 0.8rem; padding: 8px; margin-bottom: 5px; border-radius: 8px; border: 1px solid #ddd; }
+
+        .comment-box { padding: 10px; background: #f8fafc; border-top: 1px solid #eee; }
+        .comment-list { max-height: 100px; overflow-y: auto; margin-bottom: 10px; font-size: 0.75rem; }
+        .comment-item { margin-bottom: 5px; padding: 5px; background: white; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .comment-user { font-weight: bold; color: var(--primary); display: block; margin-bottom: 2px; }
         
         .nav-bar { background: white; display: flex; border-top: 1px solid #eee; padding: 10px 0 25px; } 
         .nav-item { flex: 1; text-align: center; font-size: 0.7rem; color: #94a3b8; cursor: pointer; font-weight: bold; }
@@ -242,6 +244,20 @@
         });
     }
 
+    function addComment(idx) {
+        if(!currentUser) return alert("Connectez-vous pour commenter");
+        const text = document.getElementById('cm-input-'+idx).value;
+        if(!text) return;
+        const comment = { tel: currentUser.tel, text: text };
+        db.ref('accounts/'+viewedTel+'/catalog/'+idx+'/comments').once('value', s => {
+            let cms = s.val() || [];
+            cms.push(comment);
+            db.ref('accounts/'+viewedTel+'/catalog/'+idx+'/comments').set(cms).then(() => {
+                document.getElementById('cm-input-'+idx).value = "";
+            });
+        });
+    }
+
     function renderShop() {
         db.ref('accounts/' + viewedTel).on('value', snap => {
             const u = snap.val(); if(!u) return;
@@ -250,7 +266,9 @@
                     <img src="${u.shopLogo || 'bololo.png'}" style="width:50px; height:50px; border-radius:50%; object-fit:cover; border:2px solid var(--primary);">
                     <div style="flex:1"><h4 style="margin:0">${u.shopName} <span onclick="showInfo()" style="cursor:pointer;">💡</span></h4><small>${u.tel}</small></div>
                 </div>`;
-            document.getElementById('shop-list').innerHTML = (u.catalog || []).map((it, i) => `
+            document.getElementById('shop-list').innerHTML = (u.catalog || []).map((it, i) => {
+                let cmsHtml = (it.comments || []).map(c => `<div class="comment-item"><span class="comment-user">👤 ${c.tel}</span>${c.text}</div>`).join('');
+                return `
                 <div class="product-card">
                     <img src="${it.img || ''}" class="product-img-display">
                     <div style="padding:15px;">
@@ -262,12 +280,14 @@
                             <button class="btn-vote" onclick="vote(${i}, 'dislikes', '${it.id}')">👎 ${it.dislikes||0}</button>
                         </div>
                     </div>
-                    <div class="comment-section">
-                        <textarea class="comment-input" placeholder="Commentaire client..."></textarea>
-                        <textarea class="comment-input" style="background:#fefefe" placeholder="Réponse vendeur..."></textarea>
-                        <button class="btn-action" style="padding:5px; font-size:10px; height:auto;">Envoyer</button>
-                    </div>
-                </div>`).join('');
+                    ${currentUser ? `
+                    <div class="comment-box">
+                        <div class="comment-list">${cmsHtml}</div>
+                        <input type="text" id="cm-input-${i}" placeholder="Écrire un commentaire..." style="margin-bottom:5px; font-size:12px; padding:8px;">
+                        <button class="btn-action" style="padding:8px; font-size:12px;" onclick="addComment(${i})">COMMENTER</button>
+                    </div>` : ''}
+                </div>`;
+            }).join('');
         });
     }
 
@@ -287,8 +307,8 @@
 
     function selectShop(t) { viewedTel = t; renderShop(); }
     function viewCurrentShop() { if(currentUser) { viewedTel = currentUser.tel; renderShop(); } }
-    function handleLogo(e) { const r = new FileReader(); r.onload = () => tempLogo = r.result; r.readAsDataURL(e.target.files[0]); }
-    function handleProdImg(e) { const r = new FileReader(); r.onload = () => tempProdImg = r.result; r.readAsDataURL(e.target.files[0]); }
+    function handleLogo(event) { const r = new FileReader(); r.onload = () => tempLogo = r.result; r.readAsDataURL(event.target.files[0]); }
+    function handleProdImg(event) { const r = new FileReader(); r.onload = () => tempProdImg = r.result; r.readAsDataURL(event.target.files[0]); }
     function saveSettings() { db.ref('accounts/'+currentUser.tel).update({shopName: document.getElementById('set-name').value, shopLogo: tempLogo}).then(()=>alert(translations[curL].successUpdate)); }
     function changeTheme() { document.body.className = document.getElementById('theme-selector').value; }
     
@@ -302,7 +322,8 @@
                 desc: document.getElementById('p-desc').value,
                 img: tempProdImg, 
                 likes:0, 
-                dislikes:0
+                dislikes:0,
+                comments: []
             });
             db.ref('accounts/'+currentUser.tel+'/catalog').set(cat).then(() => {
                 document.getElementById('p-name').value = ""; 
