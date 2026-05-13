@@ -54,6 +54,9 @@
         .btn-vote { border: none; background: none; cursor: pointer; font-size: 14px; font-weight: bold; color: #000; }
         .product-desc { font-size: 0.85rem; color: #64748b; margin-top: 5px; line-height: 1.4; }
         
+        .comment-section { padding: 10px; border-top: 1px solid #f0f0f0; background: #fafafa; }
+        .comment-input { font-size: 0.8rem; padding: 8px; margin-bottom: 5px; border-radius: 8px; border: 1px solid #ddd; }
+        
         .nav-bar { background: white; display: flex; border-top: 1px solid #eee; padding: 10px 0 25px; } 
         .nav-item { flex: 1; text-align: center; font-size: 0.7rem; color: #94a3b8; cursor: pointer; font-weight: bold; }
         .nav-item.active { color: var(--primary); }
@@ -164,14 +167,12 @@
 </div>
 
 <script>
-    // Initialisation PWA
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./sw.js').catch(err => console.log(err));
         });
     }
 
-    // Firebase
     const firebaseConfig = { databaseURL: "https://bololoshop-bf59b-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
@@ -261,6 +262,11 @@
                             <button class="btn-vote" onclick="vote(${i}, 'dislikes', '${it.id}')">👎 ${it.dislikes||0}</button>
                         </div>
                     </div>
+                    <div class="comment-section">
+                        <textarea class="comment-input" placeholder="Commentaire client..."></textarea>
+                        <textarea class="comment-input" style="background:#fefefe" placeholder="Réponse vendeur..."></textarea>
+                        <button class="btn-action" style="padding:5px; font-size:10px; height:auto;">Envoyer</button>
+                    </div>
                 </div>`).join('');
         });
     }
@@ -269,7 +275,6 @@
         if(!currentUser) return alert("Veuillez vous connecter pour voter");
         const voteKey = currentUser.tel + "_" + prodId;
         if(userVotes[voteKey]) return alert("Vous avez déjà voté pour cet article");
-        
         db.ref('accounts/'+viewedTel+'/catalog/'+idx+'/'+type).transaction(v => (v||0)+1);
         userVotes[voteKey] = true;
     }
