@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Télécharger BOLOLO SHOP</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #9b59b6;
+            --glam: linear-gradient(135deg, #a55eea, #8e44ad);
+            --bg-body: #f1f3f8;
+            --text-dark: #333;
+            --white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-body);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-dark);
+        }
+
+        /* Barre supérieure stylisée */
+        .header-bar {
+            width: 100%;
+            background: var(--glam);
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+            font-weight: bold;
+            font-size: 1.2rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(142, 68, 173, 0.3);
+        }
+
+        /* Conteneur principal */
+        .main-content {
+            margin-top: 50px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        /* Logo box inspiré du design premium */
+        .logo-box {
+            width: 100px;
+            height: 100px;
+            background: var(--glam);
+            border-radius: 22px;
+            margin: 0 auto 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 8px 20px rgba(155, 89, 182, 0.3);
+        }
+
+        .logo-letter {
+            color: white;
+            font-size: 60px;
+            font-weight: bold;
+        }
+
+        .brand-name {
+            color: #888;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Carte de téléchargement */
+        .download-card {
+            background: var(--white);
+            padding: 35px 25px;
+            border-radius: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        h2 {
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+
+        /* Boutons de store adaptés pour la PWA */
+        .btn-store {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #1a1a1a;
+            color: white;
+            text-decoration: none;
+            padding: 14px 20px;
+            border-radius: 15px;
+            margin-bottom: 18px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .btn-store:hover {
+            transform: translateY(-3px);
+            background-color: #000;
+        }
+
+        .btn-store i {
+            font-size: 28px;
+            margin-right: 15px;
+        }
+
+        .btn-text {
+            text-align: left;
+            line-height: 1.2;
+        }
+
+        .btn-text span {
+            display: block;
+            font-size: 10px;
+            text-transform: uppercase;
+            opacity: 0.8;
+        }
+
+        .btn-text strong {
+            display: block;
+            font-size: 17px;
+        }
+
+        /* Animation pour le bouton suggéré (Android ou iOS) */
+        .suggested {
+            border: 2px solid var(--primary);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(155, 89, 182, 0.4); }
+            70% { box-shadow: 0 0 0 12px rgba(155, 89, 182, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(155, 89, 182, 0); }
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 35px;
+            font-size: 0.9rem;
+            color: #777;
+        }
+
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-bar">BOLOLO SHOP</div>
+
+    <div class="main-content">
+        <div class="logo-box">
+            <span class="logo-letter">b</span>
+        </div>
+        <div class="brand-name">BOLOLO SHOP</div>
+
+        <div class="download-card">
+            <h2>Installer l'application sur votre écran</h2>
+
+            <a href="index.html" class="btn-store" id="android-btn">
+                <i class="fab fa-google-play"></i>
+                <div class="btn-text">
+                    <span>Installer sur</span>
+                    <strong>Android</strong>
+                </div>
+            </a>
+
+            <a href="index.html" class="btn-store" id="ios-btn">
+                <i class="fab fa-apple"></i>
+                <div class="btn-text">
+                    <span>Ajouter sur</span>
+                    <strong>iPhone</strong>
+                </div>
+            </a>
+        </div>
+
+        <div class="footer">
+            <p>Déjà membre ? <a href="index.html">Se connecter</a></p>
+        </div>
+    </div>
+
+    <script>
+        // Détection du système pour mettre en avant le bouton approprié
+        document.addEventListener("DOMContentLoaded", function() {
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            const androidBtn = document.getElementById('android-btn');
+            const iosBtn = document.getElementById('ios-btn');
+
+            if (/android/i.test(userAgent)) {
+                androidBtn.classList.add('suggested');
+            } else if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+                iosBtn.classList.add('suggested');
+            }
+        });
+    </script>
+
+</body>
+</html>
