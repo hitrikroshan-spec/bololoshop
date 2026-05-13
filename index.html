@@ -52,6 +52,7 @@
         .product-img-display { width: 100%; height: auto; max-height: 450px; object-fit: contain; display: block; }
         .interactions { display: flex; gap: 15px; padding: 10px; border-top: 1px solid #eee; }
         .btn-vote { border: none; background: none; cursor: pointer; font-size: 14px; font-weight: bold; color: #000; }
+        .product-desc { font-size: 0.85rem; color: #64748b; margin-top: 5px; line-height: 1.4; }
         
         .nav-bar { background: white; display: flex; border-top: 1px solid #eee; padding: 10px 0 25px; } 
         .nav-item { flex: 1; text-align: center; font-size: 0.7rem; color: #94a3b8; cursor: pointer; font-weight: bold; }
@@ -252,17 +253,26 @@
                 <div class="product-card">
                     <img src="${it.img || ''}" class="product-img-display">
                     <div style="padding:15px;">
-                        <b>${it.name}</b><br><span style="color:var(--primary); font-weight:bold;">${it.price} FCFA</span>
+                        <b>${it.name}</b><br>
+                        <span style="color:var(--primary); font-weight:bold;">${it.price} FCFA</span>
+                        <div class="product-desc">${it.desc || ''}</div>
                         <div class="interactions">
-                            <button class="btn-vote" onclick="vote(${i}, 'likes', ${it.id})">👍 ${it.likes||0}</button>
-                            <button class="btn-vote" onclick="vote(${i}, 'dislikes', ${it.id})">👎 ${it.dislikes||0}</button>
+                            <button class="btn-vote" onclick="vote(${i}, 'likes', '${it.id}')">👍 ${it.likes||0}</button>
+                            <button class="btn-vote" onclick="vote(${i}, 'dislikes', '${it.id}')">👎 ${it.dislikes||0}</button>
                         </div>
                     </div>
                 </div>`).join('');
         });
     }
 
-    function vote(idx, type, id) { db.ref('accounts/'+viewedTel+'/catalog/'+idx+'/'+type).transaction(v => (v||0)+1); }
+    function vote(idx, type, prodId) {
+        if(!currentUser) return alert("Veuillez vous connecter pour voter");
+        const voteKey = currentUser.tel + "_" + prodId;
+        if(userVotes[voteKey]) return alert("Vous avez déjà voté pour cet article");
+        
+        db.ref('accounts/'+viewedTel+'/catalog/'+idx+'/'+type).transaction(v => (v||0)+1);
+        userVotes[voteKey] = true;
+    }
 
     function doSignup() {
         const tel = document.getElementById('s-tel').value, pass = document.getElementById('s-pass').value;
@@ -280,9 +290,20 @@
     function addProduct() {
         db.ref('accounts/'+currentUser.tel+'/catalog').once('value', s => {
             let cat = s.val() || [];
-            cat.push({id: Date.now(), name: document.getElementById('p-name').value, price: document.getElementById('p-price').value, img: tempProdImg, likes:0, dislikes:0});
+            cat.push({
+                id: Date.now().toString(), 
+                name: document.getElementById('p-name').value, 
+                price: document.getElementById('p-price').value, 
+                desc: document.getElementById('p-desc').value,
+                img: tempProdImg, 
+                likes:0, 
+                dislikes:0
+            });
             db.ref('accounts/'+currentUser.tel+'/catalog').set(cat).then(() => {
-                document.getElementById('p-name').value = ""; document.getElementById('p-price').value = ""; alert(translations[curL].successAdd);
+                document.getElementById('p-name').value = ""; 
+                document.getElementById('p-price').value = ""; 
+                document.getElementById('p-desc').value = "";
+                alert(translations[curL].successAdd);
             });
         });
     }
