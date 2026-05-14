@@ -208,7 +208,7 @@
         en: { login: "LOGIN", vitrine: "🛍️ SHOWCASE", tel: "Number", pass: "Password", connect: "LOG IN", noAccount: "No account? CREATE AN ACCOUNT", back: "← BACK TO LOGIN", confirm: "Confirm", create: "CREATE MY ACCOUNT", warning: `⚠️ <b>WARNING</b> ⚠️<br><br>This app is a marketplace platform.`, understood: "I UNDERSTAND", config: "⚙️<br>CONFIG", articles: "📦<br>ITEMS", vue: "🛒<br>VIEW", logout: "LOGOUT", save: "SAVE", publish: "PUBLISH", search: "Search a shop...", shopName: "Shop Name", artName: "Item Name", artPrice: "Price (FCFA)", desc: "Description...", successUpdate: "Profile updated", successAdd: "Item added!", errLogin: "Incorrect credentials" }
     };
 
-    let currentUser = null, viewedTel = "", tempLogo = "", tempProdImg = "", userVotes = {}, curL = 'fr';
+    let currentUser = null, viewedTel = "", tempLogo = "", tempProdImg = "", curL = 'fr';
     let allShops = [];
     let displayedCount = 0;
     const PAGE_SIZE = 5;
@@ -398,6 +398,56 @@
             const filtered = data.filter(u => u.shopName?.toLowerCase().includes(val.toLowerCase()) || u.tel.includes(val));
             box.classList.toggle('hidden', filtered.length === 0);
             box.innerHTML = filtered.map(u => `<div style="padding:10px; border-bottom:1px solid #eee;" onclick="selectShop('${u.tel}')">${u.shopName}</div>`).join('');
+        });
+    }
+
+    // --- MISE À JOUR : LOGIQUE DE VOTE UNIQUE ET COMMENTAIRES ---
+
+    function vote(index, type, productId) {
+        if (!currentUser) return alert("Connectez-vous pour voter !");
+        
+        // On vérifie si l'utilisateur a déjà voté pour cet article précis
+        const voteRef = db.ref('userVotes/' + currentUser.tel + '/' + productId);
+        
+        voteRef.once('value', snap => {
+            if (snap.exists()) {
+                alert("Vous avez déjà voté pour cet article !");
+                return;
+            }
+
+            // Si pas encore voté, on met à jour le catalogue de la boutique vue
+            db.ref('accounts/' + viewedTel + '/catalog').once('value', s => {
+                let cat = s.val() || [];
+                if (cat[index]) {
+                    cat[index][type] = (cat[index][type] || 0) + 1;
+                    db.ref('accounts/' + viewedTel + '/catalog').set(cat).then(() => {
+                        // On enregistre le vote pour bloquer les futurs essais
+                        voteRef.set(type);
+                    });
+                }
+            });
+        });
+    }
+
+    function addComment(index) {
+        if (!currentUser) return alert("Connectez-vous pour commenter !");
+        const inp = document.getElementById('cm-input-' + index);
+        const text = inp.value.trim();
+        if (!text) return;
+
+        db.ref('accounts/' + viewedTel + '/catalog').once('value', s => {
+            let cat = s.val() || [];
+            if (cat[index]) {
+                if (!cat[index].comments) cat[index].comments = [];
+                // On ajoute le commentaire avec le numéro de l'utilisateur connecté
+                cat[index].comments.push({
+                    tel: currentUser.tel,
+                    text: text
+                });
+                db.ref('accounts/' + viewedTel + '/catalog').set(cat).then(() => {
+                    inp.value = ""; // Vider le champ après envoi
+                });
+            }
         });
     }
 </script>
