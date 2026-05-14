@@ -165,8 +165,7 @@
 
         <div id="dash-view" class="hidden">
             <div class="sticky-area">
-                <input type="text" id="search-input" placeholder="Chercher une boutique..." oninput="autoComplete(this.value)">
-                <div id="suggest-box" class="hidden" style="background:white; border: 1px solid #ddd; border-radius: 10px;"></div>
+                <input type="text" id="search-input" placeholder="Chercher une boutique..." oninput="filterShops(this.value)">
                 <div id="user-stories" class="story-container"></div>
                 <div id="shop-header"></div>
             </div>
@@ -210,14 +209,11 @@
 
     window.onload = () => {
         fillPrefixes();
-        
-        // Charger le thème sauvegardé avant tout
         const savedTheme = localStorage.getItem('bololo_theme');
         if (savedTheme) {
             document.body.className = savedTheme;
             document.getElementById('theme-selector').value = savedTheme;
         }
-
         checkSession();
     };
 
@@ -277,26 +273,31 @@
     }
 
     function initVitrine() {
-        renderStories();
         db.ref('accounts').once('value', snap => {
             const users = Object.values(snap.val() || {});
+            allShops = users;
+            renderStories(allShops);
             const priorityShop = users.find(u => u.priority === true);
             if (priorityShop) selectShop(priorityShop.tel);
             else if (currentUser) selectShop(currentUser.tel);
         });
     }
 
-    function renderStories() {
-        db.ref('accounts').once('value', snap => {
-            const users = Object.values(snap.val() || {});
-            allShops = users;
-            document.getElementById('user-stories').innerHTML = users.map(u => `
-                <div class="story-item" onclick="selectShop('${u.tel}')">
-                    <img src="${u.shopLogo || 'bololo.png'}" class="story-circle ${u.priority ? 'is-priority' : ''}">
-                    <span class="story-name">${u.shopName || 'Shop'}</span>
-                </div>
-            `).join('');
-        });
+    function renderStories(shops) {
+        document.getElementById('user-stories').innerHTML = shops.map(u => `
+            <div class="story-item" onclick="selectShop('${u.tel}')">
+                <img src="${u.shopLogo || 'bololo.png'}" class="story-circle ${u.priority ? 'is-priority' : ''}">
+                <span class="story-name">${u.shopName || 'Shop'}</span>
+            </div>
+        `).join('');
+    }
+
+    function filterShops(val) {
+        const filtered = allShops.filter(u => 
+            u.shopName.toLowerCase().includes(val.toLowerCase()) || 
+            u.tel.includes(val)
+        );
+        renderStories(filtered);
     }
 
     function selectShop(t) { 
@@ -313,7 +314,7 @@
             document.getElementById('shop-header').innerHTML = `
                 <div style="display:flex; align-items:center; gap:12px; background:white; padding:12px; border-radius:15px; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
                     <img src="${u.shopLogo || 'bololo.png'}" style="width:50px; height:50px; border-radius:50%; object-fit:cover; border:2px solid var(--primary);">
-                    <div style="flex:1"><h4 style="margin:0">${u.shopName} <span onclick="showInfo()" style="cursor:pointer;">💡</span></h4><small>${u.tel}</small></div>
+                    <div style="flex:1"><h4 style="margin:0">${u.shopName}</h4><small>${u.tel}</small></div>
                 </div>`;
             document.getElementById('shop-list').innerHTML = (u.catalog || []).map((it, i) => {
                 let cmsHtml = (it.comments || []).map(c => `<div class="comment-item"><span class="comment-user">👤 ${c.tel}</span>${c.text}</div>`).join('');
@@ -341,10 +342,33 @@
     }
 
     function doSignup() {
-        const fullTel = document.getElementById('s-prefix').value + document.getElementById('s-tel').value;
+        const prefix = document.getElementById('s-prefix').value;
+        const phone = document.getElementById('s-tel').value;
+        const fullTel = prefix + phone;
         const pass = document.getElementById('s-pass').value;
-        if(pass !== document.getElementById('s-confirm').value) return alert("MDP différents");
-        db.ref('accounts/'+fullTel).set({tel: fullTel, pass, shopName:"Boutique", shopLogo:"", catalog:[], views: 0}).then(()=>{alert("Compte créé !"); switchTab('login');});
+        const confirm = document.getElementById('s-confirm').value;
+
+        if(!phone) return alert("Numéro requis");
+        if(pass !== confirm) return alert("MDP différents");
+
+        // Vérification de l'existence du compte
+        db.ref('accounts/' + fullTel).once('value', snap => {
+            if(snap.exists()) {
+                alert("Ce numéro est déjà utilisé par un autre compte.");
+            } else {
+                db.ref('accounts/' + fullTel).set({
+                    tel: fullTel, 
+                    pass: pass, 
+                    shopName: "Ma Boutique", 
+                    shopLogo: "", 
+                    catalog: [], 
+                    views: 0
+                }).then(() => {
+                    alert("Compte créé avec succès !"); 
+                    switchTab('login');
+                });
+            }
+        });
     }
 
     function handleLogo(event) { const r = new FileReader(); r.onload = () => tempLogo = r.result; r.readAsDataURL(event.target.files[0]); }
@@ -405,7 +429,7 @@
     function changeTheme() { 
         const selectedTheme = document.getElementById('theme-selector').value;
         document.body.className = selectedTheme; 
-        localStorage.setItem('bololo_theme', selectedTheme); // Enregistrement dans localStorage
+        localStorage.setItem('bololo_theme', selectedTheme);
     }
 
     function drawQR(id, cont) { const val = document.getElementById(id).value; const c = document.getElementById(cont); c.innerHTML = ""; if(val.length > 3) new QRCode(c, { text: val, width: 120, height: 120 }); }
