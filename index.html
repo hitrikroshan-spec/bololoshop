@@ -188,6 +188,15 @@
 </div>
 
 <script>
+    // Enregistrement du Service Worker (Mise à jour Play Store)
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('SW actif', reg.scope))
+                .catch(err => console.log('Erreur SW', err));
+        });
+    }
+
     const cedeaoList = [
         {n:"Burkina Faso", c:"+226", d:"🇧🇫"},{n:"Bénin", c:"+229", d:"🇧🇯"},  {n:"Cap-Vert", c:"+238", d:"🇨🇻"},
         {n:"Côte d'Ivoire", c:"+225", d:"🇨🇮"}, {n:"Gambie", c:"+220", d:"🇬🇲"}, {n:"Ghana", c:"+233", d:"🇬🇭"},
@@ -234,7 +243,9 @@
     }
 
     function doLogin() {
-        const fullTel = document.getElementById('l-prefix').value + document.getElementById('l-tel').value;
+        const telInput = document.getElementById('l-tel').value;
+        if(!telInput) return;
+        const fullTel = document.getElementById('l-prefix').value + telInput;
         const pass = document.getElementById('l-pass').value;
         db.ref('accounts/' + fullTel).once('value', snap => {
             const user = snap.val();
@@ -301,8 +312,8 @@
 
     function filterShops(val) {
         const filtered = allShops.filter(u => 
-            u.shopName.toLowerCase().includes(val.toLowerCase()) || 
-            u.tel.includes(val)
+            (u.shopName || "").toLowerCase().includes(val.toLowerCase()) || 
+            (u.tel || "").includes(val)
         );
         renderStories(filtered);
     }
@@ -417,10 +428,7 @@
             const user = s.val() || {};
             const cat = user.catalog || [];
             const limit = user.limit || 5;
-            
-            // Mise à jour de l'affichage du quota
             document.getElementById('my-quota').innerText = "Articles publiés : " + cat.length + " / " + limit;
-
             document.getElementById('admin-list').innerHTML = cat.map((it, i) => `<div class="card" style="display:flex; justify-content:space-between; align-items:center;"><span>${it.name}</span><button onclick="deleteProduct(${i})" style="color:red; border:none; background:none;">🗑️</button></div>`).join('');
         });
     }
