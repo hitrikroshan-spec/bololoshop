@@ -185,6 +185,11 @@
     };
 
     let currentUser = null, viewedTel = "", tempLogo = "", tempProdImg = "", userVotes = {}, curL = 'fr';
+    
+    // Variables pour la pagination des stories
+    let allShops = [];
+    let displayedCount = 0;
+    const PAGE_SIZE = 5;
 
     function changeLang(lang) {
         curL = lang; const t = translations[lang];
@@ -233,15 +238,44 @@
         if(id === 'view') renderStories();
     }
 
+    // Gestionnaire de scroll pour charger plus de stories
+    document.getElementById('user-stories').addEventListener('scroll', function() {
+        const container = this;
+        if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 50) {
+            loadMoreStories();
+        }
+    });
+
     function renderStories() {
+        const container = document.getElementById('user-stories');
+        container.innerHTML = "";
+        displayedCount = 0;
         db.ref('accounts').once('value', snap => {
-            const users = snap.val(); if(!users) return;
-            document.getElementById('user-stories').innerHTML = Object.values(users).map(u => `
-                <div class="story-item" onclick="selectShop('${u.tel}')">
-                    <img src="${u.shopLogo || 'bololo.png'}" class="story-circle">
-                    <span class="story-name">${u.shopName || 'Shop'}</span>
-                </div>`).join('');
+            const users = snap.val(); 
+            if(!users) return;
+            allShops = Object.values(users);
+            loadMoreStories();
         });
+    }
+
+    function loadMoreStories() {
+        if (displayedCount >= allShops.length) return;
+        
+        const nextBatch = allShops.slice(displayedCount, displayedCount + PAGE_SIZE);
+        const container = document.getElementById('user-stories');
+        
+        nextBatch.forEach(u => {
+            const div = document.createElement('div');
+            div.className = 'story-item';
+            div.onclick = () => selectShop(u.tel);
+            div.innerHTML = `
+                <img src="${u.shopLogo || 'bololo.png'}" class="story-circle">
+                <span class="story-name">${u.shopName || 'Shop'}</span>
+            `;
+            container.appendChild(div);
+        });
+        
+        displayedCount += PAGE_SIZE;
     }
 
     function addComment(idx) {
