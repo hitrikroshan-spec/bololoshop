@@ -77,6 +77,9 @@
         
         body[dir="rtl"] .btn-logout { right: auto; left: 15px; }
         body[dir="rtl"] .lang-select { left: auto; right: 15px; }
+
+        /* Style spécifique pour le bouton WhatsApp */
+        .btn-whatsapp { display: inline-flex; align-items: center; justify-content: center; background: #25D366; color: white; text-decoration: none; padding: 5px 8px; border-radius: 6px; font-size: 0.65rem; font-weight: bold; margin-left: 10px; vertical-align: middle; }
     </style>
 </head>
 <body class="theme-glamour">
@@ -314,7 +317,11 @@
             document.getElementById('shop-header').innerHTML = `
                 <div style="display:flex; align-items:center; gap:12px; background:white; padding:12px; border-radius:15px; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
                     <img src="${u.shopLogo || 'bololo.png'}" style="width:50px; height:50px; border-radius:50%; object-fit:cover; border:2px solid var(--primary);">
-                    <div style="flex:1"><h4 style="margin:0">${u.shopName}</h4><small>${u.tel}</small></div>
+                    <div style="flex:1">
+                        <h4 style="margin:0">${u.shopName}</h4>
+                        <small>${u.tel}</small>
+                        <a href="https://wa.me/${u.tel.replace('+', '')}" class="btn-whatsapp" target="_blank">WhatsApp</a>
+                    </div>
                 </div>`;
             document.getElementById('shop-list').innerHTML = (u.catalog || []).map((it, i) => {
                 let cmsHtml = (it.comments || []).map(c => `<div class="comment-item"><span class="comment-user">👤 ${c.tel}</span>${c.text}</div>`).join('');
