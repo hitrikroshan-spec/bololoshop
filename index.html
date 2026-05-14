@@ -244,7 +244,6 @@
         qrCont.innerHTML = "";
         new QRCode(qrCont, { text: currentUser.tel, width: 140, height: 140 });
         
-        // Surveillance des vues en temps réel
         db.ref('accounts/' + currentUser.tel + '/views').on('value', s => {
             document.getElementById('my-views').innerText = "Vues : " + (s.val() || 0);
         });
@@ -269,7 +268,6 @@
         el.classList.add('active');
     }
 
-    // -- FONCTION PRIORITÉ AU DÉMARRAGE --
     function initVitrine() {
         renderStories();
         db.ref('accounts').once('value', snap => {
@@ -295,8 +293,10 @@
 
     function selectShop(t) { 
         viewedTel = t; 
-        // Incrémentation d'une vue
-        db.ref('accounts/' + t + '/views').transaction(v => (v || 0) + 1);
+        // Incrémentation d'une vue UNIQUEMENT si ce n'est pas le propriétaire qui regarde
+        if (!currentUser || currentUser.tel !== t) {
+            db.ref('accounts/' + t + '/views').transaction(v => (v || 0) + 1);
+        }
         renderShop(); 
     }
 
