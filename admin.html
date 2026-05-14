@@ -111,9 +111,9 @@
                         </span>
                     </td>
                     <td><b>${user.catalog ? user.catalog.length : 0}</b></td>
-                    <td><b style="color:var(--primary)">${user.limit || 2}</b></td>
+                    <td><b style="color:var(--primary)">${user.limit || 5}</b></td>
                     <td>
-                        <button class="btn btn-quota" onclick="updateQuota('${user.tel}', ${user.limit || 2})">Quota</button>
+                        <button class="btn btn-quota" onclick="updateQuota('${user.tel}', ${user.limit || 5})">Quota</button>
                         <button class="btn ${user.blocked ? 'btn-unblock' : 'btn-block'}" onclick="toggleBlock('${user.tel}', ${user.blocked})">
                             ${user.blocked ? 'Débloquer' : 'Bloquer'}
                         </button>
