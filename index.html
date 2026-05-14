@@ -36,9 +36,8 @@
         .content { flex: 1; overflow-y: auto; padding: 20px; background: var(--bg); position: relative; }
         .card { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #eee; }
 
-        /* Style pour le groupe de téléphone */
         .phone-group { display: flex; gap: 5px; margin-bottom: 10px; }
-        .phone-group select { flex: 0 0 110px; margin-bottom: 0; font-size: 14px; }
+        .phone-group select { flex: 0 0 90px; margin-bottom: 0; font-size: 18px; text-align: center; }
         .phone-group input { flex: 1; margin-bottom: 0; }
 
         .sticky-area { position: sticky; top: -20px; background: var(--bg); z-index: 500; padding: 10px 0; border-bottom: 2px solid #ddd; margin-bottom: 15px; }
@@ -181,16 +180,16 @@
 
 <script>
     const cedeaoList = [
-        {n:"Bénin", c:"+229"}, {n:"Burkina Faso", c:"+226"}, {n:"Cap-Vert", c:"+238"},
-        {n:"Côte d'Ivoire", c:"+225"}, {n:"Gambie", c:"+220"}, {n:"Ghana", c:"+233"},
-        {n:"Guinée", c:"+224"}, {n:"Guinée-Bissau", c:"+245"}, {n:"Libéria", c:"+231"},
-        {n:"Mali", c:"+223"}, {n:"Niger", c:"+227"}, {n:"Nigéria", c:"+234"},
-        {n:"Sénégal", c:"+221"}, {n:"Sierra Leone", c:"+232"}, {n:"Togo", c:"+228"}
+        {n:"Bénin", c:"+229", d:"🇧🇯"}, {n:"Burkina Faso", c:"+226", d:"🇧🇫"}, {n:"Cap-Vert", c:"+238", d:"🇨🇻"},
+        {n:"Côte d'Ivoire", c:"+225", d:"🇨🇮"}, {n:"Gambie", c:"+220", d:"🇬🇲"}, {n:"Ghana", c:"+233", d:"🇬🇭"},
+        {n:"Guinée", c:"+224", d:"🇬🇳"}, {n:"Guinée-Bissau", c:"+245", d:"🇬🇼"}, {n:"Libéria", c:"+231", d:"🇱🇷"},
+        {n:"Mali", c:"+223", d:"🇲🇱"}, {n:"Niger", c:"+227", d:"🇳🇪"}, {n:"Nigéria", c:"+234", d:"🇳🇬"},
+        {n:"Sénégal", c:"+221", d:"🇸🇳"}, {n:"Sierra Leone", c:"+232", d:"🇸🇱"}, {n:"Togo", c:"+228", d:"🇹🇬"}
     ];
 
     function fillPrefixes() {
         const selects = document.querySelectorAll('.cedeaos');
-        const options = cedeaoList.map(p => `<option value="${p.c}">${p.c} ${p.n}</option>`).join('');
+        const options = cedeaoList.map(p => `<option value="${p.c}">${p.d}</option>`).join('');
         selects.forEach(s => s.innerHTML = options);
     }
 
