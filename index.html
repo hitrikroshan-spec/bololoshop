@@ -210,6 +210,14 @@
 
     window.onload = () => {
         fillPrefixes();
+        
+        // Charger le thème sauvegardé avant tout
+        const savedTheme = localStorage.getItem('bololo_theme');
+        if (savedTheme) {
+            document.body.className = savedTheme;
+            document.getElementById('theme-selector').value = savedTheme;
+        }
+
         checkSession();
     };
 
@@ -293,7 +301,6 @@
 
     function selectShop(t) { 
         viewedTel = t; 
-        // Incrémentation d'une vue UNIQUEMENT si ce n'est pas le propriétaire qui regarde
         if (!currentUser || currentUser.tel !== t) {
             db.ref('accounts/' + t + '/views').transaction(v => (v || 0) + 1);
         }
@@ -395,7 +402,12 @@
         });
     }
 
-    function changeTheme() { document.body.className = document.getElementById('theme-selector').value; }
+    function changeTheme() { 
+        const selectedTheme = document.getElementById('theme-selector').value;
+        document.body.className = selectedTheme; 
+        localStorage.setItem('bololo_theme', selectedTheme); // Enregistrement dans localStorage
+    }
+
     function drawQR(id, cont) { const val = document.getElementById(id).value; const c = document.getElementById(cont); c.innerHTML = ""; if(val.length > 3) new QRCode(c, { text: val, width: 120, height: 120 }); }
 </script>
 </body>
