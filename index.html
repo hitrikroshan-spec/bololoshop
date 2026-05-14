@@ -24,11 +24,14 @@
         body.theme-dark { --primary: #64748b; --glam: linear-gradient(135deg, #334155 0%, #0f172a 100%); --bg: #1e293b; --text: #f8fafc; }
         
         body { margin: 0; font-family: 'Inter', sans-serif; background: #e2e8f0; min-height: 100vh; display: flex; justify-content: center; align-items: center; color: var(--text); overscroll-behavior: none; transition: all 0.3s; }
+
         .iphone-xs-screen { width: 100%; max-width: 400px; height: 100vh; background: white; display: flex; flex-direction: column; overflow: hidden; position: relative; border: none; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
         
         header { background: var(--glam); color: white; padding: 60px 20px 20px; text-align: center; font-weight: bold; font-size: 1.1rem; position: relative; z-index: 1000; }
         .btn-logout { position: absolute; right: 15px; bottom: 18px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 6px 12px; border-radius: 8px; font-size: 0.65rem; cursor: pointer; font-weight: bold; }
+        
         .lang-select { position: absolute; left: 15px; bottom: 18px; background: rgba(255,255,255,0.2); border: none; color: white; border-radius: 8px; font-size: 0.65rem; cursor: pointer; padding: 5px; outline: none; }
+        .lang-select option { color: black; }
 
         .content { flex: 1; overflow-y: auto; padding: 20px; background: var(--bg); position: relative; }
         .card { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #eee; }
@@ -38,22 +41,28 @@
         .phone-group input { flex: 1; margin-bottom: 0; }
 
         .sticky-area { position: sticky; top: -20px; background: var(--bg); z-index: 500; padding: 10px 0; border-bottom: 2px solid #ddd; margin-bottom: 15px; }
+        
         .story-container { display: flex; gap: 12px; overflow-x: auto; padding: 5px 0 10px; scrollbar-width: none; }
+        .story-container::-webkit-scrollbar { display: none; }
         .story-item { flex: 0 0 auto; text-align: center; width: 60px; cursor: pointer; }
         .story-circle { width: 55px; height: 55px; border-radius: 50%; border: 3px solid var(--primary); padding: 2px; object-fit: cover; background: white; }
-        .story-circle.is-priority { border-color: #ffd700; box-shadow: 0 0 8px #ffd700; }
+        .story-circle.is-priority { border-color: #FFD700; box-shadow: 0 0 10px #FFD700; }
         .story-name { font-size: 9px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; margin-top: 3px; }
 
         .modal-info { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 2500; padding: 20px; }
         .modal-content { background: white; padding: 20px; border-radius: 25px; max-width: 340px; text-align: center; color: #1e293b; border: 3px solid var(--primary); }
+        .btn-close-modal { background: var(--glam); color: white; border: none; padding: 12px 25px; border-radius: 12px; margin-top: 20px; cursor: pointer; font-weight: bold; width: 100%; }
 
         .product-card { background: white; border-radius: 15px; overflow: hidden; margin-bottom: 20px; border: 1px solid #eee; }
         .product-img-display { width: 100%; height: auto; max-height: 450px; object-fit: contain; display: block; }
         .interactions { display: flex; gap: 15px; padding: 10px; border-top: 1px solid #eee; }
         .btn-vote { border: none; background: none; cursor: pointer; font-size: 14px; font-weight: bold; color: #000; }
+        .product-desc { font-size: 0.85rem; color: #64748b; margin-top: 5px; line-height: 1.4; }
 
         .comment-box { padding: 10px; background: #f8fafc; border-top: 1px solid #eee; }
         .comment-list { max-height: 100px; overflow-y: auto; margin-bottom: 10px; font-size: 0.75rem; }
+        .comment-item { margin-bottom: 5px; padding: 5px; background: white; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .comment-user { font-weight: bold; color: var(--primary); display: block; margin-bottom: 2px; }
         
         .nav-bar { background: white; display: flex; border-top: 1px solid #eee; padding: 10px 0 25px; } 
         .nav-item { flex: 1; text-align: center; font-size: 0.7rem; color: #94a3b8; cursor: pointer; font-weight: bold; }
@@ -63,7 +72,11 @@
         .btn-action { background: var(--glam); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; }
         .hidden { display: none !important; }
         .qr-box { background: white; padding: 10px; border-radius: 12px; display: inline-block; margin: 10px auto; border: 1px solid #eee; }
-        .view-stat { background: #e0e7ff; color: #4338ca; padding: 5px 10px; border-radius: 8px; font-size: 0.75rem; display: inline-block; margin-top: 5px; }
+        .link-text { color: var(--primary); font-weight: bold; cursor: pointer; font-size: 0.8rem; text-decoration: underline; margin-top: 15px; display: inline-block; }
+        .view-count-badge { background: #fee2e2; color: #ef4444; padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; margin-top: 5px; display: inline-block; }
+        
+        body[dir="rtl"] .btn-logout { right: auto; left: 15px; }
+        body[dir="rtl"] .lang-select { left: auto; right: 15px; }
     </style>
 </head>
 <body class="theme-glamour">
@@ -72,7 +85,7 @@
     <div class="modal-content">
         <div style="font-size: 40px; margin-bottom: 10px;">💡</div>
         <div id="info-msg" style="font-size: 13px; line-height: 1.6; text-align: left;"></div>
-        <button class="btn-action" style="margin-top:20px;" onclick="closeInfo()">J'AI COMPRIS</button>
+        <button class="btn-close-modal" id="btn-modal-close" onclick="closeInfo()">J'AI COMPRIS</button>
     </div>
 </div>
 
@@ -81,6 +94,8 @@
         <select class="lang-select" onchange="changeLang(this.value)">
             <option value="fr">🇫🇷 FR</option>
             <option value="en">🇺🇸 EN</option>
+            <option value="es">🇪🇸 ES</option>
+            <option value="ar">🇸🇦 AR</option>
         </select>
         <span id="title-text">BOLOLO Pro</span>
         <button id="logout-btn" class="btn-logout hidden" onclick="doLogout()">SORTIR</button>
@@ -92,26 +107,37 @@
                 <span id="t-login" class="tab-item active" style="padding:12px; cursor:pointer; font-weight:bold; font-size:0.7rem;" onclick="switchTab('login')">LOGIN</span>
                 <span id="t-vitrine" style="padding:12px; cursor:pointer; font-weight:bold; font-size:0.7rem; color:var(--primary);" onclick="openVitrineDirect()">🛍️ VITRINE</span>
             </div>
+
             <div id="area-login" style="text-align: center;">
-                <div class="phone-group"><select id="l-prefix" class="cedeaos"></select><input type="tel" id="l-tel" placeholder="Numéro"></div>
+                <div class="phone-group">
+                    <select id="l-prefix" class="cedeaos"></select>
+                    <input type="tel" id="l-tel" placeholder="Numéro">
+                </div>
                 <input type="password" id="l-pass" placeholder="Mot de passe">
-                <button class="btn-action" onclick="doLogin()">SE CONNECTER</button>
-                <div style="color:var(--primary); font-weight:bold; cursor:pointer; font-size:0.8rem; margin-top:15px;" onclick="switchTab('signup')">CRÉER UN COMPTE</div>
+                <button class="btn-action" id="btn-login" onclick="doLogin()">SE CONNECTER</button>
+                <div class="link-text" id="link-signup" onclick="switchTab('signup')">Pas de compte ? CRÉER UN COMPTE</div>
+                <div style="margin-top:30px;">
+                    <img src="bololo.png" alt="Logo" style="width: 60px; display: block; margin: 0 auto 5px; opacity: 0.8;">
+                </div>
             </div>
+
             <div id="area-signup" class="hidden" style="text-align: center;">
-                <div class="phone-group"><select id="s-prefix" class="cedeaos"></select><input type="tel" id="s-tel" placeholder="Numéro" oninput="drawQR('s-tel', 'qr-signup')"></div>
+                <div id="btn-back-login" style="text-align:left; font-size: 0.7rem; font-weight: bold; margin-bottom: 10px; color: #666; cursor:pointer;" onclick="switchTab('login')">← RETOUR LOGIN</div>
+                <div class="phone-group">
+                    <select id="s-prefix" class="cedeaos"></select>
+                    <input type="tel" id="s-tel" placeholder="Votre numéro" oninput="drawQR('s-tel', 'qr-signup')">
+                </div>
                 <center><div id="qr-signup" class="qr-box"></div></center>
                 <input type="password" id="s-pass" placeholder="Mot de passe">
                 <input type="password" id="s-confirm" placeholder="Confirmer">
-                <button class="btn-action" onclick="doSignup()">CRÉER MON COMPTE</button>
-                <div style="margin-top:15px; font-size:0.7rem; cursor:pointer;" onclick="switchTab('login')">← RETOUR LOGIN</div>
+                <button class="btn-action" id="btn-signup-submit" onclick="doSignup()">CRÉER MON COMPTE</button>
             </div>
         </div>
 
         <div id="dash-params" class="hidden">
             <div class="card" style="text-align:center;">
-                <div id="qr-admin" class="qr-box"></div><br>
-                <div id="user-view-count" class="view-stat">Vues : 0</div>
+                <div id="qr-admin" class="qr-box"></div>
+                <div id="my-views" class="view-count-badge">Vues : 0</div>
             </div>
             <div class="card">
                 <select id="theme-selector" onchange="changeTheme()">
@@ -122,7 +148,7 @@
                 </select>
                 <input type="text" id="set-name" placeholder="Nom de la Boutique">
                 <input type="file" accept="image/*" onchange="handleLogo(event)">
-                <button class="btn-action" onclick="saveSettings()">ENREGISTRER</button>
+                <button class="btn-action" id="btn-save-settings" onclick="saveSettings()">ENREGISTRER</button>
             </div>
         </div>
 
@@ -131,15 +157,15 @@
                 <input type="text" id="p-name" placeholder="Nom Article">
                 <input type="number" id="p-price" placeholder="Prix (FCFA)">
                 <textarea id="p-desc" placeholder="Description..."></textarea>
-                <input type="file" accept="image/*" onchange="handleProdImg(event)">
-                <button class="btn-action" onclick="addProduct()">PUBLIER</button>
+                <input type="file" id="p-img-input" accept="image/*" onchange="handleProdImg(event)">
+                <button class="btn-action" id="btn-publish" onclick="addProduct()">PUBLIER</button>
             </div>
             <div id="admin-list"></div>
         </div>
 
         <div id="dash-view" class="hidden">
             <div class="sticky-area">
-                <input type="text" placeholder="Chercher une boutique..." oninput="autoComplete(this.value)">
+                <input type="text" id="search-input" placeholder="Chercher une boutique..." oninput="autoComplete(this.value)">
                 <div id="suggest-box" class="hidden" style="background:white; border: 1px solid #ddd; border-radius: 10px;"></div>
                 <div id="user-stories" class="story-container"></div>
                 <div id="shop-header"></div>
@@ -156,8 +182,15 @@
 </div>
 
 <script>
-    const cedeaoList = [{n:"Burkina", c:"+226", d:"🇧🇫"}, {n:"Côte d'Ivoire", c:"+225", d:"🇨🇮"}, {n:"Sénégal", c:"+221", d:"🇸🇳"}, {n:"Togo", c:"+228", d:"🇹🇬"}];
-    function fillPrefixes() { 
+    const cedeaoList = [
+        {n:"Burkina Faso", c:"+226", d:"🇧🇫"},{n:"Bénin", c:"+229", d:"🇧🇯"},  {n:"Cap-Vert", c:"+238", d:"🇨🇻"},
+        {n:"Côte d'Ivoire", c:"+225", d:"🇨🇮"}, {n:"Gambie", c:"+220", d:"🇬🇲"}, {n:"Ghana", c:"+233", d:"🇬🇭"},
+        {n:"Guinée", c:"+224", d:"🇬🇳"}, {n:"Guinée-Bissau", c:"+245", d:"🇬🇼"}, {n:"Libéria", c:"+231", d:"🇱🇷"},
+        {n:"Mali", c:"+223", d:"🇲🇱"}, {n:"Niger", c:"+227", d:"🇳🇪"}, {n:"Nigéria", c:"+234", d:"🇳🇬"},
+        {n:"Sénégal", c:"+221", d:"🇸🇳"}, {n:"Sierra Leone", c:"+232", d:"🇸🇱"}, {n:"Togo", c:"+228", d:"🇹🇬"}
+    ];
+
+    function fillPrefixes() {
         const selects = document.querySelectorAll('.cedeaos');
         const options = cedeaoList.map(p => `<option value="${p.c}">${p.d}</option>`).join('');
         selects.forEach(s => s.innerHTML = options);
@@ -167,27 +200,26 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let currentUser = null, viewedTel = "", tempLogo = "", tempProdImg = "";
+    const translations = {
+        fr: { login: "LOGIN", vitrine: "🛍️ VITRINE", tel: "Numéro", pass: "Mot de passe", connect: "SE CONNECTER", noAccount: "Pas de compte ? CRÉER UN COMPTE", back: "← RETOUR LOGIN", confirm: "Confirmer", create: "CRÉER MON COMPTE", warning: `⚠️ <b>AVERTISSEMENT</b> ⚠️<br><br>Transactions entre vendeur et client.<br><br>Bololo Pro n'est pas responsable.`, understood: "J'AI COMPRIS", config: "⚙️<br>CONFIG", articles: "📦<br>ARTICLES", vue: "🛒<br>VUE", logout: "SORTIR", save: "ENREGISTRER", publish: "PUBLIER", search: "Chercher une boutique...", successUpdate: "Profil mis à jour", successAdd: "Article ajouté !", errLogin: "Identifiants incorrects" },
+        en: { login: "LOGIN", vitrine: "🛍️ SHOWCASE", tel: "Number", pass: "Password", connect: "LOG IN", noAccount: "No account? CREATE AN ACCOUNT", back: "← BACK TO LOGIN", confirm: "Confirm", create: "CREATE MY ACCOUNT", warning: `⚠️ <b>WARNING</b> ⚠️<br><br>Transactions are between seller and client.`, understood: "I UNDERSTAND", config: "⚙️<br>CONFIG", articles: "📦<br>ITEMS", vue: "🛒<br>VIEW", logout: "LOGOUT", save: "SAVE", publish: "PUBLISH", search: "Search a shop...", successUpdate: "Profile updated", successAdd: "Item added!", errLogin: "Incorrect credentials" }
+    };
+
+    let currentUser = null, viewedTel = "", tempLogo = "", tempProdImg = "", curL = 'fr';
+    let allShops = [];
 
     window.onload = () => {
         fillPrefixes();
-        const saved = localStorage.getItem('bololo_user');
-        if (saved) { currentUser = JSON.parse(saved); loginUI(); }
+        checkSession();
     };
 
-    function loginUI() {
-        document.getElementById('view-auth').classList.add('hidden');
-        document.getElementById('bottom-nav').classList.remove('hidden');
-        document.getElementById('logout-btn').classList.remove('hidden');
-        showSection('params', document.getElementById('nav-params'));
-        const qrCont = document.getElementById('qr-admin');
-        qrCont.innerHTML = ""; new QRCode(qrCont, { text: currentUser.tel, width: 140, height: 140 });
-        
-        // Affichage du nombre de vues réel
-        db.ref('accounts/' + currentUser.tel + '/views').on('value', s => {
-            document.getElementById('user-view-count').innerText = "Vues : " + (s.val() || 0);
-        });
-        renderAdminList();
+    function checkSession() {
+        const saved = localStorage.getItem('bololo_user');
+        if (saved) {
+            currentUser = JSON.parse(saved);
+            viewedTel = currentUser.tel;
+            loginUI();
+        }
     }
 
     function doLogin() {
@@ -195,12 +227,33 @@
         const pass = document.getElementById('l-pass').value;
         db.ref('accounts/' + fullTel).once('value', snap => {
             const user = snap.val();
-            if (!user || user.pass !== pass) return alert("Erreur");
-            currentUser = user; viewedTel = fullTel;
+            if (!user || user.pass !== pass) return alert(translations[curL].errLogin);
+            currentUser = user;
+            viewedTel = fullTel;
             localStorage.setItem('bololo_user', JSON.stringify(user));
             loginUI();
         });
     }
+
+    function loginUI() {
+        document.getElementById('view-auth').classList.add('hidden');
+        document.getElementById('bottom-nav').classList.remove('hidden');
+        document.getElementById('logout-btn').classList.remove('hidden');
+        showSection('params', document.getElementById('nav-params'));
+        const qrCont = document.getElementById('qr-admin');
+        qrCont.innerHTML = "";
+        new QRCode(qrCont, { text: currentUser.tel, width: 140, height: 140 });
+        
+        // Surveillance des vues en temps réel
+        db.ref('accounts/' + currentUser.tel + '/views').on('value', s => {
+            document.getElementById('my-views').innerText = "Vues : " + (s.val() || 0);
+        });
+        renderAdminList();
+    }
+
+    function doLogout() { localStorage.removeItem('bololo_user'); location.reload(); }
+
+    function switchTab(t) { document.getElementById('area-login').classList.toggle('hidden', t !== 'login'); document.getElementById('area-signup').classList.toggle('hidden', t !== 'signup'); }
 
     function openVitrineDirect() {
         document.getElementById('view-auth').classList.add('hidden');
@@ -209,27 +262,28 @@
         initVitrine();
     }
 
-    function initVitrine() {
-        renderStories();
-        // Chargement du premier prioritaire au démarrage de la vitrine
-        db.ref('accounts').once('value', snap => {
-            const users = Object.values(snap.val() || {});
-            const firstPriority = users.find(u => u.priority === true);
-            if (firstPriority) selectShop(firstPriority.tel);
-            else if (currentUser) selectShop(currentUser.tel);
-        });
+    function showSection(id, el) {
+        ['params', 'articles', 'view'].forEach(s => document.getElementById('dash-'+s).classList.add('hidden'));
+        document.getElementById('dash-'+id).classList.remove('hidden');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
     }
 
-    function selectShop(t) { 
-        viewedTel = t; 
-        // Incrémentation des vues lors de la sélection
-        db.ref('accounts/' + t + '/views').transaction(c => (c || 0) + 1);
-        renderShop(); 
+    // -- FONCTION PRIORITÉ AU DÉMARRAGE --
+    function initVitrine() {
+        renderStories();
+        db.ref('accounts').once('value', snap => {
+            const users = Object.values(snap.val() || {});
+            const priorityShop = users.find(u => u.priority === true);
+            if (priorityShop) selectShop(priorityShop.tel);
+            else if (currentUser) selectShop(currentUser.tel);
+        });
     }
 
     function renderStories() {
         db.ref('accounts').once('value', snap => {
             const users = Object.values(snap.val() || {});
+            allShops = users;
             document.getElementById('user-stories').innerHTML = users.map(u => `
                 <div class="story-item" onclick="selectShop('${u.tel}')">
                     <img src="${u.shopLogo || 'bololo.png'}" class="story-circle ${u.priority ? 'is-priority' : ''}">
@@ -239,49 +293,108 @@
         });
     }
 
+    function selectShop(t) { 
+        viewedTel = t; 
+        // Incrémentation d'une vue
+        db.ref('accounts/' + t + '/views').transaction(v => (v || 0) + 1);
+        renderShop(); 
+    }
+
     function renderShop() {
         db.ref('accounts/' + viewedTel).on('value', snap => {
             const u = snap.val(); if(!u) return;
             document.getElementById('shop-header').innerHTML = `
-                <div style="display:flex; align-items:center; gap:12px; background:white; padding:12px; border-radius:15px;">
-                    <img src="${u.shopLogo || 'bololo.png'}" style="width:45px; height:45px; border-radius:50%; object-fit:cover;">
-                    <div><h4 style="margin:0">${u.shopName}</h4><small>${u.tel}</small></div>
+                <div style="display:flex; align-items:center; gap:12px; background:white; padding:12px; border-radius:15px; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
+                    <img src="${u.shopLogo || 'bololo.png'}" style="width:50px; height:50px; border-radius:50%; object-fit:cover; border:2px solid var(--primary);">
+                    <div style="flex:1"><h4 style="margin:0">${u.shopName} <span onclick="showInfo()" style="cursor:pointer;">💡</span></h4><small>${u.tel}</small></div>
                 </div>`;
-            document.getElementById('shop-list').innerHTML = (u.catalog || []).map((it, i) => `
+            document.getElementById('shop-list').innerHTML = (u.catalog || []).map((it, i) => {
+                let cmsHtml = (it.comments || []).map(c => `<div class="comment-item"><span class="comment-user">👤 ${c.tel}</span>${c.text}</div>`).join('');
+                return `
                 <div class="product-card">
                     <img src="${it.img || ''}" class="product-img-display">
-                    <div style="padding:15px;"><b>${it.name}</b><br><span style="color:var(--primary); font-weight:bold;">${it.price} FCFA</span></div>
-                </div>`).join('');
+                    <div style="padding:15px;">
+                        <b>${it.name}</b><br>
+                        <span style="color:var(--primary); font-weight:bold;">${it.price} FCFA</span>
+                        <div class="product-desc">${it.desc || ''}</div>
+                        <div class="interactions">
+                            <button class="btn-vote" onclick="vote(${i}, 'likes', '${it.id}')">👍 ${it.likes||0}</button>
+                            <button class="btn-vote" onclick="vote(${i}, 'dislikes', '${it.id}')">👎 ${it.dislikes||0}</button>
+                        </div>
+                    </div>
+                    ${currentUser ? `
+                    <div class="comment-box">
+                        <div class="comment-list">${cmsHtml}</div>
+                        <input type="text" id="cm-input-${i}" placeholder="Commentaire..." style="margin-bottom:5px; font-size:12px; padding:8px;">
+                        <button class="btn-action" style="padding:8px; font-size:12px;" onclick="addComment(${i})">COMMENTER</button>
+                    </div>` : ''}
+                </div>`;
+            }).join('');
         });
     }
 
-    // -- Fonctions de gestion Articles & Profil --
+    function doSignup() {
+        const fullTel = document.getElementById('s-prefix').value + document.getElementById('s-tel').value;
+        const pass = document.getElementById('s-pass').value;
+        if(pass !== document.getElementById('s-confirm').value) return alert("MDP différents");
+        db.ref('accounts/'+fullTel).set({tel: fullTel, pass, shopName:"Boutique", shopLogo:"", catalog:[], views: 0}).then(()=>{alert("Compte créé !"); switchTab('login');});
+    }
+
     function handleLogo(event) { const r = new FileReader(); r.onload = () => tempLogo = r.result; r.readAsDataURL(event.target.files[0]); }
     function handleProdImg(event) { const r = new FileReader(); r.onload = () => tempProdImg = r.result; r.readAsDataURL(event.target.files[0]); }
-    function saveSettings() { db.ref('accounts/'+currentUser.tel).update({shopName: document.getElementById('set-name').value, shopLogo: tempLogo || currentUser.shopLogo }).then(()=>alert("Profil mis à jour")); }
+    
+    function saveSettings() { 
+        db.ref('accounts/'+currentUser.tel).update({
+            shopName: document.getElementById('set-name').value || currentUser.shopName, 
+            shopLogo: tempLogo || currentUser.shopLogo
+        }).then(()=>alert("Profil mis à jour")); 
+    }
+
     function addProduct() {
         db.ref('accounts/'+currentUser.tel+'/catalog').once('value', s => {
             let cat = s.val() || [];
-            cat.push({ id: Date.now().toString(), name: document.getElementById('p-name').value, price: document.getElementById('p-price').value, desc: document.getElementById('p-desc').value, img: tempProdImg });
+            cat.push({ id: Date.now().toString(), name: document.getElementById('p-name').value, price: document.getElementById('p-price').value, desc: document.getElementById('p-desc').value, img: tempProdImg, likes:0, dislikes:0, comments: [] });
             db.ref('accounts/'+currentUser.tel+'/catalog').set(cat).then(() => { alert("Publié !"); renderAdminList(); });
         });
     }
+
     function renderAdminList() {
         db.ref('accounts/'+currentUser.tel+'/catalog').on('value', s => {
-            document.getElementById('admin-list').innerHTML = (s.val()||[]).map((it, i) => `<div class="card" style="display:flex; justify-content:space-between;"><span>${it.name}</span><button onclick="deleteProduct(${i})" style="color:red; border:none; background:none;">🗑️</button></div>`).join('');
+            document.getElementById('admin-list').innerHTML = (s.val()||[]).map((it, i) => `<div class="card" style="display:flex; justify-content:space-between; align-items:center;"><span>${it.name}</span><button onclick="deleteProduct(${i})" style="color:red; border:none; background:none;">🗑️</button></div>`).join('');
         });
     }
-    function deleteProduct(i) { db.ref('accounts/'+currentUser.tel+'/catalog').once('value', s => { let cat = s.val(); cat.splice(i,1); db.ref('accounts/'+currentUser.tel+'/catalog').set(cat); }); }
 
-    // -- Navigation & UI --
-    function showSection(id, el) {
-        ['params', 'articles', 'view'].forEach(s => document.getElementById('dash-'+s).classList.add('hidden'));
-        document.getElementById('dash-'+id).classList.remove('hidden');
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        el.classList.add('active');
+    function deleteProduct(i) { if(confirm("Supprimer ?")) { db.ref('accounts/'+currentUser.tel+'/catalog').once('value', s => { let cat = s.val(); cat.splice(i,1); db.ref('accounts/'+currentUser.tel+'/catalog').set(cat); }); } }
+    
+    function vote(index, type, productId) {
+        if (!currentUser) return alert("Connectez-vous !");
+        const voteRef = db.ref('userVotes/' + currentUser.tel + '/' + productId);
+        voteRef.once('value', snap => {
+            if (snap.exists()) return alert("Déjà voté !");
+            db.ref('accounts/' + viewedTel + '/catalog').once('value', s => {
+                let cat = s.val() || [];
+                if (cat[index]) {
+                    cat[index][type] = (cat[index][type] || 0) + 1;
+                    db.ref('accounts/' + viewedTel + '/catalog').set(cat).then(() => voteRef.set(type));
+                }
+            });
+        });
     }
-    function switchTab(t) { document.getElementById('area-login').classList.toggle('hidden', t !== 'login'); document.getElementById('area-signup').classList.toggle('hidden', t !== 'signup'); }
-    function doLogout() { localStorage.removeItem('bololo_user'); location.reload(); }
+
+    function addComment(index) {
+        const inp = document.getElementById('cm-input-' + index);
+        const text = inp.value.trim();
+        if (!text) return;
+        db.ref('accounts/' + viewedTel + '/catalog').once('value', s => {
+            let cat = s.val() || [];
+            if (cat[index]) {
+                if (!cat[index].comments) cat[index].comments = [];
+                cat[index].comments.push({ tel: currentUser.tel, text: text });
+                db.ref('accounts/' + viewedTel + '/catalog').set(cat).then(() => inp.value = "");
+            }
+        });
+    }
+
     function changeTheme() { document.body.className = document.getElementById('theme-selector').value; }
     function drawQR(id, cont) { const val = document.getElementById(id).value; const c = document.getElementById(cont); c.innerHTML = ""; if(val.length > 3) new QRCode(c, { text: val, width: 120, height: 120 }); }
 </script>
