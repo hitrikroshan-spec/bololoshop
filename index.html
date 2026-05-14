@@ -80,6 +80,9 @@
 
         /* Style spécifique pour le bouton WhatsApp */
         .btn-whatsapp { display: inline-flex; align-items: center; justify-content: center; background: #25D366; color: white; text-decoration: none; padding: 5px 8px; border-radius: 6px; font-size: 0.65rem; font-weight: bold; margin-left: 10px; vertical-align: middle; }
+        
+        /* Style pour l'affichage du quota */
+        .quota-badge { background: #f1f5f9; color: var(--primary); padding: 5px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: bold; margin-bottom: 15px; display: block; border-left: 4px solid var(--primary); }
     </style>
 </head>
 <body class="theme-glamour">
@@ -156,6 +159,7 @@
         </div>
 
         <div id="dash-articles" class="hidden">
+            <div id="my-quota" class="quota-badge">Quota de publication : chargement...</div>
             <div class="card">
                 <input type="text" id="p-name" placeholder="Nom Article">
                 <input type="number" id="p-price" placeholder="Prix (FCFA)">
@@ -358,7 +362,6 @@
         if(!phone) return alert("Numéro requis");
         if(pass !== confirm) return alert("MDP différents");
 
-        // Vérification de l'existence du compte
         db.ref('accounts/' + fullTel).once('value', snap => {
             if(snap.exists()) {
                 alert("Ce numéro est déjà utilisé par un autre compte.");
@@ -389,16 +392,36 @@
     }
 
     function addProduct() {
-        db.ref('accounts/'+currentUser.tel+'/catalog').once('value', s => {
-            let cat = s.val() || [];
+        db.ref('accounts/'+currentUser.tel).once('value', s => {
+            const user = s.val();
+            let cat = user.catalog || [];
+            let limit = user.limit || 5;
+
+            if (cat.length >= limit) {
+                return alert("Limite de publication atteinte (" + limit + " articles). Contactez l'admin pour augmenter votre quota.");
+            }
+
             cat.push({ id: Date.now().toString(), name: document.getElementById('p-name').value, price: document.getElementById('p-price').value, desc: document.getElementById('p-desc').value, img: tempProdImg, likes:0, dislikes:0, comments: [] });
-            db.ref('accounts/'+currentUser.tel+'/catalog').set(cat).then(() => { alert("Publié !"); renderAdminList(); });
+            db.ref('accounts/'+currentUser.tel+'/catalog').set(cat).then(() => { 
+                alert("Publié !"); 
+                document.getElementById('p-name').value = "";
+                document.getElementById('p-price').value = "";
+                document.getElementById('p-desc').value = "";
+                renderAdminList(); 
+            });
         });
     }
 
     function renderAdminList() {
-        db.ref('accounts/'+currentUser.tel+'/catalog').on('value', s => {
-            document.getElementById('admin-list').innerHTML = (s.val()||[]).map((it, i) => `<div class="card" style="display:flex; justify-content:space-between; align-items:center;"><span>${it.name}</span><button onclick="deleteProduct(${i})" style="color:red; border:none; background:none;">🗑️</button></div>`).join('');
+        db.ref('accounts/'+currentUser.tel).on('value', s => {
+            const user = s.val() || {};
+            const cat = user.catalog || [];
+            const limit = user.limit || 5;
+            
+            // Mise à jour de l'affichage du quota
+            document.getElementById('my-quota').innerText = "Articles publiés : " + cat.length + " / " + limit;
+
+            document.getElementById('admin-list').innerHTML = cat.map((it, i) => `<div class="card" style="display:flex; justify-content:space-between; align-items:center;"><span>${it.name}</span><button onclick="deleteProduct(${i})" style="color:red; border:none; background:none;">🗑️</button></div>`).join('');
         });
     }
 
