@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "io.github.hitrikroshan_spec.twa",
+        "sha256_cert_fingerprints": ["96:DE:3C:25:66:A3:B2:D3:7A:F6:D7:CE:00:A8:5A:0A:C6:38:00:26:71:D8:24:0D:B2:E3:8E:F4:01:BD:B4:8F"]
+      }
+    }]
