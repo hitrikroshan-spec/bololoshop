@@ -54,7 +54,7 @@
         .btn-close-modal { background: var(--glam); color: white; border: none; padding: 12px 25px; border-radius: 12px; margin-top: 20px; cursor: pointer; font-weight: bold; width: 100%; }
 
         .product-card { background: white; border-radius: 15px; overflow: hidden; margin-bottom: 20px; border: 1px solid #eee; }
-        .product-img-display { width: 100%; height: auto; max-height: 450px; object-fit: contain; display: block; }
+        .product-img-display { width: 100%; height: auto; max-height: 450px; object-fit: contain; display: block; background: #e2e8f0; min-height: 200px; }
         .interactions { display: flex; gap: 15px; padding: 10px; border-top: 1px solid #eee; }
         .btn-vote { border: none; background: none; cursor: pointer; font-size: 14px; font-weight: bold; color: #000; }
         .product-desc { font-size: 0.85rem; color: #64748b; margin-top: 5px; line-height: 1.4; }
@@ -188,7 +188,6 @@
 </div>
 
 <script>
-    // Enregistrement du Service Worker (Mise à jour Play Store)
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./sw.js')
@@ -222,6 +221,7 @@
 
     let currentUser = null, viewedTel = "", tempLogo = "", tempProdImg = "", curL = 'fr';
     let allShops = [];
+    let currentShopIndex = 0;
 
     window.onload = () => {
         fillPrefixes();
@@ -231,6 +231,14 @@
             document.getElementById('theme-selector').value = savedTheme;
         }
         checkSession();
+
+        // Événement pour détecter la fin du scroll et passer au shop suivant
+        document.getElementById('main-content').addEventListener('scroll', function() {
+            if (document.getElementById('dash-view').classList.contains('hidden')) return;
+            if (this.scrollTop + this.clientHeight >= this.scrollHeight - 5) {
+                switchToNextShop();
+            }
+        });
     };
 
     function checkSession() {
@@ -292,22 +300,31 @@
 
     function initVitrine() {
         db.ref('accounts').once('value', snap => {
-            const users = Object.values(snap.val() || {});
+            let users = Object.values(snap.val() || {});
+            
+            // Tri : Les 5 boutiques prioritaires restent toujours en tête de liste
+            users.sort((a, b) => (b.priority === true ? 1 : 0) - (a.priority === true ? 1 : 0));
+            
             allShops = users;
             renderStories(allShops);
-            const priorityShop = users.find(u => u.priority === true);
-            if (priorityShop) selectShop(priorityShop.tel);
-            else if (currentUser) selectShop(currentUser.tel);
+            
+            if (allShops.length > 0) {
+                currentShopIndex = 0;
+                selectShop(allShops[0].tel);
+            } else if (currentUser) {
+                selectShop(currentUser.tel);
+            }
         });
     }
 
     function renderStories(shops) {
         document.getElementById('user-stories').innerHTML = shops.map(u => `
             <div class="story-item" onclick="selectShop('${u.tel}')">
-                <img src="${u.shopLogo || 'bololo.png'}" class="story-circle ${u.priority ? 'is-priority' : ''}">
+                <img src="bololo.png" data-src="${u.shopLogo || 'bololo.png'}" class="story-circle lazy ${u.priority ? 'is-priority' : ''}">
                 <span class="story-name">${u.shopName || 'Shop'}</span>
             </div>
         `).join('');
+        lazyLoadImages();
     }
 
     function filterShops(val) {
@@ -320,10 +337,19 @@
 
     function selectShop(t) { 
         viewedTel = t; 
+        currentShopIndex = allShops.findIndex(u => u.tel === t);
         if (!currentUser || currentUser.tel !== t) {
             db.ref('accounts/' + t + '/views').transaction(v => (v || 0) + 1);
         }
         renderShop(); 
+    }
+
+    function switchToNextShop() {
+        if (allShops.length > 0 && currentShopIndex < allShops.length - 1) {
+            currentShopIndex++;
+            selectShop(allShops[currentShopIndex].tel);
+            document.getElementById('main-content').scrollTop = 0; // Remonte au début pour la nouvelle boutique
+        }
     }
 
     function renderShop() {
@@ -331,7 +357,7 @@
             const u = snap.val(); if(!u) return;
             document.getElementById('shop-header').innerHTML = `
                 <div style="display:flex; align-items:center; gap:12px; background:white; padding:12px; border-radius:15px; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
-                    <img src="${u.shopLogo || 'bololo.png'}" style="width:50px; height:50px; border-radius:50%; object-fit:cover; border:2px solid var(--primary);">
+                    <img src="bololo.png" data-src="${u.shopLogo || 'bololo.png'}" class="lazy" style="width:50px; height:50px; border-radius:50%; object-fit:cover; border:2px solid var(--primary);">
                     <div style="flex:1">
                         <h4 style="margin:0">${u.shopName}</h4>
                         <small>${u.tel}</small>
@@ -342,7 +368,7 @@
                 let cmsHtml = (it.comments || []).map(c => `<div class="comment-item"><span class="comment-user">👤 ${c.tel}</span>${c.text}</div>`).join('');
                 return `
                 <div class="product-card">
-                    <img src="${it.img || ''}" class="product-img-display">
+                    <img src="bololo.png" data-src="${it.img || ''}" class="product-img-display lazy">
                     <div style="padding:15px;">
                         <b>${it.name}</b><br>
                         <span style="color:var(--primary); font-weight:bold;">${it.price} FCFA</span>
@@ -360,7 +386,30 @@
                     </div>` : ''}
                 </div>`;
             }).join('');
+            lazyLoadImages();
         });
+    }
+
+    // Fonction de Lazy Loading ultra-rapide pour alléger la RAM et accélérer le rendu
+    function lazyLoadImages() {
+        const lazyImages = document.querySelectorAll('.lazy');
+        if ('IntersectionObserver' in window) {
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        if(img.dataset.src) {
+                            img.src = img.dataset.src;
+                            img.classList.remove('lazy');
+                        }
+                        observer.unobserve(img);
+                    }
+                });
+            });
+            lazyImages.forEach(img => observer.observe(img));
+        } else {
+            lazyImages.forEach(img => { if(img.dataset.src) img.src = img.dataset.src; });
+        }
     }
 
     function doSignup() {
