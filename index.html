@@ -229,14 +229,15 @@
     const db = firebase.database();
 
     const translations = {
-        fr: { login: "LOGIN", vitrine: "🛍️ VITRINE", tel: "Numéro", pass: "Mot de passe", connect: "SE CONNECTER", noAccount: "Pas de compte ? CRÉER UN COMPTE", back: "← RETOUR LOGIN", confirm: "Confirmer", create: "CRÉER MON COMPTE", warning: `⚠️ <b>AVERTISSEMENT</b> ⚠️<br><br>Transactions entre vendeur et client.<br><br>Bololo Pro n'est pas responsible.`, understood: "J'AI COMPRIS", config: "⚙️<br>CONFIG", articles: "📦<br>ARTICLES", vue: "🛒<br>VUE", logout: "SORTIR", save: "ENREGISTRER", publish: "PUBLIER", search: "Chercher une boutique...", successUpdate: "Profil mis à jour", successAdd: "Article ajouté !", errLogin: "Identifiants incorrects" },
+        fr: { login: "LOGIN", vitrine: "🛍️ VITRINE", tel: "Numéro", pass: "Mot de passe", connect: "SE CONNECTER", noAccount: "Pas de compte ? CRÉER UN COMPTE", back: "← RETOUR LOGIN", confirm: "Confirmer", create: "CRÉER MON COMPTE", warning: `⚠️ <b>AVERTISSEMENT</b> ⚠️<br><br>Transactions entre vendeur et client.<br><br>Bololo Pro n'est pas responsable.`, understood: "J'AI COMPRIS", config: "⚙️<br>CONFIG", articles: "📦<br>ARTICLES", vue: "🛒<br>VUE", logout: "SORTIR", save: "ENREGISTRER", publish: "PUBLIER", search: "Chercher une boutique...", successUpdate: "Profil mis à jour", successAdd: "Article ajouté !", errLogin: "Identifiants incorrects" },
         en: { login: "LOGIN", vitrine: "🛍️ SHOWCASE", tel: "Number", pass: "Password", connect: "LOG IN", noAccount: "No account? CREATE AN ACCOUNT", back: "← BACK TO LOGIN", confirm: "Confirm", create: "CREATE MY ACCOUNT", warning: `⚠️ <b>WARNING</b> ⚠️<br><br>Transactions are between seller and client.`, understood: "I UNDERSTAND", config: "⚙️<br>CONFIG", articles: "📦<br>ITEMS", vue: "🛒<br>VIEW", logout: "LOGOUT", save: "SAVE", publish: "PUBLISH", search: "Search a shop...", successUpdate: "Profile updated", successAdd: "Item added!", errLogin: "Incorrect credentials" }
     };
 
     let currentUser = null, viewedTel = "", tempLogo = "", tempProdImg = "", curL = 'fr';
     let allShops = [];
     let currentShopIndex = 0;
-    let currentShopListener = null; // Stocke l'écouteur actif pour pouvoir le détacher
+    let currentShopListener = null; 
+    let lastViewedTelWithListener = null;
 
     window.onload = () => {
         fillPrefixes();
@@ -334,21 +335,21 @@
             </div>`;
     }
 
-    // OPTIMISATION CRITIQUE : On ne charge QUE les métadonnées légères pour créer les stories
     function initVitrine() {
         showSkeleton();
-        // On récupère uniquement la liste globale indexée sans les gros catalogues lourds
         db.ref('accounts').once('value', snap => {
-            let shopsData = snap.val() || {};
+            let snapVal = snap.val() || {};
             let users = [];
             
-            for (let tel in shopsData) {
-                users.push({
-                    tel: tel,
-                    shopName: shopsData[tel].shopName || "Shop",
-                    shopLogo: shopsData[tel].shopLogo || "",
-                    priority: shopsData[tel].priority || false
-                });
+            for (let key in snapVal) {
+                if (snapVal.hasOwnProperty(key)) {
+                    users.push({
+                        tel: snapVal[key].tel,
+                        shopName: snapVal[key].shopName,
+                        shopLogo: snapVal[key].shopLogo,
+                        priority: snapVal[key].priority
+                    });
+                }
             }
             
             users.sort((a, b) => (b.priority === true ? 1 : 0) - (a.priority === true ? 1 : 0));
@@ -384,6 +385,7 @@
     }
 
     function selectShop(t) { 
+        lastViewedTelWithListener = viewedTel;
         viewedTel = t; 
         currentShopIndex = allShops.findIndex(u => u.tel === t);
         if (!currentUser || currentUser.tel !== t) {
@@ -400,16 +402,13 @@
         }
     }
 
-    // OPTIMISATION CRITIQUE : Écoute et charge dynamiquement LA boutique sélectionnée uniquement
     function renderShop() {
         showSkeleton();
         
-        // Supprime l'ancien écouteur de la boutique précédente pour économiser la RAM
-        if (currentShopListener) {
-            db.ref('accounts/' + viewedTel).off('value', currentShopListener);
+        if (currentShopListener && lastViewedTelWithListener) {
+            db.ref('accounts/' + lastViewedTelWithListener).off('value', currentShopListener);
         }
         
-        // Active l'écouteur uniquement sur la boutique ciblée
         currentShopListener = db.ref('accounts/' + viewedTel).on('value', snap => {
             const u = snap.val(); if(!u) return;
             document.getElementById('shop-header').innerHTML = `
