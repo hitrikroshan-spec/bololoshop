@@ -97,6 +97,10 @@
         .sk-prod-title { width: 60%; height: 16px; margin-bottom: 10px; border-radius: 4px; }
         .sk-prod-price { width: 30%; height: 16px; margin-bottom: 10px; border-radius: 4px; }
         .sk-prod-desc { width: 90%; height: 12px; margin-bottom: 6px; border-radius: 4px; }
+
+        /* Styles des boutons flottants pour naviguer en avant/arrière */
+        .nav-floating-box { position: fixed; bottom: 85px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 2000; }
+        .btn-floating-nav { background: var(--glam); color: white; border: none; width: 45px; height: 45px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-weight: bold; }
     </style>
 </head>
 <body class="theme-glamour">
@@ -192,6 +196,11 @@
             </div>
             <div id="shop-list"></div>
         </div>
+    </div>
+
+    <div id="nav-arrows" class="nav-floating-box hidden">
+        <button class="btn-floating-nav" onclick="switchToPrevShop()">↑</button>
+        <button class="btn-floating-nav" onclick="switchToNextShop()">↓</button>
     </div>
 
     <nav id="bottom-nav" class="nav-bar hidden">
@@ -303,6 +312,7 @@
         document.getElementById('view-auth').classList.add('hidden');
         document.getElementById('dash-view').classList.remove('hidden');
         document.getElementById('logout-btn').classList.remove('hidden');
+        document.getElementById('nav-arrows').classList.remove('hidden');
         initVitrine();
     }
 
@@ -311,6 +321,13 @@
         document.getElementById('dash-'+id).classList.remove('hidden');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         el.classList.add('active');
+        
+        // Gérer la visibilité des flèches selon la section active
+        if (id === 'view') {
+            document.getElementById('nav-arrows').classList.remove('hidden');
+        } else {
+            document.getElementById('nav-arrows').classList.add('hidden');
+        }
     }
 
     function showSkeleton() {
@@ -399,6 +416,15 @@
             currentShopIndex++;
             selectShop(allShops[currentShopIndex].tel);
             document.getElementById('main-content').scrollTop = 0; 
+        }
+    }
+
+    // Nouvelle fonction permettant de retourner à la boutique précédente
+    function switchToPrevShop() {
+        if (allShops.length > 0 && currentShopIndex > 0) {
+            currentShopIndex--;
+            selectShop(allShops[currentShopIndex].tel);
+            document.getElementById('main-content').scrollTop = 0;
         }
     }
 
