@@ -222,6 +222,7 @@
     let currentUser = null, viewedTel = "", tempLogo = "", tempProdImg = "", curL = 'fr';
     let allShops = [];
     let currentShopIndex = 0;
+    let shopListener = null;
 
     window.onload = () => {
         fillPrefixes();
@@ -353,7 +354,13 @@
     }
 
     function renderShop() {
-        db.ref('accounts/' + viewedTel).on('value', snap => {
+        // Supprime l'écouteur Firebase précédent s'il existe pour éviter les fuites de mémoire
+        if (shopListener) {
+            db.ref('accounts/' + viewedTel).off('value', shopListener);
+        }
+
+        // Crée un nouvel écouteur ciblant uniquement le compte utilisateur à afficher (chargement 1 par 1)
+        shopListener = db.ref('accounts/' + viewedTel).on('value', snap => {
             const u = snap.val(); if(!u) return;
             document.getElementById('shop-header').innerHTML = `
                 <div style="display:flex; align-items:center; gap:12px; background:white; padding:12px; border-radius:15px; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
