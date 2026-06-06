@@ -366,13 +366,33 @@
     }
 
     function renderStories(shops) {
-        document.getElementById('user-stories').innerHTML = shops.map(u => `
-            <div class="story-item" onclick="selectShop('${u.tel}')">
-                <img src="bololo.png" data-src="${u.shopLogo || 'bololo.png'}" class="story-circle lazy ${u.priority ? 'is-priority' : ''}">
-                <span class="story-name">${u.shopName || 'Shop'}</span>
-            </div>
-        `).join('');
-        lazyLoadImages();
+        const container = document.getElementById('user-stories');
+        container.innerHTML = ""; // Vide le conteneur au début
+        
+        let index = 0;
+        function loadNextStory() {
+            if (index >= shops.length) {
+                lazyLoadImages(); // Active le lazy loading une fois terminé
+                return;
+            }
+            
+            const u = shops[index];
+            const storyHTML = `
+                <div class="story-item" onclick="selectShop('${u.tel}')">
+                    <img src="bololo.png" data-src="${u.shopLogo || 'bololo.png'}" class="story-circle lazy ${u.priority ? 'is-priority' : ''}">
+                    <span class="story-name">${u.shopName || 'Shop'}</span>
+                </div>
+            `;
+            
+            // Ajoute l'élément un par un dans le DOM
+            container.insertAdjacentHTML('beforeend', storyHTML);
+            
+            index++;
+            // Un léger timeout (ou requestAnimationFrame) permet de forcer le rendu un par un visible à l'œil
+            setTimeout(loadNextStory, 50); 
+        }
+        
+        loadNextStory();
     }
 
     function filterShops(val) {
