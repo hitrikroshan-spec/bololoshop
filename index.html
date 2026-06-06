@@ -247,10 +247,17 @@
         }
         checkSession();
 
+        // GESTION DU SCROLL HAUT VERS BAS ET BAS VERS HAUT
         document.getElementById('main-content').addEventListener('scroll', function() {
             if (document.getElementById('dash-view').classList.contains('hidden')) return;
+            
+            // Défilement vers le bas : Arrivé en bas de page
             if (this.scrollTop + this.clientHeight >= this.scrollHeight - 5) {
                 switchToNextShop();
+            }
+            // Défilement vers le haut : Arrivé tout en haut de la page
+            else if (this.scrollTop <= 0) {
+                switchToPreviousShop();
             }
         });
     };
@@ -334,10 +341,8 @@
             </div>`;
     }
 
-    // OPTIMISATION CRITIQUE : On ne charge QUE les métadonnées légères pour créer les stories
     function initVitrine() {
         showSkeleton();
-        // On récupère uniquement la liste globale indexée sans les gros catalogues lourds
         db.ref('accounts').once('value', snap => {
             let shopsData = snap.val() || {};
             let users = [];
@@ -354,41 +359,42 @@
             users.sort((a, b) => (b.priority === true ? 1 : 0) - (a.priority === true ? 1 : 0));
             
             allShops = users;
-            renderStories(allShops);
             
             if (allShops.length > 0) {
                 currentShopIndex = 0;
-                selectShop(allShops[0].tel);
+                renderStoriesSequentially(allShops);
             } else if (currentUser) {
                 selectShop(currentUser.tel);
             }
         });
     }
 
-    function renderStories(shops) {
+    function renderStoriesSequentially(shops) {
         const container = document.getElementById('user-stories');
-        container.innerHTML = ""; // Vide le conteneur au début
+        container.innerHTML = ""; 
         
         let index = 0;
         function loadNextStory() {
             if (index >= shops.length) {
-                lazyLoadImages(); // Active le lazy loading une fois terminé
+                lazyLoadImages(); 
                 return;
             }
             
             const u = shops[index];
             const storyHTML = `
-                <div class="story-item" onclick="selectShop('${u.tel}')">
-                    <img src="bololo.png" data-src="${u.shopLogo || 'bololo.png'}" class="story-circle lazy ${u.priority ? 'is-priority' : ''}">
+                <div class="story-item" id="story-item-${u.tel}" onclick="selectShop('${u.tel}')">
+                    <img src="bololo.png" data-src="${u.shopLogo || 'bololo.png'}" class="story-circle lazy ${u.priority ? 'is-priority' : ''}" id="story-img-${u.tel}">
                     <span class="story-name">${u.shopName || 'Shop'}</span>
                 </div>
             `;
             
-            // Ajoute l'élément un par un dans le DOM
             container.insertAdjacentHTML('beforeend', storyHTML);
             
+            if (index === 0) {
+                selectShop(u.tel);
+            }
+            
             index++;
-            // Un léger timeout (ou requestAnimationFrame) permet de forcer le rendu un par un visible à l'œil
             setTimeout(loadNextStory, 50); 
         }
         
@@ -400,7 +406,7 @@
             (u.shopName || "").toLowerCase().includes(val.toLowerCase()) || 
             (u.tel || "").includes(val)
         );
-        renderStories(filtered);
+        renderStoriesSequentially(filtered);
     }
 
     function selectShop(t) { 
@@ -409,6 +415,26 @@
         if (!currentUser || currentUser.tel !== t) {
             db.ref('accounts/' + t + '/views').transaction(v => (v || 0) + 1);
         }
+
+        // MARQUEUR DE STORY ACTIVE (COMME LES PRIVILÉGIÉS)
+        allShops.forEach(shop => {
+            const imgEl = document.getElementById(`story-img-${shop.tel}`);
+            if (imgEl) {
+                // Si la boutique est celle sélectionnée ou était initialement prioritaire, on met la bordure or
+                if (shop.tel === t || shop.priority) {
+                    imgEl.classList.add('is-priority');
+                } else {
+                    imgEl.classList.remove('is-priority');
+                }
+            }
+        });
+
+        // Centrer automatiquement la story sélectionnée dans le bandeau horizontal
+        const activeStoryItem = document.getElementById(`story-item-${t}`);
+        if (activeStoryItem) {
+            activeStoryItem.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+
         renderShop(); 
     }
 
@@ -416,20 +442,30 @@
         if (allShops.length > 0 && currentShopIndex < allShops.length - 1) {
             currentShopIndex++;
             selectShop(allShops[currentShopIndex].tel);
-            document.getElementById('main-content').scrollTop = 0; 
+            document.getElementById('main-content').scrollTop = 1; // Légère marge pour éviter les boucles de détection à 0
         }
     }
 
-    // OPTIMISATION CRITIQUE : Écoute et charge dynamiquement LA boutique sélectionnée uniquement
+    // FONCTION POUR SCROLLER VERS LE HAUT ENTRE LES BOUTIQUES
+    function switchToPreviousShop() {
+        if (allShops.length > 0 && currentShopIndex > 0) {
+            currentShopIndex--;
+            selectShop(allShops[currentShopIndex].tel);
+            // On repositionne le scroll légèrement vers le bas de la nouvelle boutique pour permettre de re-scroller vers le haut si nécessaire
+            setTimeout(() => {
+                const mc = document.getElementById('main-content');
+                mc.scrollTop = 5;
+            }, 100);
+        }
+    }
+
     function renderShop() {
         showSkeleton();
         
-        // Supprime l'ancien écouteur de la boutique précédente pour économiser la RAM
         if (currentShopListener) {
             db.ref('accounts/' + viewedTel).off('value', currentShopListener);
         }
         
-        // Active l'écouteur uniquement sur la boutique ciblée
         currentShopListener = db.ref('accounts/' + viewedTel).on('value', snap => {
             const u = snap.val(); if(!u) return;
             document.getElementById('shop-header').innerHTML = `
@@ -595,6 +631,8 @@
         localStorage.setItem('bololo_theme', selectedTheme);
     }
 
+    function changeLang(l) { curL = l; }
+    function closeInfo() { document.getElementById('info-modal').style.display = 'none'; }
     function drawQR(id, cont) { const val = document.getElementById(id).value; const c = document.getElementById(cont); c.innerHTML = ""; if(val.length > 3) new QRCode(c, { text: val, width: 120, height: 120 }); }
 </script>
 </body>
