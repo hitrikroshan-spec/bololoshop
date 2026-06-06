@@ -97,10 +97,6 @@
         .sk-prod-title { width: 60%; height: 16px; margin-bottom: 10px; border-radius: 4px; }
         .sk-prod-price { width: 30%; height: 16px; margin-bottom: 10px; border-radius: 4px; }
         .sk-prod-desc { width: 90%; height: 12px; margin-bottom: 6px; border-radius: 4px; }
-
-        /* Styles des boutons flottants pour naviguer en avant/arrière */
-        .nav-floating-box { position: fixed; bottom: 85px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 2000; }
-        .btn-floating-nav { background: var(--glam); color: white; border: none; width: 45px; height: 45px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-weight: bold; }
     </style>
 </head>
 <body class="theme-glamour">
@@ -198,11 +194,6 @@
         </div>
     </div>
 
-    <div id="nav-arrows" class="nav-floating-box hidden">
-        <button class="btn-floating-nav" onclick="switchToPrevShop()">↑</button>
-        <button class="btn-floating-nav" onclick="switchToNextShop()">↓</button>
-    </div>
-
     <nav id="bottom-nav" class="nav-bar hidden">
         <div class="nav-item active" id="nav-params" onclick="showSection('params', this)">⚙️<br>CONFIG</div>
         <div class="nav-item" id="nav-articles" onclick="showSection('articles', this)">📦<br>ARTICLES</div>
@@ -238,15 +229,14 @@
     const db = firebase.database();
 
     const translations = {
-        fr: { login: "LOGIN", vitrine: "🛍️ VITRINE", tel: "Numéro", pass: "Mot de passe", connect: "SE CONNECTER", noAccount: "Pas de compte ? CRÉER UN COMPTE", back: "← RETOUR LOGIN", confirm: "Confirmer", create: "CRÉER MON COMPTE", warning: `⚠️ <b>AVERTISSEMENT</b> ⚠️<br><br>Transactions entre vendeur et client.<br><br>Bololo Pro n'est pas responsable.`, understood: "J'AI COMPRIS", config: "⚙️<br>CONFIG", articles: "📦<br>ARTICLES", vue: "🛒<br>VUE", logout: "SORTIR", save: "ENREGISTRER", publish: "PUBLIER", search: "Chercher une boutique...", successUpdate: "Profil mis à jour", successAdd: "Article ajouté !", errLogin: "Identifiants incorrects" },
+        fr: { login: "LOGIN", vitrine: "🛍️ VITRINE", tel: "Numéro", pass: "Mot de passe", connect: "SE CONNECTER", noAccount: "Pas de compte ? CRÉER UN COMPTE", back: "← RETOUR LOGIN", confirm: "Confirmer", create: "CRÉER MON COMPTE", warning: `⚠️ <b>AVERTISSEMENT</b> ⚠️<br><br>Transactions entre vendeur et client.<br><br>Bololo Pro n'est pas responsible.`, understood: "J'AI COMPRIS", config: "⚙️<br>CONFIG", articles: "📦<br>ARTICLES", vue: "🛒<br>VUE", logout: "SORTIR", save: "ENREGISTRER", publish: "PUBLIER", search: "Chercher une boutique...", successUpdate: "Profil mis à jour", successAdd: "Article ajouté !", errLogin: "Identifiants incorrects" },
         en: { login: "LOGIN", vitrine: "🛍️ SHOWCASE", tel: "Number", pass: "Password", connect: "LOG IN", noAccount: "No account? CREATE AN ACCOUNT", back: "← BACK TO LOGIN", confirm: "Confirm", create: "CREATE MY ACCOUNT", warning: `⚠️ <b>WARNING</b> ⚠️<br><br>Transactions are between seller and client.`, understood: "I UNDERSTAND", config: "⚙️<br>CONFIG", articles: "📦<br>ITEMS", vue: "🛒<br>VIEW", logout: "LOGOUT", save: "SAVE", publish: "PUBLISH", search: "Search a shop...", successUpdate: "Profile updated", successAdd: "Item added!", errLogin: "Incorrect credentials" }
     };
 
     let currentUser = null, viewedTel = "", tempLogo = "", tempProdImg = "", curL = 'fr';
     let allShops = [];
     let currentShopIndex = 0;
-    let currentShopListener = null; 
-    let lastViewedTelWithListener = null;
+    let currentShopListener = null; // Stocke l'écouteur actif pour pouvoir le détacher
 
     window.onload = () => {
         fillPrefixes();
@@ -312,7 +302,6 @@
         document.getElementById('view-auth').classList.add('hidden');
         document.getElementById('dash-view').classList.remove('hidden');
         document.getElementById('logout-btn').classList.remove('hidden');
-        document.getElementById('nav-arrows').classList.remove('hidden');
         initVitrine();
     }
 
@@ -321,13 +310,6 @@
         document.getElementById('dash-'+id).classList.remove('hidden');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         el.classList.add('active');
-        
-        // Gérer la visibilité des flèches selon la section active
-        if (id === 'view') {
-            document.getElementById('nav-arrows').classList.remove('hidden');
-        } else {
-            document.getElementById('nav-arrows').classList.add('hidden');
-        }
     }
 
     function showSkeleton() {
@@ -352,21 +334,21 @@
             </div>`;
     }
 
+    // OPTIMISATION CRITIQUE : On ne charge QUE les métadonnées légères pour créer les stories
     function initVitrine() {
         showSkeleton();
+        // On récupère uniquement la liste globale indexée sans les gros catalogues lourds
         db.ref('accounts').once('value', snap => {
-            let snapVal = snap.val() || {};
+            let shopsData = snap.val() || {};
             let users = [];
             
-            for (let key in snapVal) {
-                if (snapVal.hasOwnProperty(key)) {
-                    users.push({
-                        tel: snapVal[key].tel,
-                        shopName: snapVal[key].shopName,
-                        shopLogo: snapVal[key].shopLogo,
-                        priority: snapVal[key].priority
-                    });
-                }
+            for (let tel in shopsData) {
+                users.push({
+                    tel: tel,
+                    shopName: shopsData[tel].shopName || "Shop",
+                    shopLogo: shopsData[tel].shopLogo || "",
+                    priority: shopsData[tel].priority || false
+                });
             }
             
             users.sort((a, b) => (b.priority === true ? 1 : 0) - (a.priority === true ? 1 : 0));
@@ -402,7 +384,6 @@
     }
 
     function selectShop(t) { 
-        lastViewedTelWithListener = viewedTel;
         viewedTel = t; 
         currentShopIndex = allShops.findIndex(u => u.tel === t);
         if (!currentUser || currentUser.tel !== t) {
@@ -419,30 +400,18 @@
         }
     }
 
-    // Nouvelle fonction permettant de retourner à la boutique précédente
-    function switchToPrevShop() {
-        if (allShops.length > 0 && currentShopIndex > 0) {
-            currentShopIndex--;
-            selectShop(allShops[currentShopIndex].tel);
-            document.getElementById('main-content').scrollTop = 0;
-        }
-    }
-
+    // OPTIMISATION CRITIQUE : Écoute et charge dynamiquement LA boutique sélectionnée uniquement
     function renderShop() {
         showSkeleton();
         
-        if (currentShopListener && lastViewedTelWithListener) {
-            db.ref('accounts/' + lastViewedTelWithListener).off('value', currentShopListener);
+        // Supprime l'ancien écouteur de la boutique précédente pour économiser la RAM
+        if (currentShopListener) {
+            db.ref('accounts/' + viewedTel).off('value', currentShopListener);
         }
         
+        // Active l'écouteur uniquement sur la boutique ciblée
         currentShopListener = db.ref('accounts/' + viewedTel).on('value', snap => {
             const u = snap.val(); if(!u) return;
-            
-            if (!u.catalog || u.catalog.length === 0) {
-                switchToNextShop();
-                return;
-            }
-            
             document.getElementById('shop-header').innerHTML = `
                 <div style="display:flex; align-items:center; gap:12px; background:white; padding:12px; border-radius:15px; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
                     <img src="bololo.png" data-src="${u.shopLogo || 'bololo.png'}" class="lazy" style="width:50px; height:50px; border-radius:50%; object-fit:cover; border:2px solid var(--primary);">
