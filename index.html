@@ -84,7 +84,7 @@
         .comment-user { font-weight: bold; color: var(--primary); display: block; margin-bottom: 2px; }
         
         .nav-bar { background: white; display: flex; border-top: 1px solid #eee; padding: 10px 0 25px; transition: background-color 0.3s, border-color 0.3s; }
-        .nav-item { flex: 1; text-align: center; font-size: 0.7rem; color: #94a3b8; cursor: pointer; font-weight: 600; transition: color 0.2s, transform 0.1s; padding: 4px 0; }
+        .nav-item { flex: 1; text-align: center; font-size: 0.6rem; color: #94a3b8; cursor: pointer; font-weight: 600; transition: color 0.2s, transform 0.1s; padding: 4px 1px; }
         .nav-item:active { transform: scale(0.95); }
         .nav-item.active { color: var(--primary); }
         .nav-item .nav-icon { font-size: 1.2rem; display: block; margin-bottom: 2px; }
@@ -239,9 +239,17 @@
         <div id="dash-favs" class="hidden">
             <div id="favs-list"></div>
         </div>
+
+        <div id="dash-home" class="hidden">
+            <div class="sticky-area" style="padding-top:0;">
+                <input type="text" id="home-search-input" placeholder="Chercher un article..." oninput="filterHomeFeed(this.value)">
+            </div>
+            <div id="home-feed"></div>
+        </div>
     </div>
 
     <nav id="bottom-nav" class="nav-bar hidden">
+        <div class="nav-item" id="nav-home" onclick="showSection('home', this); initHomeFeed();"><span class="nav-icon">🏠</span>ACCUEIL</div>
         <div class="nav-item active" id="nav-params" onclick="showSection('params', this)"><span class="nav-icon">⚙️</span>CONFIG</div>
         <div class="nav-item" id="nav-articles" onclick="showSection('articles', this)"><span class="nav-icon">📦</span>ARTICLES</div>
         <div class="nav-item" id="nav-view" onclick="showSection('view', this); initVitrine();"><span class="nav-icon">🛒</span>VUE</div>
@@ -374,6 +382,106 @@
         setTimeout(() => selectShop(tel), 300);
     }
 
+    // --- Accueil : fil de tous les articles de toutes les boutiques ---
+    let homeFeedItems = []; // [{ shopTel, shopName, shopLogo, priority, item }]
+    let homeFeedLoaded = false;
+
+    function initHomeFeed() {
+        if (homeFeedLoaded) {
+            renderHomeFeed(homeFeedItems);
+            return;
+        }
+        document.getElementById('home-feed').innerHTML = `<div class="spinner"></div>`;
+        db.ref('accounts').once('value', snap => {
+            const accountsVal = snap.val() || {};
+            const items = [];
+            Object.values(accountsVal).forEach(u => {
+                if (!u || !u.tel) return;
+                (u.catalog || []).forEach(it => {
+                    items.push({
+                        shopTel: u.tel,
+                        shopName: u.shopName || 'Shop',
+                        shopLogo: u.shopLogo || '',
+                        priority: u.priority === true,
+                        item: it
+                    });
+                });
+            });
+
+            // Tri : articles des boutiques prioritaires en tête, puis les plus récents (id = timestamp)
+            items.sort((a, b) => {
+                const pa = a.priority ? 1 : 0, pb = b.priority ? 1 : 0;
+                if (pb !== pa) return pb - pa;
+                return (Number(b.item.id) || 0) - (Number(a.item.id) || 0);
+            });
+
+            homeFeedItems = items;
+            homeFeedLoaded = true;
+            renderHomeFeed(homeFeedItems);
+        }).catch(() => {
+            document.getElementById('home-feed').innerHTML = `<div class="empty-state"><div class="emoji">⚠️</div>Erreur de chargement.<br><span class="link-text" onclick="homeFeedLoaded=false; initHomeFeed();">Réessayer</span></div>`;
+            showToast("Erreur de chargement du fil", "error");
+        });
+    }
+
+    function renderHomeFeed(items) {
+        const container = document.getElementById('home-feed');
+        if (!items || items.length === 0) {
+            container.innerHTML = `<div class="empty-state"><div class="emoji">📭</div>Aucun article disponible pour le moment.</div>`;
+            return;
+        }
+        const PLACEHOLDER = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+        container.innerHTML = items.map(entry => {
+            const it = entry.item;
+            return `
+            <div class="product-card">
+                <div style="display:flex; align-items:center; gap:10px; padding:10px 12px; cursor:pointer;" onclick="goToShopFromHome('${entry.shopTel}')">
+                    <img src="${PLACEHOLDER}" data-src="${entry.shopLogo || 'bololo.png'}" onerror="this.src='bololo.png'" class="lazy" style="width:32px; height:32px; border-radius:50%; object-fit:cover; border:2px solid var(--primary);">
+                    <span style="font-weight:700; font-size:0.85rem; flex:1;">${entry.shopName}</span>
+                    ${entry.priority ? '<span style="font-size:0.65rem; background:#FFD700; color:#1e293b; padding:3px 8px; border-radius:6px; font-weight:800;">⭐ TOP</span>' : ''}
+                </div>
+                <div style="position:relative;">
+                    <img src="${PLACEHOLDER}" data-src="${it.img || 'bololo.png'}" onerror="this.src='bololo.png'" class="product-img-display lazy">
+                    <button onclick="toggleFavorite('${entry.shopTel}','${it.id}', this)" style="position:absolute; top:10px; right:10px; background:rgba(255,255,255,0.9); border:none; border-radius:50%; width:34px; height:34px; font-size:16px; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.15);">${isFav(entry.shopTel, it.id) ? '❤️' : '🤍'}</button>
+                </div>
+                <div style="padding:15px;">
+                    <b>${it.name}</b><br>
+                    <span style="color:var(--primary); font-weight:bold;">${it.price} FCFA</span>
+                    <div class="product-desc">${it.desc || ''}</div>
+                    <div class="product-desc" style="margin-top:8px;"><span class="link-text" onclick="goToShopFromHome('${entry.shopTel}')" style="margin:0;">Voir la boutique →</span></div>
+                </div>
+            </div>`;
+        }).join('');
+        lazyLoadImages(container);
+    }
+
+    function filterHomeFeed(val) {
+        const v = val.toLowerCase();
+        if (!v) return renderHomeFeed(homeFeedItems);
+        const filtered = homeFeedItems.filter(entry => 
+            (entry.item.name || "").toLowerCase().includes(v) ||
+            (entry.shopName || "").toLowerCase().includes(v) ||
+            (entry.item.desc || "").toLowerCase().includes(v)
+        );
+        renderHomeFeed(filtered);
+    }
+
+    function goToShopFromHome(tel) {
+        document.getElementById('nav-view').click();
+        setTimeout(() => {
+            if (vitrineLoaded) {
+                selectShop(tel);
+            } else {
+                // Si la vitrine n'est pas encore chargée, on charge puis on sélectionne
+                const tryGo = () => {
+                    if (vitrineLoaded) selectShop(tel);
+                    else setTimeout(tryGo, 200);
+                };
+                tryGo();
+            }
+        }, 200);
+    }
+
     window.onload = () => {
         fillPrefixes();
         const savedTheme = localStorage.getItem('bololo_theme');
@@ -454,13 +562,16 @@
 
     function openVitrineDirect() {
         document.getElementById('view-auth').classList.add('hidden');
-        document.getElementById('dash-view').classList.remove('hidden');
         document.getElementById('logout-btn').classList.remove('hidden');
-        initVitrine();
+        document.getElementById('bottom-nav').classList.remove('hidden');
+        document.getElementById('nav-params').classList.add('hidden');
+        document.getElementById('nav-articles').classList.add('hidden');
+        showSection('home', document.getElementById('nav-home'));
+        initHomeFeed();
     }
 
     function showSection(id, el) {
-        ['params', 'articles', 'view', 'favs'].forEach(s => document.getElementById('dash-'+s).classList.add('hidden'));
+        ['params', 'articles', 'view', 'favs', 'home'].forEach(s => document.getElementById('dash-'+s).classList.add('hidden'));
         document.getElementById('dash-'+id).classList.remove('hidden');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         el.classList.add('active');
