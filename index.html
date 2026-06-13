@@ -33,7 +33,7 @@
         .lang-select { position: absolute; left: 15px; bottom: 18px; background: rgba(255,255,255,0.2); border: none; color: white; border-radius: 8px; font-size: 0.65rem; cursor: pointer; padding: 5px; outline: none; }
         .lang-select option { color: black; }
 
-        .content { flex: 1; overflow-y: auto; padding: 20px; background: var(--bg); position: relative; }
+        .content { flex: 1; overflow-y: auto; padding: 20px; background: var(--bg); position: relative; -webkit-overflow-scrolling: touch; will-change: scroll-position; }
         .card { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #eee; }
 
         .phone-group { display: flex; gap: 5px; margin-bottom: 10px; }
@@ -45,7 +45,8 @@
         .story-container { display: flex; gap: 12px; overflow-x: auto; padding: 5px 0 10px; scrollbar-width: none; }
         .story-container::-webkit-scrollbar { display: none; }
         .story-item { flex: 0 0 auto; text-align: center; width: 60px; cursor: pointer; }
-        .story-circle { width: 55px; height: 55px; border-radius: 50%; border: 3px solid var(--primary); padding: 2px; object-fit: cover; background: white; }
+        .story-circle { width: 55px; height: 55px; border-radius: 50%; border: 3px solid var(--primary); padding: 2px; object-fit: cover; background: #e2e8f0; }
+        .story-circle.lazy { opacity: 0.5; }
         .story-circle.is-priority { border-color: #FFD700; box-shadow: 0 0 10px #FFD700; }
         .story-name { font-size: 9px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; margin-top: 3px; }
 
@@ -83,20 +84,6 @@
         
         /* Style pour l'affichage du quota */
         .quota-badge { background: #f1f5f9; color: var(--primary); padding: 5px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: bold; margin-bottom: 15px; display: block; border-left: 4px solid var(--primary); }
-
-        /* Styles pour le Skeleton Screen */
-        .skeleton { animation: skeleton-loading 1s linear infinite alternate; }
-        @keyframes skeleton-loading { 0% { background-color: #cbd5e1; } 100% { background-color: #f1f5f9; } }
-        .sk-circle { width: 50px; height: 50px; border-radius: 50%; }
-        .sk-text-title { width: 120px; height: 16px; margin-bottom: 8px; border-radius: 4px; }
-        .sk-text-sub { width: 80px; height: 12px; margin-bottom: 8px; border-radius: 4px; }
-        .sk-btn { width: 60px; height: 20px; border-radius: 6px; }
-        .sk-card { background: white; border-radius: 15px; overflow: hidden; margin-bottom: 20px; border: 1px solid #eee; }
-        .sk-img { width: 100%; height: 250px; }
-        .sk-content { padding: 15px; }
-        .sk-prod-title { width: 60%; height: 16px; margin-bottom: 10px; border-radius: 4px; }
-        .sk-prod-price { width: 30%; height: 16px; margin-bottom: 10px; border-radius: 4px; }
-        .sk-prod-desc { width: 90%; height: 12px; margin-bottom: 6px; border-radius: 4px; }
     </style>
 </head>
 <body class="theme-glamour">
@@ -229,14 +216,13 @@
     const db = firebase.database();
 
     const translations = {
-        fr: { login: "LOGIN", vitrine: "🛍️ VITRINE", tel: "Numéro", pass: "Mot de passe", connect: "SE CONNECTER", noAccount: "Pas de compte ? CRÉER UN COMPTE", back: "← RETOUR LOGIN", confirm: "Confirmer", create: "CRÉER MON COMPTE", warning: `⚠️ <b>AVERTISSEMENT</b> ⚠️<br><br>Transactions entre vendeur et client.<br><br>Bololo Pro n'est pas responsible.`, understood: "J'AI COMPRIS", config: "⚙️<br>CONFIG", articles: "📦<br>ARTICLES", vue: "🛒<br>VUE", logout: "SORTIR", save: "ENREGISTRER", publish: "PUBLIER", search: "Chercher une boutique...", successUpdate: "Profil mis à jour", successAdd: "Article ajouté !", errLogin: "Identifiants incorrects" },
+        fr: { login: "LOGIN", vitrine: "🛍️ VITRINE", tel: "Numéro", pass: "Mot de passe", connect: "SE CONNECTER", noAccount: "Pas de compte ? CRÉER UN COMPTE", back: "← RETOUR LOGIN", confirm: "Confirmer", create: "CRÉER MON COMPTE", warning: `⚠️ <b>AVERTISSEMENT</b> ⚠️<br><br>Transactions entre vendeur et client.<br><br>Bololo Pro n'est pas responsable.`, understood: "J'AI COMPRIS", config: "⚙️<br>CONFIG", articles: "📦<br>ARTICLES", vue: "🛒<br>VUE", logout: "SORTIR", save: "ENREGISTRER", publish: "PUBLIER", search: "Chercher une boutique...", successUpdate: "Profil mis à jour", successAdd: "Article ajouté !", errLogin: "Identifiants incorrects" },
         en: { login: "LOGIN", vitrine: "🛍️ SHOWCASE", tel: "Number", pass: "Password", connect: "LOG IN", noAccount: "No account? CREATE AN ACCOUNT", back: "← BACK TO LOGIN", confirm: "Confirm", create: "CREATE MY ACCOUNT", warning: `⚠️ <b>WARNING</b> ⚠️<br><br>Transactions are between seller and client.`, understood: "I UNDERSTAND", config: "⚙️<br>CONFIG", articles: "📦<br>ITEMS", vue: "🛒<br>VIEW", logout: "LOGOUT", save: "SAVE", publish: "PUBLISH", search: "Search a shop...", successUpdate: "Profile updated", successAdd: "Item added!", errLogin: "Incorrect credentials" }
     };
 
     let currentUser = null, viewedTel = "", tempLogo = "", tempProdImg = "", curL = 'fr';
     let allShops = [];
     let currentShopIndex = 0;
-    let currentShopListener = null; // Stocke l'écouteur actif pour pouvoir le détacher
 
     window.onload = () => {
         fillPrefixes();
@@ -247,19 +233,20 @@
         }
         checkSession();
 
-        // GESTION DU SCROLL HAUT VERS BAS ET BAS VERS HAUT
+        // Événement pour détecter la fin du scroll et passer au shop suivant (throttlé pour fluidité)
+        let scrollTicking = false;
         document.getElementById('main-content').addEventListener('scroll', function() {
-            if (document.getElementById('dash-view').classList.contains('hidden')) return;
-            
-            // Défilement vers le bas : Arrivé en bas de page
-            if (this.scrollTop + this.clientHeight >= this.scrollHeight - 5) {
-                switchToNextShop();
-            }
-            // Défilement vers le haut : Arrivé tout en haut de la page
-            else if (this.scrollTop <= 0) {
-                switchToPreviousShop();
-            }
-        });
+            if (scrollTicking) return;
+            scrollTicking = true;
+            requestAnimationFrame(() => {
+                if (!document.getElementById('dash-view').classList.contains('hidden')) {
+                    if (this.scrollTop + this.clientHeight >= this.scrollHeight - 5) {
+                        switchToNextShop();
+                    }
+                }
+                scrollTicking = false;
+            });
+        }, { passive: true });
     };
 
     function checkSession() {
@@ -319,86 +306,41 @@
         el.classList.add('active');
     }
 
-    function showSkeleton() {
-        document.getElementById('shop-header').innerHTML = `
-            <div style="display:flex; align-items:center; gap:12px; background:white; padding:12px; border-radius:15px; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
-                <div class="skeleton sk-circle"></div>
-                <div style="flex:1">
-                    <div class="skeleton sk-text-title"></div>
-                    <div class="skeleton sk-text-sub"></div>
-                    <div class="skeleton sk-btn"></div>
-                </div>
-            </div>`;
-        document.getElementById('shop-list').innerHTML = `
-            <div class="sk-card">
-                <div class="skeleton sk-img"></div>
-                <div class="sk-content">
-                    <div class="skeleton sk-prod-title"></div>
-                    <div class="skeleton sk-prod-price"></div>
-                    <div class="skeleton sk-prod-desc"></div>
-                    <div class="skeleton sk-prod-desc" style="width:70%;"></div>
-                </div>
-            </div>`;
-    }
-
+    let vitrineLoaded = false;
     function initVitrine() {
-        showSkeleton();
+        if (vitrineLoaded && allShops.length > 0) {
+            // Déjà chargé : on évite de re-télécharger tout l'arbre "accounts" (lourd avec images en base64)
+            renderStories(allShops);
+            renderShop();
+            return;
+        }
         db.ref('accounts').once('value', snap => {
-            let shopsData = snap.val() || {};
-            let users = [];
+            let users = Object.values(snap.val() || {});
             
-            for (let tel in shopsData) {
-                users.push({
-                    tel: tel,
-                    shopName: shopsData[tel].shopName || "Shop",
-                    shopLogo: shopsData[tel].shopLogo || "",
-                    priority: shopsData[tel].priority || false
-                });
-            }
-            
+            // Tri : Les 5 boutiques prioritaires restent toujours en tête de liste
             users.sort((a, b) => (b.priority === true ? 1 : 0) - (a.priority === true ? 1 : 0));
             
             allShops = users;
+            vitrineLoaded = true;
+            renderStories(allShops);
             
             if (allShops.length > 0) {
                 currentShopIndex = 0;
-                renderStoriesSequentially(allShops);
+                selectShop(allShops[0].tel);
             } else if (currentUser) {
                 selectShop(currentUser.tel);
             }
         });
     }
 
-    function renderStoriesSequentially(shops) {
-        const container = document.getElementById('user-stories');
-        container.innerHTML = ""; 
-        
-        let index = 0;
-        function loadNextStory() {
-            if (index >= shops.length) {
-                lazyLoadImages(); 
-                return;
-            }
-            
-            const u = shops[index];
-            const storyHTML = `
-                <div class="story-item" id="story-item-${u.tel}" onclick="selectShop('${u.tel}')">
-                    <img src="bololo.png" data-src="${u.shopLogo || 'bololo.png'}" class="story-circle lazy ${u.priority ? 'is-priority' : ''}" id="story-img-${u.tel}">
-                    <span class="story-name">${u.shopName || 'Shop'}</span>
-                </div>
-            `;
-            
-            container.insertAdjacentHTML('beforeend', storyHTML);
-            
-            if (index === 0) {
-                selectShop(u.tel);
-            }
-            
-            index++;
-            setTimeout(loadNextStory, 50); 
-        }
-        
-        loadNextStory();
+    function renderStories(shops) {
+        document.getElementById('user-stories').innerHTML = shops.map(u => `
+            <div class="story-item" onclick="selectShop('${u.tel}')">
+                <img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="${u.shopLogo || 'bololo.png'}" onerror="this.src='bololo.png'" class="story-circle lazy ${u.priority ? 'is-priority' : ''}">
+                <span class="story-name">${u.shopName || 'Shop'}</span>
+            </div>
+        `).join('');
+        lazyLoadImages(document.getElementById('user-stories'));
     }
 
     function filterShops(val) {
@@ -406,7 +348,7 @@
             (u.shopName || "").toLowerCase().includes(val.toLowerCase()) || 
             (u.tel || "").includes(val)
         );
-        renderStoriesSequentially(filtered);
+        renderStories(filtered);
     }
 
     function selectShop(t) { 
@@ -415,62 +357,37 @@
         if (!currentUser || currentUser.tel !== t) {
             db.ref('accounts/' + t + '/views').transaction(v => (v || 0) + 1);
         }
-
-        // MARQUEUR DE STORY ACTIVE (COMME LES PRIVILÉGIÉS)
-        allShops.forEach(shop => {
-            const imgEl = document.getElementById(`story-img-${shop.tel}`);
-            if (imgEl) {
-                // Si la boutique est celle sélectionnée ou était initialement prioritaire, on met la bordure or
-                if (shop.tel === t || shop.priority) {
-                    imgEl.classList.add('is-priority');
-                } else {
-                    imgEl.classList.remove('is-priority');
-                }
-            }
-        });
-
-        // Centrer automatiquement la story sélectionnée dans le bandeau horizontal
-        const activeStoryItem = document.getElementById(`story-item-${t}`);
-        if (activeStoryItem) {
-            activeStoryItem.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-        }
-
         renderShop(); 
     }
 
+    let isSwitchingShop = false;
     function switchToNextShop() {
+        if (isSwitchingShop) return;
         if (allShops.length > 0 && currentShopIndex < allShops.length - 1) {
+            isSwitchingShop = true;
             currentShopIndex++;
             selectShop(allShops[currentShopIndex].tel);
-            document.getElementById('main-content').scrollTop = 1; // Légère marge pour éviter les boucles de détection à 0
+            // Remonte au début pour la nouvelle boutique (sans animation pour éviter conflit de scroll)
+            const mc = document.getElementById('main-content');
+            mc.scrollTop = 0;
+            setTimeout(() => { isSwitchingShop = false; }, 400);
         }
     }
 
-    // FONCTION POUR SCROLLER VERS LE HAUT ENTRE LES BOUTIQUES
-    function switchToPreviousShop() {
-        if (allShops.length > 0 && currentShopIndex > 0) {
-            currentShopIndex--;
-            selectShop(allShops[currentShopIndex].tel);
-            // On repositionne le scroll légèrement vers le bas de la nouvelle boutique pour permettre de re-scroller vers le haut si nécessaire
-            setTimeout(() => {
-                const mc = document.getElementById('main-content');
-                mc.scrollTop = 5;
-            }, 100);
-        }
-    }
+    let currentShopListener = { ref: null, cb: null };
 
     function renderShop() {
-        showSkeleton();
-        
-        if (currentShopListener) {
-            db.ref('accounts/' + viewedTel).off('value', currentShopListener);
+        // Détache l'ancien listener pour éviter l'accumulation (cause majeure de lenteur)
+        if (currentShopListener.ref && currentShopListener.cb) {
+            currentShopListener.ref.off('value', currentShopListener.cb);
         }
-        
-        currentShopListener = db.ref('accounts/' + viewedTel).on('value', snap => {
+        const shopRef = db.ref('accounts/' + viewedTel);
+        const cb = snap => {
             const u = snap.val(); if(!u) return;
+            const PLACEHOLDER = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
             document.getElementById('shop-header').innerHTML = `
                 <div style="display:flex; align-items:center; gap:12px; background:white; padding:12px; border-radius:15px; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
-                    <img src="bololo.png" data-src="${u.shopLogo || 'bololo.png'}" class="lazy" style="width:50px; height:50px; border-radius:50%; object-fit:cover; border:2px solid var(--primary);">
+                    <img src="${PLACEHOLDER}" data-src="${u.shopLogo || 'bololo.png'}" onerror="this.src='bololo.png'" class="lazy" style="width:50px; height:50px; border-radius:50%; object-fit:cover; border:2px solid var(--primary);">
                     <div style="flex:1">
                         <h4 style="margin:0">${u.shopName}</h4>
                         <small>${u.tel}</small>
@@ -481,7 +398,7 @@
                 let cmsHtml = (it.comments || []).map(c => `<div class="comment-item"><span class="comment-user">👤 ${c.tel}</span>${c.text}</div>`).join('');
                 return `
                 <div class="product-card">
-                    <img src="bololo.png" data-src="${it.img || ''}" class="product-img-display lazy">
+                    <img src="${PLACEHOLDER}" data-src="${it.img || 'bololo.png'}" onerror="this.src='bololo.png'" class="product-img-display lazy">
                     <div style="padding:15px;">
                         <b>${it.name}</b><br>
                         <span style="color:var(--primary); font-weight:bold;">${it.price} FCFA</span>
@@ -499,28 +416,43 @@
                     </div>` : ''}
                 </div>`;
             }).join('');
-            lazyLoadImages();
-        });
+            lazyLoadImages(document.getElementById('shop-list'));
+            lazyLoadImages(document.getElementById('shop-header'));
+        };
+        shopRef.on('value', cb);
+        currentShopListener = { ref: shopRef, cb: cb };
     }
 
-    function lazyLoadImages() {
-        const lazyImages = document.querySelectorAll('.lazy');
+    // Observer unique et persistant pour le lazy loading (évite les fuites mémoire)
+    let lazyObserver = null;
+    function getLazyObserver() {
+        if (lazyObserver) return lazyObserver;
         if ('IntersectionObserver' in window) {
-            const observer = new IntersectionObserver((entries, observer) => {
+            lazyObserver = new IntersectionObserver((entries, obs) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         const img = entry.target;
-                        if(img.dataset.src) {
+                        if (img.dataset.src) {
                             img.src = img.dataset.src;
+                            img.removeAttribute('data-src');
                             img.classList.remove('lazy');
                         }
-                        observer.unobserve(img);
+                        obs.unobserve(img);
                     }
                 });
-            });
+            }, { rootMargin: '100px' });
+        }
+        return lazyObserver;
+    }
+
+    function lazyLoadImages(container) {
+        const root = container || document;
+        const lazyImages = root.querySelectorAll('img.lazy[data-src]');
+        const observer = getLazyObserver();
+        if (observer) {
             lazyImages.forEach(img => observer.observe(img));
         } else {
-            lazyImages.forEach(img => { if(img.dataset.src) img.src = img.dataset.src; });
+            lazyImages.forEach(img => { if (img.dataset.src) { img.src = img.dataset.src; img.removeAttribute('data-src'); } });
         }
     }
 
@@ -631,8 +563,6 @@
         localStorage.setItem('bololo_theme', selectedTheme);
     }
 
-    function changeLang(l) { curL = l; }
-    function closeInfo() { document.getElementById('info-modal').style.display = 'none'; }
     function drawQR(id, cont) { const val = document.getElementById(id).value; const c = document.getElementById(cont); c.innerHTML = ""; if(val.length > 3) new QRCode(c, { text: val, width: 120, height: 120 }); }
 </script>
 </body>
