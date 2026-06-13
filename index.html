@@ -482,29 +482,76 @@
             </div>`).join('');
         document.getElementById('shop-list').innerHTML = `<div class="spinner"></div>`;
 
+        // Étape 1 : récupère uniquement la liste des clés (numéros), requête légère
         db.ref('accounts').once('value', snap => {
-            let users = Object.values(snap.val() || {});
-            
-            // Tri : Les 5 boutiques prioritaires restent toujours en tête de liste
-            users.sort((a, b) => (b.priority === true ? 1 : 0) - (a.priority === true ? 1 : 0));
-            
-            allShops = users;
-            vitrineLoaded = true;
-            renderStories(allShops);
-            
-            if (allShops.length > 0) {
-                currentShopIndex = 0;
-                selectShop(allShops[0].tel);
-            } else if (currentUser) {
-                selectShop(currentUser.tel);
-            } else {
-                document.getElementById('shop-list').innerHTML = `<div class="empty-state"><div class="emoji">🏪</div>Aucune boutique disponible pour le moment.</div>`;
+            const accountsVal = snap.val() || {};
+            const tels = Object.keys(accountsVal);
+
+            if (tels.length === 0) {
+                document.getElementById('user-stories').innerHTML = '';
+                if (currentUser) {
+                    allShops = []; vitrineLoaded = true;
+                    selectShop(currentUser.tel);
+                } else {
+                    document.getElementById('shop-list').innerHTML = `<div class="empty-state"><div class="emoji">🏪</div>Aucune boutique disponible pour le moment.</div>`;
+                }
+                return;
             }
+
+            // Vide le conteneur pour insertion progressive
+            document.getElementById('user-stories').innerHTML = '';
+            allShops = accountsVal; // objet temporaire en attendant le chargement complet
+            const loadedShops = [];
+            let firstShopSelected = false;
+            let loadedCount = 0;
+
+            // Étape 2 : chaque boutique est déjà présente dans accountsVal (réponse unique de Firebase),
+            // mais on l'affiche progressivement, une par une, pour ne pas bloquer le rendu pendant
+            // la génération du DOM (utile surtout avec beaucoup de boutiques/images).
+            tels.forEach((tel) => {
+                const u = accountsVal[tel];
+                if (!u) { loadedCount++; return; }
+
+                // requestAnimationFrame étale le rendu sur plusieurs frames -> pas de gel de l'UI
+                requestAnimationFrame(() => {
+                    loadedShops.push(u);
+                    appendStory(u);
+                    loadedCount++;
+
+                    if (!firstShopSelected) {
+                        firstShopSelected = true;
+                        allShops = loadedShops;
+                        currentShopIndex = 0;
+                        selectShop(u.tel);
+                    }
+
+                    if (loadedCount === tels.length) {
+                        vitrineLoaded = true;
+                        loadedShops.sort((a, b) => (b.priority === true ? 1 : 0) - (a.priority === true ? 1 : 0));
+                        allShops = loadedShops;
+                        renderStories(allShops);
+                        currentShopIndex = allShops.findIndex(s => s.tel === viewedTel);
+                    }
+                });
+            });
         }).catch(() => {
             document.getElementById('user-stories').innerHTML = '';
             document.getElementById('shop-list').innerHTML = `<div class="empty-state"><div class="emoji">⚠️</div>Erreur de connexion.<br><span class="link-text" onclick="vitrineLoaded=false; initVitrine();">Réessayer</span></div>`;
             showToast("Erreur de chargement. Vérifiez votre connexion.", "error");
         });
+    }
+
+    // Ajoute une seule story au conteneur (chargement progressif, un par un)
+    function appendStory(u) {
+        const div = document.createElement('div');
+        div.className = 'story-item' + (u.tel === viewedTel ? ' active-story' : '');
+        div.setAttribute('onclick', `selectShop('${u.tel}')`);
+        div.innerHTML = `
+            <img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="${u.shopLogo || 'bololo.png'}" onerror="this.src='bololo.png'" class="story-circle lazy ${u.priority ? 'is-priority' : ''}">
+            <span class="story-name">${u.shopName || 'Shop'}</span>
+        `;
+        document.getElementById('user-stories').appendChild(div);
+        lazyLoadImages(div);
     }
 
     function renderStories(shops) {
